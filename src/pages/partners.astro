@@ -1,0 +1,921 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_KEY";
+
+// Why-partner benefits — Lucide-style line icons (stroke uses currentColor).
+const benefits = [
+  {
+    title: "Pocket-money pricing",
+    line: "Rs. 5 to Rs. 50 — the impulse sweet-spot for kids.",
+    icon: `<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/>`,
+  },
+  {
+    title: "Full range, one brand",
+    line: "7 categories and 40+ SKUs to fill the counter.",
+    icon: `<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`,
+  },
+  {
+    title: "Fast-moving category",
+    line: "Bright packs and mascots drive repeat pull.",
+    icon: `<path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/>`,
+  },
+  {
+    title: "Reliable supply",
+    line: "Contract-manufactured for consistent quality and stock.",
+    icon: `<path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/>`,
+  },
+  {
+    title: "National reach",
+    line: "A distributor network and in-house sales force.",
+    icon: `<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/>`,
+  },
+];
+
+// Commercials — headline stats + supply-chain flow.
+// NOTE: pack ratios are PLACEHOLDERS — confirm before publishing.
+const stats = [
+  { n: "Rs. 5–50", l: "Price points" },
+  { n: "7", l: "Categories" },
+  { n: "40+", l: "SKUs" },
+];
+const flow = [
+  {
+    v: "50 pcs / box*",
+    k: "Inner pack",
+    icon: `<path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5M12 13v8"/>`,
+  },
+  {
+    v: "36 box / carton*",
+    k: "Outer carton",
+    icon: `<rect x="3" y="7" width="18" height="13" rx="1"/><path d="M3 7l3-4h12l3 4M12 7v13"/>`,
+  },
+  {
+    v: "Nationwide",
+    k: "Distribution",
+    icon: `<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/>`,
+  },
+];
+
+const steps = [
+  { title: "Enquire", line: "Send us your details and territory using the form below." },
+  { title: "Samples & terms", line: "We share samples, price lists, and trade terms." },
+  { title: "Onboard", line: "We agree territory, margins, and first order." },
+  { title: "Stock & sell", line: "Reliable resupply and marketing support, ongoing." },
+];
+
+const faqs = [
+  { q: "What's the minimum order quantity?", a: "Sole distributorships carry a minimum commitment of Rs. 30 million per month. That reflects the scale of an exclusive territory — full coverage, consistent stock, and a partnership built for real volume." },
+  { q: "Do you offer exclusive territories?", a: "Yes. We grant exclusive coverage where a distributor commits to fully covering the area and the order value justifies the territory. Protected territories reward the partners who invest in building the market." },
+  { q: "What are the payment terms?", a: "Advance payment on all orders. As the relationship matures and a track record builds, terms can be revisited together." },
+  { q: "What are typical lead times?", a: "Typically 3–5 working days. Timelines vary slightly by region and are coordinated with you in advance — once we commit a delivery window, we deliver on it." },
+];
+
+const arrowIcon = `<path d="M5 12h14M13 6l6 6-6 6"/>`;
+const pfInput = "pf-input";
+---
+
+<BaseLayout
+  title="Partner with Tall Nest — Distributors & Retail"
+  description="Stock Tall Nest brands. Pocket-money pricing, a full fast-moving range, reliable supply, and national distribution. Become a distributor or retail partner."
+>
+  <!-- Intro -->
+  <section class="section-y bg-white">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">For distributors &amp; retail</p>
+      <h1
+        data-reveal-heading
+        class="max-w-3xl font-display text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.04] tracking-[-0.02em] text-ink text-balance"
+      >
+        A range that <em class="text-red">sells itself.</em>
+      </h1>
+      <p data-reveal class="mt-7 max-w-[58ch] text-lg leading-relaxed text-gray">
+        We don't just sell product — we build relationships. Reliable supply,
+        strong margins, a growing range, and a team that markets the brand
+        alongside you.
+      </p>
+    </div>
+  </section>
+
+  <!-- Why partner — bento grid -->
+  <section class="section-y bg-paper">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">Why partner</p>
+      <h2
+        data-reveal-heading
+        class="mb-10 max-w-2xl font-display text-[clamp(1.8rem,3.8vw,3rem)] font-medium leading-[1.05] tracking-[-0.01em] text-ink text-balance"
+      >
+        Built to <em class="text-red">move off shelves.</em>
+      </h2>
+
+      <ul data-reveal-group class="bento">
+        {
+          benefits.map((b, i) => (
+            <li data-reveal-item class="pcard card">
+              <span class="chip" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  set:html={b.icon}
+                />
+              </span>
+              <div class="pnum font-display">{String(i + 1).padStart(2, "0")}</div>
+              <h3 class="ptitle font-display">{b.title}</h3>
+              <p class="pbody">{b.line}</p>
+            </li>
+          ))
+        }
+        <li data-reveal-item class="pcard pcard-cta group">
+          <a href="#enquire" class="cta-link">
+            <h3 class="font-display">Ready to stock Tall Nest?</h3>
+            <span class="go">
+              Become a partner
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                set:html={arrowIcon}
+              />
+            </span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Commercials — single premium panel -->
+  <section class="section-y bg-white">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">The commercials</p>
+      <h2
+        data-reveal-heading
+        class="mb-10 max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
+      >
+        Pack economics built for the counter.
+      </h2>
+
+      <div data-reveal class="spec-panel panel">
+        <div class="toprow">
+          {
+            stats.map((s) => (
+              <div class="bigstat">
+                <div class="bigstat-n font-display">{s.n}</div>
+                <div class="bigstat-l">{s.l}</div>
+              </div>
+            ))
+          }
+        </div>
+
+        <hr class="midline" />
+
+        <div class="flow-supply">
+          {
+            flow.map((f, i) => (
+              <>
+                {i > 0 && (
+                  <span class="supply-arrow" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      set:html={arrowIcon}
+                    />
+                  </span>
+                )}
+                <div class="supply-step">
+                  <span class="supply-ic" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      set:html={f.icon}
+                    />
+                  </span>
+                  <div>
+                    <div class="supply-v font-display">{f.v}</div>
+                    <div class="supply-k">{f.k}</div>
+                  </div>
+                </div>
+              </>
+            ))
+          }
+        </div>
+
+        <p class="foot">
+          * Pack ratios are indicative placeholders — confirm exact case
+          configurations with us per SKU.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works — scroll-scrubbed timeline -->
+  <section class="section-y bg-paper">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-5">How it works</p>
+      <h2
+        data-reveal-heading
+        class="max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
+      >
+        Become a partner in four steps.
+      </h2>
+      <div class="flow" data-flow>
+        <span class="flow-line" aria-hidden="true"></span>
+        <span class="flow-progress" aria-hidden="true"></span>
+        <ol class="flow-grid">
+          {
+            steps.map((s, i) => (
+              <li class="step" data-step>
+                <span class="node" aria-hidden="true" />
+                <span class="step-num font-display">{String(i + 1).padStart(2, "0")}</span>
+                <h3 class="mt-2 font-display text-xl font-medium text-ink">{s.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray">{s.line}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-y bg-white">
+    <div class="mx-auto max-w-3xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">Questions</p>
+      <ul data-reveal-group class="faq">
+        {
+          faqs.map((f) => (
+            <li data-reveal-item class="faq-item">
+              <details>
+                <summary>
+                  <span>{f.q}</span>
+                  <span class="faq-icon" aria-hidden="true" />
+                </summary>
+                <p>{f.a}</p>
+              </details>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Inquiry form -->
+  <section id="enquire" class="section-y bg-paper scroll-mt-24">
+    <div class="mx-auto max-w-3xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-5">Become a partner</p>
+      <h2
+        data-reveal-heading
+        class="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
+      >
+        Tell us about your business.
+      </h2>
+
+      <form
+        id="partner-form"
+        action="https://api.web3forms.com/submit"
+        method="POST"
+        class="pf card"
+        novalidate
+        data-msg-unconfigured="Form isn't connected yet — add your Web3Forms key to enable sending."
+        data-msg-sending="Sending…"
+        data-msg-success="Thanks — we'll be in touch about partnering."
+        data-msg-error="Something went wrong. Please try again, or call us instead."
+      >
+        <input type="hidden" name="access_key" value={WEB3FORMS_ACCESS_KEY} />
+        <input type="hidden" name="subject" value="New partner enquiry — Tall Nest" />
+        <input type="hidden" name="from_name" value="Tall Nest website" />
+        <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+        <div class="pf-field">
+          <input id="pf-name" name="name" type="text" required autocomplete="name" placeholder=" " class={pfInput} />
+          <label for="pf-name">Name <span aria-hidden="true">*</span></label>
+        </div>
+        <div class="pf-field">
+          <input id="pf-company" name="company" type="text" required autocomplete="organization" placeholder=" " class={pfInput} />
+          <label for="pf-company">Company <span aria-hidden="true">*</span></label>
+        </div>
+        <div class="pf-field">
+          <input id="pf-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr" placeholder=" " class={pfInput} />
+          <label for="pf-phone">Phone <span aria-hidden="true">*</span></label>
+        </div>
+        <div class="pf-field">
+          <input id="pf-region" name="city_region" type="text" required placeholder=" " class={pfInput} />
+          <label for="pf-region">City / Region <span aria-hidden="true">*</span></label>
+        </div>
+        <div class="pf-field">
+          <textarea id="pf-message" name="message" rows="3" placeholder=" " class={pfInput}></textarea>
+          <label for="pf-message">Message</label>
+        </div>
+
+        <button type="submit" class="btn group w-full">
+          Send enquiry
+          <span class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true">→</span>
+        </button>
+        <p data-form-status role="status" aria-live="polite" class="min-h-5 text-sm"></p>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---- Why partner — bento ---- */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Equal-height cells so every row's bottom edge aligns, longer copy simply
+       grows the whole row uniformly. */
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+    gap: 18px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 900px) {
+    .bento {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .bento {
+      grid-template-columns: 1fr;
+      /* Single column: let each card size to its own content. */
+      grid-auto-rows: auto;
+    }
+  }
+  .pcard {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 28px 26px 30px;
+    transition:
+      transform 0.35s var(--ease-brand),
+      box-shadow 0.35s var(--ease-brand),
+      border-color 0.35s var(--ease-brand);
+  }
+  /* Red top-accent grows from the reading-start edge on hover. */
+  .pcard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    height: 3px;
+    width: 0;
+    background: var(--color-red);
+    transition: width 0.4s var(--ease-brand);
+    z-index: 1;
+  }
+  .pcard:hover::before {
+    width: 100%;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    color: var(--color-red);
+    background: color-mix(in srgb, var(--color-red) 9%, transparent);
+    margin-bottom: 20px;
+    transition:
+      background 0.3s var(--ease-brand),
+      color 0.3s var(--ease-brand);
+  }
+  .chip svg {
+    width: 22px;
+    height: 22px;
+  }
+  .pcard:hover .chip {
+    background: var(--color-red);
+    color: #fff;
+  }
+  .pnum {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-red);
+    margin-bottom: 6px;
+  }
+  .ptitle {
+    font-size: 1.32rem;
+    font-weight: 500;
+    line-height: 1.15;
+    color: var(--color-ink);
+    margin: 0 0 8px;
+  }
+  .pbody {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--color-gray);
+    margin: 0;
+  }
+
+  /* CTA card (deep-red gradient) */
+  .pcard-cta {
+    background: linear-gradient(150deg, var(--color-red), var(--color-red-deep));
+    border-color: transparent;
+    color: #fff;
+    padding: 0;
+    transition:
+      transform 0.35s var(--ease-brand),
+      box-shadow 0.35s var(--ease-brand);
+  }
+  .pcard-cta:hover {
+    transform: translateY(-6px);
+  }
+  .pcard-cta::before {
+    display: none;
+  }
+  .cta-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 28px 26px 30px;
+    color: #fff;
+    text-decoration: none;
+  }
+  .pcard-cta h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: #fff;
+    margin: 0 0 14px;
+  }
+  .pcard-cta .go {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+  }
+  .pcard-cta .go svg {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.25s var(--ease-brand);
+  }
+  .pcard-cta:hover .go svg {
+    transform: translateX(5px);
+  }
+
+  /* ---- Commercials panel ---- */
+  .spec-panel {
+    margin-top: 8px;
+    padding: clamp(28px, 3.5vw, 48px);
+  }
+  .toprow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bigstat {
+    position: relative;
+    padding: 6px 0;
+  }
+  .bigstat + .bigstat {
+    padding-inline-start: 36px;
+  }
+  .bigstat + .bigstat::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--color-hairline);
+  }
+  .bigstat-n {
+    font-size: clamp(2.1rem, 4.4vw, 3.25rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  .bigstat-l {
+    margin-top: 10px;
+    font-size: 0.69rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+  }
+  .midline {
+    border: 0;
+    border-top: 1px solid var(--color-hairline);
+    margin: 34px 0;
+  }
+  .flow-supply {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .supply-step {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .supply-ic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    background: var(--color-paper);
+    color: var(--color-red);
+  }
+  .supply-ic svg {
+    width: 23px;
+    height: 23px;
+  }
+  .supply-v {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--color-ink);
+  }
+  .supply-k {
+    margin-top: 5px;
+    font-size: 0.66rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+  }
+  .supply-arrow {
+    flex: none;
+    display: inline-flex;
+    color: #cfc7b8;
+  }
+  .supply-arrow svg {
+    width: 22px;
+    height: 22px;
+  }
+  .foot {
+    margin: 22px 0 0;
+    font-size: 0.78rem;
+    color: var(--color-gray);
+  }
+  @media (max-width: 860px) {
+    .toprow {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .bigstat + .bigstat {
+      padding-inline-start: 0;
+    }
+    .bigstat + .bigstat::before {
+      display: none;
+    }
+    .flow-supply {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .supply-arrow {
+      transform: rotate(90deg);
+      align-self: center;
+    }
+  }
+
+  /* ---- How it works — scroll-scrubbed 4-step flow ---- */
+  .flow {
+    position: relative;
+    margin-top: clamp(40px, 5vw, 64px);
+  }
+  /* Hairline track. */
+  .flow-line {
+    position: absolute;
+    top: 6px;
+    inset-inline: 4px;
+    height: 2px;
+    background: var(--color-hairline);
+    z-index: 0;
+  }
+  /* Red progress line drawn over the track (scaled by scroll progress). */
+  .flow-progress {
+    position: absolute;
+    top: 6px;
+    inset-inline-start: 4px;
+    inset-inline-end: 4px;
+    height: 2px;
+    background: var(--color-red);
+    transform: scaleX(var(--draw, 1));
+    transform-origin: left center;
+    z-index: 1;
+  }
+  :global(html[dir="rtl"]) .flow-progress {
+    transform-origin: right center;
+  }
+  .flow-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .step {
+    position: relative;
+    padding-top: 32px;
+  }
+  .node {
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--color-red);
+    box-shadow: 0 0 0 5px var(--color-paper);
+    transition:
+      background 0.3s var(--ease-brand),
+      transform 0.3s var(--ease-brand);
+  }
+  .step-num {
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-red);
+  }
+
+  /* When JS scrub is active, steps start muted and brighten in sequence.
+     Without JS (or reduced motion) every step stays fully visible/active. */
+  .flow.is-scrubbed .step {
+    opacity: 0.4;
+    transition: opacity 0.4s var(--ease-brand);
+  }
+  .flow.is-scrubbed .step .node {
+    background: var(--color-hairline);
+  }
+  .flow.is-scrubbed .step.is-active {
+    opacity: 1;
+  }
+  .flow.is-scrubbed .step.is-active .node {
+    background: var(--color-red);
+  }
+
+  @media (max-width: 760px) {
+    .flow-grid {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .flow-line {
+      top: 0;
+      bottom: 0;
+      inset-inline: auto;
+      inset-inline-start: 6px;
+      width: 2px;
+      height: auto;
+    }
+    .flow-progress {
+      top: 0;
+      bottom: 0;
+      inset-inline: auto;
+      inset-inline-start: 6px;
+      width: 2px;
+      height: auto;
+      transform: scaleY(var(--draw, 1));
+      transform-origin: center top;
+    }
+    .step {
+      padding-top: 0;
+      padding-inline-start: 34px;
+      padding-block: 18px;
+    }
+    .node {
+      top: 22px;
+    }
+  }
+
+  /* FAQ */
+  .faq {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--color-hairline);
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 2px;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-icon {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .faq-icon::before,
+  .faq-icon::after {
+    content: "";
+    position: absolute;
+    background: var(--color-red);
+    transition: transform 0.25s var(--ease-brand);
+  }
+  .faq-icon::before {
+    top: 7px;
+    left: 0;
+    width: 16px;
+    height: 2px;
+  }
+  .faq-icon::after {
+    left: 7px;
+    top: 0;
+    width: 2px;
+    height: 16px;
+  }
+  .faq details[open] .faq-icon::after {
+    transform: scaleY(0);
+  }
+  .faq p {
+    margin: 0;
+    padding: 0 2px 22px;
+    max-width: 60ch;
+    line-height: 1.6;
+    color: var(--color-gray);
+  }
+
+  /* Floating-label form (matches the contact panel styling) */
+  .pf {
+    margin-top: clamp(28px, 4vw, 44px);
+    padding: clamp(28px, 4vw, 44px);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+  .pf-field {
+    position: relative;
+  }
+  .pf-input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1.5px solid var(--color-hairline);
+    border-radius: 0;
+    padding: 22px 2px 8px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition: border-color 0.2s var(--ease-brand);
+  }
+  textarea.pf-input {
+    resize: vertical;
+    min-height: 64px;
+  }
+  .pf-input:focus {
+    outline: none;
+    border-color: var(--color-red);
+  }
+  .pf-field label {
+    position: absolute;
+    inset-inline-start: 2px;
+    top: 20px;
+    color: var(--color-gray);
+    pointer-events: none;
+    transition:
+      top 0.2s var(--ease-brand),
+      font-size 0.2s var(--ease-brand),
+      color 0.2s var(--ease-brand);
+  }
+  .pf-input:focus + label,
+  .pf-input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    color: var(--color-red);
+  }
+  .pf-field label span {
+    color: var(--color-red);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pcard,
+    .pcard-cta,
+    .chip,
+    .pcard::before,
+    .pcard-cta .go svg,
+    .node,
+    .pf-input,
+    .pf-field label,
+    .faq-icon::before,
+    .faq-icon::after {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- How it works: scroll-scrubbed timeline ---- */
+  const flowEl = document.querySelector<HTMLElement>("[data-flow]");
+  const progressEl = flowEl?.querySelector<HTMLElement>(".flow-progress");
+  const stepEls = flowEl ? Array.from(flowEl.querySelectorAll<HTMLElement>("[data-step]")) : [];
+
+  if (flowEl && progressEl && stepEls.length && !reduce) {
+    flowEl.classList.add("is-scrubbed");
+    progressEl.style.setProperty("--draw", "0");
+
+    const apply = (p: number) => {
+      progressEl.style.setProperty("--draw", p.toFixed(4));
+      stepEls.forEach((s, i) => {
+        // Activate each step a touch before the line fully reaches it.
+        const threshold = i / stepEls.length;
+        s.classList.toggle("is-active", p >= threshold - 0.001);
+      });
+    };
+    apply(0);
+
+    ScrollTrigger.create({
+      trigger: flowEl,
+      start: "top 72%",
+      end: "bottom 62%",
+      scrub: 0.5,
+      onUpdate: (self) => apply(self.progress),
+      onRefresh: (self) => apply(self.progress),
+    });
+  }
+
+  /* ---- Partner inquiry form (Web3Forms) ---- */
+  const form = document.getElementById("partner-form") as HTMLFormElement | null;
+  if (form) {
+    const statusEl = form.querySelector<HTMLElement>("[data-form-status]");
+    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const accessKey =
+      form.querySelector<HTMLInputElement>('input[name="access_key"]')?.value ?? "";
+    const set = (text: string, kind: "ok" | "error" | "pending") => {
+      if (!statusEl) return;
+      statusEl.textContent = text;
+      statusEl.style.color =
+        kind === "error" ? "var(--color-red)" : kind === "ok" ? "var(--color-ink)" : "var(--color-gray)";
+    };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) return form.reportValidity();
+      if (!accessKey || accessKey === "YOUR_WEB3FORMS_KEY") {
+        set(form.dataset.msgUnconfigured ?? "", "error");
+        return;
+      }
+      if (submitBtn) submitBtn.disabled = true;
+      set(form.dataset.msgSending ?? "", "pending");
+      try {
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: new FormData(form),
+        });
+        const json = await res.json();
+        if (json.success) {
+          form.reset();
+          set(form.dataset.msgSuccess ?? "", "ok");
+        } else {
+          set(form.dataset.msgError ?? "", "error");
+        }
+      } catch {
+        set(form.dataset.msgError ?? "", "error");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  }
+</script>

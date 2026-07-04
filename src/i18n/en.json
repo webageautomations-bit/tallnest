@@ -1,0 +1,113 @@
+{
+  "nav": {
+    "about": "About",
+    "partners": "Partners",
+    "theNest": "The Nest",
+    "contact": "Contact"
+  },
+  "hero": {
+    "eyebrow": "A Pakistani food & beverage company",
+    "headlineLine1": "We build the brands",
+    "headlineLine2Pre": "families ask for ",
+    "headlineLine2Em": "by name.",
+    "subcopy": "We create, market, and distribute food & beverage brands for Pakistan — combining confectionery and FMCG experience with international-trade reach and modern marketing.",
+    "ctaPrimary": "What we do",
+    "ctaSecondary": "Partner with us",
+    "jingoLabel": "Our first brand",
+    "jingoMore": "more in development",
+    "cue": "Scroll"
+  },
+  "approach": {
+    "eyebrow": "What we do",
+    "heading": "More than a name on the shelf.",
+    "steps": [
+      {
+        "title": "Build",
+        "line": "We create brands from the ground up — identity, packaging, naming, and product."
+      },
+      {
+        "title": "Market",
+        "line": "Modern digital and trade marketing that drives shelf pull and repeat purchase."
+      },
+      {
+        "title": "Distribute",
+        "line": "Contract manufacturing, reliable supply, and a growing national distribution network."
+      }
+    ]
+  },
+  "cta": {
+    "pre": "Building something for shelves? ",
+    "em": "Let's talk.",
+    "button": "Get in touch"
+  },
+  "about": {
+    "eyebrow": "Our story",
+    "statementPre": "A real brand at pocket-money prices — ",
+    "statementEm": "built to be remembered",
+    "statementPost": ", not forgotten at the counter.",
+    "narrative": "Tall Nest is a Pakistani food & beverage company building its first brand, Jingo — with more in development. Our team brings together seasoned confectionery and FMCG veterans alongside expertise in international trade and modern digital marketing — combining the know-how that moves product off shelves with the reach that builds brands.",
+    "pillars": [
+      { "title": "Flavour", "line": "Crafted for the tastes children love most." },
+      { "title": "Fun", "line": "Built into every wrapper and every pack." },
+      { "title": "Value", "line": "Pocket-money prices that make saying yes easy." }
+    ]
+  },
+  "flagship": {
+    "eyebrow": "Our first brand",
+    "headingPre": "Meet Jingo — ",
+    "headingEm": "our flagship.",
+    "desc": "Pakistan's poppiest candy — candies, toffees, lollipops, liquid chocolates, bubblegums, bunties & nimkos.",
+    "stats": [
+      { "value": "7", "count": 7, "suffix": "", "label": "Categories" },
+      { "value": "35+", "count": 35, "suffix": "+", "label": "Products" },
+      { "value": "Rs. 5–50", "count": null, "suffix": "", "label": "Pricing" }
+    ],
+    "categories": ["Candies", "Toffees", "Squizo", "Twist", "Bublo", "Choco Chums", "Mehfil"],
+    "visit": "Visit Jingo",
+    "more": "More brands in development. Tall Nest is built to grow."
+  },
+  "partners": {
+    "eyebrow": "For distributors & retail",
+    "headingPre": "A range that ",
+    "headingEm": "sells itself.",
+    "intro": "We don't just sell product — we build relationships. Reliable supply, strong margins, a growing range, and a team that markets the brand alongside you.",
+    "proof": [
+      { "title": "Pocket-money pricing", "line": "Rs. 5 to Rs. 50 — the impulse sweet-spot for kids." },
+      { "title": "Full range, one brand", "line": "7 categories and 40+ SKUs to fill the counter." },
+      { "title": "Fast-moving category", "line": "Bright packs and mascots drive repeat pull." },
+      { "title": "Reliable supply", "line": "Contract-manufactured for consistent quality and stock." },
+      { "title": "National reach", "line": "A distributor network and in-house sales force." }
+    ],
+    "ctaLine": "Stock Tall Nest brands — let's build turnover together.",
+    "ctaButton": "Become a partner"
+  },
+  "contact": {
+    "eyebrow": "Get in touch",
+    "heading": "Let's talk.",
+    "labelPhone": "Phone",
+    "labelEmail": "Email",
+    "labelStudio": "Head office",
+    "labelWeb": "Website",
+    "address": "DHA Phase 6, Lahore",
+    "careersHeading": "Careers",
+    "careersLine": "We're a growing food & beverage company building our first brand, and always open to sharp confectionery, sales, and marketing people. Reach out above.",
+    "formName": "Name",
+    "formEmail": "Email",
+    "formCompany": "Company",
+    "formCompanyOptional": "(optional)",
+    "formMessage": "Message",
+    "formSubmit": "Send message",
+    "statusUnconfigured": "Form isn't connected yet — add your Web3Forms key to enable sending.",
+    "statusSending": "Sending…",
+    "statusSuccess": "Thanks — your message is on its way. We'll be in touch.",
+    "statusError": "Something went wrong. Please try again, or call us instead."
+  },
+  "footer": {
+    "tagline": "Food & Beverages",
+    "address": "DHA Phase 6, Lahore",
+    "descriptor": "A Pakistani food & beverage company building its first brand.",
+    "navHeading": "Navigate",
+    "contactHeading": "Contact",
+    "madeIn": "Made in Lahore"
+  }
+}

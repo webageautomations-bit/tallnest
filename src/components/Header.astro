@@ -1,0 +1,333 @@
+---
+interface Props {
+  t: {
+    about: string;
+    partners: string;
+    theNest: string;
+    contact: string;
+  };
+}
+
+const { t } = Astro.props;
+
+const navLinks: { label: string; href: string; brand?: boolean }[] = [
+  { label: t.about, href: "/about" },
+  // Jingo — the flagship brand. Points to the homepage "Meet Jingo" section for
+  // now so it's never a dead link from any page. TODO: change to "/jingo" once
+  // the dedicated Jingo site/zone is deployed.
+  { label: "Jingo", href: "/#jingo", brand: true },
+  { label: t.partners, href: "/partners" },
+  { label: t.theNest, href: "/the-nest" },
+  { label: t.contact, href: "/contact" },
+];
+
+const homeHref = "/";
+
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isActive = (href: string) =>
+  href !== "/" && (path === href || path.startsWith(`${href}/`));
+
+const phones = [
+  { display: "+92 317 827 6277", href: "tel:+923178276277" },
+];
+---
+
+<header
+  id="site-header"
+  class="fixed inset-x-0 top-0 z-50 border-b border-transparent bg-white/85 backdrop-blur-md transition-[border-color,box-shadow] duration-300 ease-out"
+>
+  <div
+    class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 md:px-10"
+  >
+    <a href={homeHref} class="inline-flex items-center" aria-label="Tall Nest — home">
+      <img
+        src="/tallnest-logo.png"
+        alt="Tall Nest Food &amp; Beverages"
+        width="122"
+        height="48"
+        class="h-[42px] w-auto md:h-[48px]"
+        decoding="async"
+      />
+    </a>
+
+    <!-- Desktop: nav links -->
+    <nav aria-label="Primary" class="hidden md:block">
+      <ul class="flex items-center gap-9">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={["navlink", { "is-current": isActive(link.href), "is-brand": link.brand }]}
+                aria-current={isActive(link.href) ? "page" : undefined}
+              >
+                {link.label}
+                {link.brand && <span class="brand-dot" aria-hidden="true" />}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- Mobile: hamburger -->
+    <button
+      id="menu-open"
+      type="button"
+      class="inline-flex size-11 items-center justify-center rounded-pill text-ink transition-colors hover:text-red md:hidden"
+      aria-label="Open menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile slide-in overlay menu -->
+<div id="mobile-menu" class="mobile-menu md:hidden" aria-hidden="true">
+  <div class="mm-backdrop" data-close></div>
+  <div class="mm-panel" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="mm-head">
+      <span class="eyebrow text-[0.7rem]">Menu</span>
+      <button
+        id="menu-close"
+        type="button"
+        class="inline-flex size-11 items-center justify-center rounded-pill text-ink transition-colors hover:text-red"
+        aria-label="Close menu"
+        data-close
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav aria-label="Mobile" class="mm-nav">
+      <ul>
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={["mm-link font-display", { "is-current": isActive(link.href), "is-brand": link.brand }]}
+                aria-current={isActive(link.href) ? "page" : undefined}
+                data-close
+              >
+                {link.label}
+                {link.brand && <span class="mm-flag">Flagship</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mm-contact">
+      {
+        phones.map((p) => (
+          <a href={p.href} dir="ltr" class="link-underline w-fit text-ink">
+            {p.display}
+          </a>
+        ))
+      }
+      <a href="mailto:hello@tallnest.com" dir="ltr" class="link-underline w-fit text-ink">
+        hello@tallnest.com
+      </a>
+      <span class="text-gray">DHA Phase 6, Lahore</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .navlink {
+    position: relative;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-ink);
+    opacity: 0.85;
+    text-decoration: none;
+    transition: opacity 0.2s var(--ease-brand);
+  }
+  .navlink:hover {
+    opacity: 1;
+  }
+  .navlink::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inset-inline-end: 100%;
+    bottom: -6px;
+    height: 2px;
+    background: var(--color-red);
+    transition: inset-inline-end 0.28s var(--ease-brand);
+  }
+  .navlink:hover::after,
+  .navlink:focus-visible::after,
+  .navlink.is-current::after {
+    inset-inline-end: 0;
+  }
+  .navlink.is-current {
+    opacity: 1;
+    color: var(--color-red);
+  }
+  .mm-link.is-current {
+    color: var(--color-red);
+  }
+
+  /* Flagship (Jingo) — a small red accent dot marks it as the brand
+     destination without a loud button. */
+  .navlink.is-brand {
+    display: inline-flex;
+    align-items: center;
+  }
+  .brand-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-red);
+    margin-inline-start: 6px;
+  }
+  /* Mobile: a touch more highlighted with a small "Flagship" tag. */
+  .mm-flag {
+    display: inline-block;
+    vertical-align: middle;
+    margin-inline-start: 12px;
+    transform: translateY(-5px);
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-red);
+    background: color-mix(in srgb, var(--color-red) 10%, transparent);
+    padding: 4px 9px;
+    border-radius: var(--radius-pill);
+  }
+
+  #site-header.is-scrolled {
+    border-color: var(--color-hairline);
+    box-shadow: 0 6px 24px -18px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Mobile overlay */
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    visibility: hidden;
+  }
+  .mobile-menu.is-open {
+    visibility: visible;
+  }
+  .mm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 27, 22, 0.45);
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-brand);
+  }
+  .mobile-menu.is-open .mm-backdrop {
+    opacity: 1;
+  }
+  .mm-panel {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: min(86vw, 360px);
+    background: #fff;
+    box-shadow: var(--shadow-e3);
+    padding: 22px clamp(22px, 6vw, 34px) 40px;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.36s var(--ease-brand);
+    overflow-y: auto;
+  }
+  [dir="rtl"] .mm-panel {
+    transform: translateX(-100%);
+  }
+  .mobile-menu.is-open .mm-panel {
+    transform: translateX(0);
+  }
+  .mm-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .mm-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mm-link {
+    display: block;
+    font-size: clamp(1.9rem, 8vw, 2.4rem);
+    font-weight: 500;
+    color: var(--color-ink);
+    text-decoration: none;
+    padding: 8px 0;
+    transition: color 0.2s var(--ease-brand);
+  }
+  .mm-link:hover {
+    color: var(--color-red);
+  }
+  .mm-contact {
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 1px solid var(--color-hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.95rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .navlink::after,
+    .mm-backdrop,
+    .mm-panel {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const header = document.getElementById("site-header");
+  if (header) {
+    const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+
+  const menu = document.getElementById("mobile-menu");
+  const openBtn = document.getElementById("menu-open");
+  if (menu && openBtn) {
+    const open = () => {
+      menu.classList.add("is-open");
+      menu.setAttribute("aria-hidden", "false");
+      openBtn.setAttribute("aria-expanded", "true");
+      document.documentElement.style.overflow = "hidden";
+      menu.querySelector<HTMLElement>("#menu-close")?.focus();
+    };
+    const close = () => {
+      menu.classList.remove("is-open");
+      menu.setAttribute("aria-hidden", "true");
+      openBtn.setAttribute("aria-expanded", "false");
+      document.documentElement.style.overflow = "";
+      openBtn.focus();
+    };
+    openBtn.addEventListener("click", open);
+    menu.querySelectorAll<HTMLElement>("[data-close]").forEach((el) =>
+      el.addEventListener("click", close),
+    );
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && menu.classList.contains("is-open")) close();
+    });
+  }
+</script>

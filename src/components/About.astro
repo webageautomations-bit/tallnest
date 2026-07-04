@@ -1,0 +1,181 @@
+---
+// About / Story — editorial two-column intro + premium equal-height cards.
+import type { Dict } from "../i18n/utils";
+
+interface Props {
+  t: Dict["about"];
+}
+const { t } = Astro.props;
+
+// Lucide-style line icons, one per pillar (Flavour, Fun, Value).
+const icons = [
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 13.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>`,
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9h.01M15 9h.01"/></svg>`,
+  `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 11.6 11 4.2a2 2 0 0 1 1.4-.6H19a1.4 1.4 0 0 1 1.4 1.4v6.6a2 2 0 0 1-.6 1.4l-7.4 7.4a2 2 0 0 1-2.8 0l-5.6-5.6a2 2 0 0 1 0-2.8z"/><circle cx="16" cy="8" r="1.2"/></svg>`,
+];
+---
+
+<section id="about" class="section-y bg-white">
+  <div class="mx-auto max-w-7xl px-6 md:px-10">
+    <!-- Editorial intro: statement (left) + body (right) -->
+    <div class="grid gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:items-start lg:gap-16">
+      <div>
+        <p data-reveal class="eyebrow mb-6">{t.eyebrow}</p>
+        <h2
+          data-reveal-heading
+          class="font-display text-[clamp(1.75rem,3.6vw,2.9rem)] font-medium leading-[1.14] tracking-[-0.01em] text-ink text-balance"
+        >
+          {t.statementPre}<span class="text-red">{t.statementEm}</span>{t.statementPost}
+        </h2>
+        <div data-reveal class="mt-8 border-t border-hairline pt-4">
+          <p class="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-gray">
+            Est. 2026 · Lahore, Pakistan
+          </p>
+        </div>
+      </div>
+
+      <div data-reveal class="lg:pt-1">
+        <p class="text-lg leading-relaxed text-gray">{t.narrative}</p>
+        <a
+          href="/about"
+          class="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-red"
+        >
+          Read our story
+          <span
+            class="transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none"
+            aria-hidden="true">&rarr;</span
+          >
+        </a>
+      </div>
+    </div>
+
+    <!-- The promise -->
+    <p data-reveal class="eyebrow mb-6 mt-16 lg:mt-24">The promise</p>
+    <ul data-reveal-group class="about-cards">
+      {
+        t.pillars.map((p, i) => (
+          <li data-reveal-item class="about-card card">
+            <span class="icon-chip" aria-hidden="true" set:html={icons[i]} />
+            <h3 class="mt-5 font-display text-xl font-medium text-ink">
+              {p.title}
+            </h3>
+            <p class="mt-2 leading-relaxed text-gray">{p.line}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    perspective: 1000px;
+  }
+  @media (max-width: 760px) {
+    .about-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+  .about-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 28px;
+    will-change: transform;
+    /* transform is driven by JS (ambient float); animate only paint props here */
+    transition:
+      box-shadow 0.35s var(--ease-brand),
+      border-color 0.35s var(--ease-brand);
+  }
+  /* Thin red top-accent grows across the card on hover. */
+  .about-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    height: 3px;
+    width: 0;
+    background: var(--color-red);
+    transition: width 0.4s var(--ease-brand);
+    z-index: 1;
+  }
+  .about-card:hover::before {
+    width: 100%;
+  }
+  .icon-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    color: var(--color-red);
+    background: color-mix(in srgb, var(--color-red) 9%, transparent);
+    transition:
+      background 0.3s var(--ease-brand),
+      color 0.3s var(--ease-brand);
+  }
+  .about-card:hover .icon-chip {
+    background: var(--color-red);
+    color: #fff;
+  }
+  /* Reduced motion: no JS transforms — simple instant lift on hover. */
+  @media (prefers-reduced-motion: reduce) {
+    .about-card:hover {
+      transform: translateY(-6px);
+    }
+  }
+</style>
+
+<script>
+  // Restrained ambient float + hover lift for the promise cards. Skipped under
+  // reduced motion (CSS handles a simple hover lift). Paused when offscreen.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cards = Array.from(document.querySelectorAll<HTMLElement>(".about-card"));
+
+  if (!reduce && cards.length) {
+    const states = cards.map((el, i) => ({ el, phase: i * 2.1, lift: 0, tl: 0 }));
+    states.forEach((s) => {
+      s.el.addEventListener("pointerenter", () => (s.tl = 1));
+      s.el.addEventListener("pointerleave", () => (s.tl = 0));
+    });
+
+    let t = 0;
+    let raf = 0;
+    let running = false;
+    const frame = () => {
+      t += 0.016;
+      for (const s of states) {
+        s.lift += (s.tl - s.lift) * 0.1;
+        const ay = Math.sin(t * 0.8 + s.phase) * 2.5;
+        s.el.style.transform = `translate3d(0, ${(ay - s.lift * 6).toFixed(2)}px, 0)`;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    const group = cards[0].closest(".about-cards") ?? cards[0];
+    new IntersectionObserver(
+      (entries) => entries.forEach((en) => (en.isIntersecting ? start() : stop())),
+      { threshold: 0 },
+    ).observe(group);
+  }
+</script>

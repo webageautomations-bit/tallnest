@@ -1,0 +1,390 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const pillars = [
+  {
+    title: "Flavour",
+    line: "Bold, distinct taste that children recognise and come back for — not a vague sweetness they forget.",
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 13.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>`,
+  },
+  {
+    title: "Fun",
+    line: "Character built into every wrapper and pack — a small moment of delight, designed in on purpose.",
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9h.01M15 9h.01"/></svg>`,
+  },
+  {
+    title: "Value",
+    line: "Pocket-money prices that make saying yes easy — a real brand inside a five-rupee note.",
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 11.6 11 4.2a2 2 0 0 1 1.4-.6H19a1.4 1.4 0 0 1 1.4 1.4v6.6a2 2 0 0 1-.6 1.4l-7.4 7.4a2 2 0 0 1-2.8 0l-5.6-5.6a2 2 0 0 1 0-2.8z"/><circle cx="16" cy="8" r="1.2"/></svg>`,
+  },
+];
+
+const capabilities = [
+  { k: "Confectionery & FMCG", v: "Seasoned veterans who've moved real product at scale." },
+  { k: "International trade", v: "Sourcing and trade reach beyond a single market." },
+  { k: "Modern marketing", v: "Digital and trade marketing that builds genuine pull." },
+  { k: "Reliable supply", v: "Contract manufacturing built for consistency and stock." },
+];
+---
+
+<BaseLayout
+  title="About — Tall Nest Food & Beverages"
+  description="Tall Nest is a Pakistani food & beverage company building real brands at pocket-money prices. Our first brand is Jingo, with more in development."
+  flushFooter
+>
+  <!-- Intro -->
+  <section class="section-y bg-white">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">About Tall Nest</p>
+      <h1
+        data-reveal-heading
+        class="max-w-4xl font-display text-[clamp(2.4rem,5vw,4.2rem)] font-medium leading-[1.04] tracking-[-0.02em] text-ink text-balance"
+      >
+        Building brands Pakistan grows up with.
+      </h1>
+      <p data-reveal class="mt-7 max-w-[58ch] text-lg leading-relaxed text-gray">
+        We're a Pakistani food &amp; beverage company that builds, markets, and
+        distributes brands for the everyday — starting with the smallest budget
+        in the market and the most loyal customer in it: a child at a counter.
+      </p>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="section-y bg-paper">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:items-start">
+        <h2
+          data-reveal-heading
+          class="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-medium leading-[1.12] tracking-[-0.01em] text-ink text-balance"
+        >
+          It started with a five-rupee question.
+        </h2>
+        <div data-reveal class="max-w-[60ch] text-lg leading-relaxed text-gray">
+          <p>
+            Tall Nest began with a question: why should a Rs. 5 treat feel like
+            an afterthought? In a market full of sweets children forget the
+            moment they've finished them, we set out to build something
+            different — a real brand at pocket-money prices, with character and
+            bold flavour, the kind children recognise on the shelf and ask for
+            by name.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we believe -->
+  <section class="section-y bg-white">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">What we believe</p>
+      <ul data-reveal-group class="believe-grid">
+        {
+          pillars.map((p) => (
+            <li data-reveal-item data-float class="believe-card card">
+              <span class="icon-chip" aria-hidden="true" set:html={p.icon} />
+              <h3 class="mt-5 font-display text-xl font-medium text-ink">
+                {p.title}
+              </h3>
+              <p class="mt-2 leading-relaxed text-gray">{p.line}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Who we are -->
+  <section class="section-y bg-paper">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:items-start">
+        <div>
+          <p data-reveal class="eyebrow mb-6">Who we are</p>
+          <h2
+            data-reveal-heading
+            class="font-display text-[clamp(1.6rem,3vw,2.4rem)] font-medium leading-[1.12] tracking-[-0.01em] text-ink text-balance"
+          >
+            Built by people who've done it before.
+          </h2>
+          <p data-reveal class="mt-6 max-w-[46ch] text-lg leading-relaxed text-gray">
+            Built by people who've moved product and built brands — seasoned
+            confectionery and FMCG veterans, plus expertise in international
+            trade and modern digital marketing.
+          </p>
+        </div>
+        <ul data-reveal-group class="cap-grid">
+          {
+            capabilities.map((c) => (
+              <li data-reveal-item data-float class="cap-card card">
+                <h3 class="font-display text-lg font-medium text-ink">{c.k}</h3>
+                <p class="mt-1.5 text-sm leading-relaxed text-gray">{c.v}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flagship line -->
+  <section class="bg-white pb-4">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p
+        data-reveal
+        class="border-t border-hairline pt-8 text-lg text-gray text-balance"
+      >
+        <span class="font-medium text-ink">Jingo is our first brand</span> — a
+        poppy, pocket-money confectionery range. More are in development.
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA — dark panel that flows seamlessly into the dark footer below -->
+  <section class="cta-wrap bg-white px-3 sm:px-4 lg:px-6">
+    <div class="about-cta mx-auto max-w-7xl">
+      <div class="about-cta-inner">
+        <h2
+          data-reveal-heading
+          class="mx-auto max-w-4xl font-display text-[clamp(2rem,4.5vw,3.2rem)] font-medium leading-[1.08] tracking-[-0.02em] text-white text-balance"
+        >
+          Want to <em class="about-cta-em">build with us?</em>
+        </h2>
+        <div class="about-cta-actions">
+          <a href="/partners" class="cta-primary group">
+            Partner with us
+            <span class="cta-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <a href="/contact" class="cta-ghost">Get in touch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .believe-grid,
+  .cap-grid {
+    display: grid;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .believe-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .cap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 760px) {
+    .believe-grid,
+    .cap-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .believe-card,
+  .cap-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 28px;
+    will-change: transform;
+    /* transform is driven by JS (ambient float); animate only paint props here */
+    transition:
+      box-shadow 0.35s var(--ease-brand),
+      border-color 0.35s var(--ease-brand);
+  }
+  /* Red top-accent grows across the card on hover. */
+  .believe-card::before,
+  .cap-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    height: 3px;
+    width: 0;
+    background: var(--color-red);
+    transition: width 0.4s var(--ease-brand);
+    z-index: 1;
+  }
+  .believe-card:hover::before,
+  .cap-card:hover::before {
+    width: 100%;
+  }
+  .icon-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    color: var(--color-red);
+    background: color-mix(in srgb, var(--color-red) 9%, transparent);
+    transition:
+      background 0.3s var(--ease-brand),
+      color 0.3s var(--ease-brand);
+  }
+  .believe-card:hover .icon-chip {
+    background: var(--color-red);
+    color: #fff;
+  }
+
+  /* Breathing room above the dark CTA; bg-white wrapper matches the footer's. */
+  .cta-wrap {
+    padding-top: clamp(56px, 8vw, 96px);
+  }
+  /* Dark panel — same container as the footer (rounded top only) so the two
+     join into one continuous dark base with no seam. */
+  .about-cta {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-ink);
+    border-radius: 36px 36px 0 0;
+  }
+  .about-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 100% at 50% -10%, rgba(224, 32, 43, 0.18), transparent 60%),
+      radial-gradient(55% 90% at 100% 110%, rgba(0, 0, 0, 0.35), transparent 65%);
+    pointer-events: none;
+  }
+  .about-cta-inner {
+    position: relative;
+    padding: clamp(64px, 10vw, 104px) clamp(24px, 5vw, 72px);
+    text-align: center;
+  }
+  .about-cta-em {
+    font-style: italic;
+    color: #ff6b66;
+  }
+  .about-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+  }
+  .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-red);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    padding: 15px 30px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.5);
+    transition:
+      transform 0.2s var(--ease-brand),
+      background 0.2s var(--ease-brand),
+      box-shadow 0.2s var(--ease-brand);
+  }
+  .cta-primary:hover {
+    transform: translateY(-2px);
+    background: var(--color-red-deep);
+    box-shadow: 0 22px 44px -16px rgba(0, 0, 0, 0.6);
+  }
+  .cta-primary:hover .cta-arrow {
+    transform: translateX(4px);
+  }
+  .cta-arrow {
+    transition: transform 0.2s var(--ease-brand);
+  }
+  .cta-ghost {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    padding: 15px 28px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition:
+      background 0.2s var(--ease-brand),
+      border-color 0.2s var(--ease-brand);
+  }
+  .cta-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .believe-card,
+    .cap-card,
+    .believe-card::before,
+    .cap-card::before,
+    .icon-chip,
+    .cta-primary,
+    .cta-arrow,
+    .cta-ghost {
+      transition: none;
+    }
+    .believe-card:hover,
+    .cap-card:hover {
+      transform: translateY(-6px);
+    }
+  }
+</style>
+
+<script>
+  // Restrained ambient float + hover lift for the belief & capability cards.
+  // Skipped under reduced motion (CSS handles a simple hover lift). Paused
+  // when both grids are offscreen.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-float]"));
+
+  if (!reduce && cards.length) {
+    const states = cards.map((el, i) => ({ el, phase: i * 1.9, lift: 0, tl: 0 }));
+    states.forEach((s) => {
+      s.el.addEventListener("pointerenter", () => (s.tl = 1));
+      s.el.addEventListener("pointerleave", () => (s.tl = 0));
+    });
+
+    let t = 0;
+    let raf = 0;
+    let running = false;
+    const frame = () => {
+      t += 0.016;
+      for (const s of states) {
+        s.lift += (s.tl - s.lift) * 0.1;
+        const ay = Math.sin(t * 0.8 + s.phase) * 2.5;
+        s.el.style.transform = `translate3d(0, ${(ay - s.lift * 6).toFixed(2)}px, 0)`;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    const groups = new Set<Element>();
+    cards.forEach((c) => {
+      const g = c.closest(".believe-grid, .cap-grid");
+      if (g) groups.add(g);
+    });
+    const visible = new Set<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) visible.add(e.target);
+          else visible.delete(e.target);
+        }
+        visible.size ? start() : stop();
+      },
+      { threshold: 0 },
+    );
+    groups.forEach((g) => io.observe(g));
+  }
+</script>

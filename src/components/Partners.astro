@@ -1,0 +1,288 @@
+---
+// Partners — dark, confident pitch to distributors and retail buyers.
+import type { Dict } from "../i18n/utils";
+
+interface Props {
+  t: Dict["partners"];
+}
+const { t } = Astro.props;
+---
+
+<section id="partners" class="scroll-mt-24 bg-white px-3 py-12 sm:px-4 lg:px-6 lg:py-16">
+  <div class="dark mx-auto max-w-7xl">
+    <div class="dark-inner">
+      <p data-reveal class="meta-caps mb-5 text-xs" style="color:#ff8a86">
+        {t.eyebrow}
+      </p>
+      <h2
+        data-reveal-heading
+        class="max-w-3xl font-display text-[clamp(2rem,4vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em] text-white text-balance"
+      >
+        {t.headingPre}<span style="color:#ff6b66">{t.headingEm}</span>
+      </h2>
+      <p
+        data-reveal
+        class="mt-6 max-w-[54ch] text-lg leading-relaxed"
+        style="color:rgba(255,255,255,0.62)"
+      >
+        {t.intro}
+      </p>
+
+      <ul data-reveal-group class="pcards">
+        {
+          t.proof.map((p, i) => (
+            <li data-reveal-item class="pcard">
+              <div class="pcard-num">{String(i + 1).padStart(2, "0")}</div>
+              <h3 class="pcard-title">{p.title}</h3>
+              <p class="pcard-body">{p.line}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <a data-reveal href="/partners" class="pcta group">
+        Partner with us
+        <span
+          class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+          aria-hidden="true">&rarr;</span
+        >
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pcta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 36px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    padding-bottom: 3px;
+    transition: border-color 0.2s var(--ease-brand);
+  }
+  .pcta:hover {
+    border-color: #fff;
+  }
+</style>
+
+<style>
+  .dark {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-ink);
+    border-radius: 36px;
+  }
+  /* Soft radial red glow in one corner for depth (RTL-aware corner). */
+  .dark::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    inset-inline-end: -10%;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(224, 32, 43, 0.22), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .dark-inner {
+    position: relative;
+    padding: clamp(56px, 8vh, 104px) clamp(24px, 5vw, 72px);
+  }
+
+  /* 6-col grid: top row of 3, bottom row of 2 centered (no orphan gap). */
+  .pcards {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 18px;
+    margin-top: 48px;
+    list-style: none;
+    padding: 0;
+    perspective: 1100px;
+  }
+  .pcard {
+    grid-column: span 2;
+  }
+  .pcard:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+  .pcard:nth-child(5) {
+    grid-column: 4 / span 2;
+  }
+  @media (max-width: 1024px) and (min-width: 641px) {
+    .pcards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .pcard,
+    .pcard:nth-child(4),
+    .pcard:nth-child(5) {
+      grid-column: auto;
+    }
+    .pcard:nth-child(5) {
+      grid-column: span 2;
+    }
+  }
+  @media (max-width: 640px) {
+    .pcards {
+      grid-template-columns: 1fr;
+    }
+    .pcard,
+    .pcard:nth-child(4),
+    .pcard:nth-child(5) {
+      grid-column: auto;
+    }
+  }
+
+  .pcard {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 30px 28px 32px;
+    transform-style: preserve-3d;
+    will-change: transform;
+    box-shadow: 0 18px 44px -26px rgba(0, 0, 0, 0.6);
+    transition:
+      border-color 0.35s ease,
+      background 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+  /* Red top-line grows from the reading-start side on hover. */
+  .pcard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    height: 3px;
+    width: 0;
+    background: #e0202b;
+    transition: width 0.4s ease;
+    z-index: 1;
+  }
+  .pcard:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(224, 32, 43, 0.5);
+    box-shadow: 0 44px 90px -34px rgba(0, 0, 0, 0.7);
+  }
+  .pcard:hover::before {
+    width: 100%;
+  }
+  /* Reduced motion: no JS transforms — a simple, smooth lift on hover. */
+  @media (prefers-reduced-motion: reduce) {
+    .pcard {
+      transition:
+        border-color 0.35s ease,
+        background 0.35s ease,
+        box-shadow 0.35s ease,
+        transform 0.35s ease;
+    }
+    .pcard:hover {
+      transform: translateY(-7px);
+    }
+  }
+  .pcard-num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 15px;
+    color: #e0202b;
+    margin-bottom: 30px;
+  }
+  .pcard-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 23px;
+    margin: 0 0 10px;
+    color: #fff;
+  }
+  .pcard-body {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.58);
+    margin: 0;
+  }
+
+</style>
+
+<script>
+  // Ambient 3D float + cursor tilt for the partner cards. Skipped under
+  // reduced motion (CSS handles a simple hover lift). Paused when offscreen.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cards = Array.from(document.querySelectorAll<HTMLElement>(".pcard"));
+
+  if (!reduce && cards.length) {
+    type S = {
+      el: HTMLElement;
+      phase: number;
+      rx: number; ry: number; lift: number;
+      trx: number; try_: number; tl: number;
+    };
+    const states: S[] = cards.map((el, i) => ({
+      el,
+      phase: i * 1.7,
+      rx: 0, ry: 0, lift: 0,
+      trx: 0, try_: 0, tl: 0,
+    }));
+
+    states.forEach((s) => {
+      s.el.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = s.el.getBoundingClientRect();
+        const nx = (e.clientX - r.left) / r.width - 0.5;
+        const ny = (e.clientY - r.top) / r.height - 0.5;
+        s.try_ = nx * 14;
+        s.trx = -ny * 14;
+        s.tl = 1;
+      });
+      s.el.addEventListener("pointerleave", () => {
+        s.trx = 0;
+        s.try_ = 0;
+        s.tl = 0;
+      });
+    });
+
+    let t = 0;
+    let raf = 0;
+    let running = false;
+    const frame = () => {
+      t += 0.016;
+      for (const s of states) {
+        s.rx += (s.trx - s.rx) * 0.12;
+        s.ry += (s.try_ - s.ry) * 0.12;
+        s.lift += (s.tl - s.lift) * 0.1;
+        const ay = Math.sin(t * 0.9 + s.phase) * 3;
+        const arz = Math.sin(t * 0.8 + s.phase) * 0.5;
+        const arx = Math.cos(t * 0.7 + s.phase) * 0.4;
+        const ty = ay - s.lift * 8;
+        const tz = s.lift * 30;
+        s.el.style.transform =
+          `translate3d(0, ${ty.toFixed(2)}px, ${tz.toFixed(1)}px) ` +
+          `rotateX(${(s.rx + arx).toFixed(2)}deg) ` +
+          `rotateY(${s.ry.toFixed(2)}deg) rotateZ(${arz.toFixed(2)}deg)`;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    const group = cards[0].closest(".pcards") ?? cards[0];
+    new IntersectionObserver(
+      (entries) => entries.forEach((en) => (en.isIntersecting ? start() : stop())),
+      { threshold: 0 },
+    ).observe(group);
+  }
+</script>

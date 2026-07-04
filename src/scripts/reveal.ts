@@ -1,0 +1,162 @@
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+
+gsap.registerPlugin(ScrollTrigger, SplitText);
+
+const prefersReducedMotion = window.matchMedia(
+  "(prefers-reduced-motion: reduce)",
+).matches;
+
+// Shared timing tokens so the whole page animates with one rhythm.
+const EASE = "power3.out";
+
+/**
+ * Restrained, on-scroll entrance reveals for supporting elements
+ * (eyebrows, paragraphs, cards, stats) — a simple fade + rise.
+ *
+ *   [data-reveal]                 — single element that rises + fades in.
+ *   [data-reveal-group] +         — container whose [data-reveal-item]
+ *     [data-reveal-item]            children stagger in when it enters view.
+ *
+ * Under prefers-reduced-motion nothing is hidden or animated.
+ */
+export function initReveals(): void {
+  if (prefersReducedMotion) return;
+
+  gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+    gsap.from(el, {
+      autoAlpha: 0,
+      y: 24,
+      duration: 0.6,
+      ease: EASE,
+      scrollTrigger: { trigger: el, start: "top 85%" },
+    });
+  });
+
+  gsap.utils.toArray<HTMLElement>("[data-reveal-group]").forEach((group) => {
+    const items = group.querySelectorAll<HTMLElement>("[data-reveal-item]");
+    if (!items.length) return;
+    gsap.from(items, {
+      autoAlpha: 0,
+      y: 24,
+      duration: 0.55,
+      ease: EASE,
+      stagger: 0.1,
+      scrollTrigger: { trigger: group, start: "top 80%" },
+    });
+  });
+}
+
+/**
+ * Signature heading reveal — blur-to-focus, line by line (SplitText).
+ *
+ *   [data-reveal-heading]         — h1 / section h2 to reveal by lines.
+ *   [data-reveal-now]             — play immediately on load (the hero h1);
+ *                                   otherwise plays once on scroll into view.
+ *
+ * Robustness: waits for fonts before splitting (correct line breaks, no swap
+ * reflow), re-splits on resize, reverts each split once played (tidy DOM +
+ * screen-reader-correct text). FOUC is handled by the `reveal-active` class on
+ * <html> (set by an inline head script) — headings are only hidden when JS is
+ * actually running and motion is allowed. Under reduced motion this is a no-op.
+ */
+export async function initHeadingReveals(): Promise<void> {
+  if (prefersReducedMotion) return;
+
+  const heads = gsap.utils.toArray<HTMLElement>("[data-reveal-heading]");
+  if (!heads.length) return;
+
+  // Correct line breaks require the real fonts to be in place first.
+  await document.fonts.ready;
+
+  const played = new WeakSet<HTMLElement>();
+  const splits = new Map<HTMLElement, SplitText>();
+  const triggers = new Map<HTMLElement, ScrollTrigger>();
+
+  const cleanup = (el: HTMLElement) => {
+    const s = splits.get(el);
+    if (s) {
+      s.revert(); // restores original markup (accessible text, no will-change)
+      splits.delete(el);
+    }
+    const trig = triggers.get(el);
+    if (trig) {
+      trig.kill();
+      triggers.delete(el);
+    }
+    // Keep the heading visible after revert (inline opacity beats the CSS hide).
+    gsap.set(el, { opacity: 1, visibility: "visible" });
+  };
+
+  const buildOne = (el: HTMLElement) => {
+    if (played.has(el)) {
+      gsap.set(el, { opacity: 1, visibility: "visible" });
+      return;
+    }
+    const split = new SplitText(el, {
+      type: "lines",
+      mask: "lines",
+      linesClass: "reveal-line",
+      aria: "auto",
+    });
+    splits.set(el, split);
+
+    gsap.set(el, { autoAlpha: 1 }); // reveal container; lines are hidden below
+    gsap.set(split.lines, {
+      opacity: 0,
+      y: 24,
+      filter: "blur(12px)",
+      willChange: "transform, filter, opacity",
+    });
+
+    const animate = () =>
+      gsap.to(split.lines, {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.8,
+        stagger: 0.09,
+        ease: EASE,
+        onComplete: () => {
+          played.add(el);
+          cleanup(el);
+        },
+      });
+
+    if (el.hasAttribute("data-reveal-now")) {
+      animate();
+    } else {
+      const trig = ScrollTrigger.create({
+        trigger: el,
+        start: "top 82%",
+        once: true,
+        onEnter: animate,
+      });
+      triggers.set(el, trig);
+    }
+  };
+
+  const build = () => heads.forEach(buildOne);
+
+  build();
+  ScrollTrigger.refresh();
+
+  // Re-split unplayed headings on resize so line masks stay correct.
+  let resizeTimer: number | undefined;
+  window.addEventListener(
+    "resize",
+    () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        splits.forEach((s) => s.revert());
+        splits.clear();
+        triggers.forEach((t) => t.kill());
+        triggers.clear();
+        build();
+        ScrollTrigger.refresh();
+      }, 200);
+    },
+    { passive: true },
+  );
+}

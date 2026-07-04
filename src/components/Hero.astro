@@ -1,0 +1,135 @@
+---
+// Homepage hero — a bold, capability-led editorial statement on white.
+// Tall Nest is the company; Jingo is its first brand (one honest callout).
+// Big type carries it; whitespace is deliberate.
+import { type Dict } from "../i18n/utils";
+
+interface Props {
+  t: Dict["hero"];
+}
+const { t } = Astro.props;
+const arrow = "→";
+---
+
+<section
+  class="relative flex min-h-svh flex-col bg-white"
+  aria-labelledby="hero-headline"
+>
+  <!-- Statement -->
+  <div
+    class="mx-auto flex w-full max-w-7xl flex-1 items-center px-6 pt-28 pb-14 md:px-10 lg:pt-32 lg:pb-20"
+  >
+    <div class="w-full max-w-5xl">
+      <p data-hero="eyebrow" class="eyebrow mb-7">
+        {t.eyebrow}
+      </p>
+
+      <h1
+        id="hero-headline"
+        data-reveal-heading
+        data-reveal-now
+        class="font-display font-medium leading-[0.98] tracking-[-0.02em] text-ink text-[clamp(2.75rem,6.5vw,5.5rem)]"
+      >
+        {t.headlineLine1}<br />{t.headlineLine2Pre}<em class="text-red"
+          >{t.headlineLine2Em}</em
+        >
+      </h1>
+
+      <p
+        data-hero="subcopy"
+        class="mt-8 max-w-[52ch] text-base leading-relaxed text-gray sm:text-lg"
+      >
+        {t.subcopy}
+      </p>
+
+      <div
+        data-hero="actions"
+        class="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4"
+      >
+        <a href="#approach" class="btn">{t.ctaPrimary}</a>
+        <a
+          href="/partners"
+          class="group inline-flex items-center gap-1.5 text-sm font-semibold text-red"
+        >
+          {t.ctaSecondary}
+          <span
+            class="transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none rtl:group-hover:-translate-x-0.5"
+            aria-hidden="true">{arrow}</span
+          >
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom band: honest Jingo callout + scroll cue -->
+  <div class="mx-auto w-full max-w-7xl px-6 pb-10 md:px-10">
+    <div
+      class="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 border-t border-hairline pt-6"
+    >
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a
+          href="/jingo"
+          data-hero="jingo"
+          class="group inline-flex items-center gap-3"
+          aria-label="Our first brand: Jingo"
+        >
+          <span class="meta-caps text-[0.62rem] text-red">{t.jingoLabel}</span>
+          <img
+            src="/jingo-logo.png"
+            alt="Jingo"
+            width="51"
+            height="26"
+            class="h-[26px] w-auto"
+            decoding="async"
+          />
+          <span
+            class="text-red transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none rtl:group-hover:-translate-x-0.5"
+            aria-hidden="true">{arrow}</span
+          >
+        </a>
+        <span class="meta-caps text-[0.6rem] text-gray">{t.jingoMore}</span>
+      </div>
+
+      <div
+        data-hero="cue"
+        class="meta-caps flex items-center gap-2 text-[0.6rem] text-gray"
+      >
+        {t.cue}
+        <span class="animate-bounce-slow motion-reduce:animate-none" aria-hidden="true"
+          >&darr;</span
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from "gsap";
+
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  // The h1 itself is handled by the shared blur-to-focus heading reveal;
+  // here we just bring in the supporting elements (fade + rise) on load.
+  const q = (sel: string) => document.querySelector<HTMLElement>(sel);
+  const eyebrow = q('[data-hero="eyebrow"]');
+  const subcopy = q('[data-hero="subcopy"]');
+  const actions = q('[data-hero="actions"]');
+  const jingo = q('[data-hero="jingo"]');
+  const cue = q('[data-hero="cue"]');
+
+  if (!prefersReducedMotion) {
+    gsap.set([eyebrow, subcopy, actions, jingo, cue], {
+      autoAlpha: 0,
+      y: 16,
+    });
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" }, delay: 0.1 });
+
+    tl.to(eyebrow, { autoAlpha: 1, y: 0, duration: 0.4 })
+      .to(subcopy, { autoAlpha: 1, y: 0, duration: 0.4 }, "+=0.1")
+      .to(actions, { autoAlpha: 1, y: 0, duration: 0.4 }, "-=0.28")
+      .to([jingo, cue], { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.08 }, "-=0.2");
+  }
+</script>

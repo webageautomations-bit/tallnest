@@ -1,0 +1,77 @@
+---
+// Closing CTA band — deep red, bookends toward the dark footer.
+import type { Dict } from "../i18n/utils";
+
+interface Props {
+  t: Dict["cta"];
+}
+const { t } = Astro.props;
+---
+
+<section class="cta-band">
+  <div class="relative mx-auto max-w-4xl px-6 text-center">
+    <h2
+      data-reveal-heading
+      class="font-display text-[clamp(2rem,4.5vw,3.4rem)] font-medium leading-[1.08] tracking-[-0.02em] text-white text-balance"
+    >
+      {t.pre}<em class="cta-em">{t.em}</em>
+    </h2>
+    <a href="#contact" class="cta-btn group">
+      {t.button}
+      <span
+        class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+        aria-hidden="true">→</span
+      >
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-red);
+    padding-block: clamp(72px, 12vw, 128px);
+  }
+  /* Soft radial glow for depth (consistent with the contact panel). */
+  .cta-band::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(70% 120% at 50% -10%, rgba(255, 255, 255, 0.16), transparent 60%),
+      radial-gradient(60% 100% at 100% 100%, rgba(0, 0, 0, 0.22), transparent 65%);
+    pointer-events: none;
+  }
+  .cta-em {
+    font-style: italic;
+    color: #ffd2cd;
+  }
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    background: #fff;
+    color: var(--color-red);
+    border-radius: var(--radius-pill);
+    padding: 15px 30px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.45);
+    transition:
+      transform 0.2s var(--ease-brand),
+      box-shadow 0.2s var(--ease-brand);
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 44px -16px rgba(0, 0, 0, 0.55);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cta-btn {
+      transition: none;
+    }
+  }
+</style>

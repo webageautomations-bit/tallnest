@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+/* Fonts (Sentient display + General Sans body) are loaded via the Fontshare
+   CSS API with a <link> in BaseLayout's <head>. */
+
+/* ---------------------------------------------------------------------------
+   Design tokens — single source of truth.
+   Defined as CSS custom properties, then mapped into the Tailwind theme below
+   so utilities like bg-paper, text-ink, font-display are generated.
+   Base surface is white (use Tailwind's bg-white / text-white directly).
+--------------------------------------------------------------------------- */
+:root {
+  --color-paper: #f7f6f4; /* barely-there alternate band */
+  --color-red: #93221e; /* single accent */
+  --color-red-deep: #7a1c19; /* accent, pressed/hover */
+  --color-ink: #1e1b16; /* primary text / full dark sections */
+  --color-gray: #6b6358; /* secondary text */
+  --color-hairline: #e8e5df; /* dividers / borders (tuned for white) */
+}
+
+/* Map tokens into the Tailwind theme (CSS-first config, Tailwind v4).
+   Namespaced tokens (--shadow-*, --radius-*, --ease-*) also generate Tailwind
+   utilities: shadow-e1/e2/e3, rounded-card/panel/input/pill, ease-brand. */
+@theme {
+  --color-paper: var(--color-paper);
+  --color-red: var(--color-red);
+  --color-red-deep: var(--color-red-deep);
+  --color-ink: var(--color-ink);
+  --color-gray: var(--color-gray);
+  --color-hairline: var(--color-hairline);
+
+  --font-display: "Sentient", Georgia, serif;
+  --font-body: "General Sans", Arial, sans-serif;
+
+  /* Shared easing */
+  --ease-brand: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Elevation system */
+  --shadow-e1:
+    0 1px 2px rgba(30, 27, 22, 0.04), 0 4px 12px -6px rgba(30, 27, 22, 0.12);
+  --shadow-e2:
+    0 2px 6px rgba(30, 27, 22, 0.04), 0 22px 48px -28px rgba(30, 27, 22, 0.45);
+  --shadow-e3:
+    0 2px 6px rgba(30, 27, 22, 0.04), 0 40px 76px -38px rgba(147, 34, 30, 0.42);
+
+  /* Radii scale */
+  --radius-input: 14px;
+  --radius-card: 22px;
+  --radius-panel: 28px;
+  --radius-pill: 999px;
+}
+
+/* ---------------------------------------------------------------------------
+   Type helpers
+--------------------------------------------------------------------------- */
+/* Display headline (Sentient). Accent phrase uses Sentient's true italic. */
+.font-display em,
+.font-display i {
+  font-style: italic;
+}
+
+/* Utility / data role — letterspaced caps with lining tabular figures, used
+   for index labels and data. */
+.meta-caps {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Shared premium utilities (one source of truth, reused across all sections)
+--------------------------------------------------------------------------- */
+/* The single eyebrow style — red, uppercase, .2em tracking. */
+.eyebrow {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--color-red);
+}
+
+/* Generous, consistent vertical rhythm for sections. */
+.section-y {
+  padding-block: clamp(5rem, 10vw, 8rem);
+}
+
+/* Interactive card — soft elevation that floats on hover. */
+.card {
+  background: #fff;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-e2);
+  transition:
+    transform 0.35s var(--ease-brand),
+    box-shadow 0.35s var(--ease-brand),
+    border-color 0.35s var(--ease-brand);
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-e3);
+}
+
+/* Static container panel (forms, large surfaces). */
+.panel {
+  background: #fff;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-e2);
+}
+
+/* Site-wide scroll-progress indicator — a thin red bar flush under the sticky
+   header. `top` is set in JS to the header's height. Above the header shadow,
+   below the mobile-menu overlay. Decorative (aria-hidden), never focusable. */
+.scroll-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 80px; /* JS overrides with the measured header height */
+  height: 3px;
+  z-index: 55;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-hairline) 60%, transparent);
+}
+.scroll-progress-bar {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--color-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+:root[dir="rtl"] .scroll-progress-bar,
+[dir="rtl"] .scroll-progress-bar {
+  transform-origin: right center;
+}
+
+/* Primary button — depth + hover lift, used everywhere. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  background: var(--color-red);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 14px 26px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -10px rgba(147, 34, 30, 0.6);
+  transition:
+    transform 0.2s var(--ease-brand),
+    box-shadow 0.2s var(--ease-brand),
+    background 0.2s var(--ease-brand);
+}
+.btn:hover {
+  transform: translateY(-2px);
+  background: var(--color-red-deep);
+  box-shadow: 0 16px 30px -12px rgba(147, 34, 30, 0.7);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Link with an underline that grows from the reading-start side. */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.2s var(--ease-brand);
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-inline-end: 100%;
+  bottom: -2px;
+  height: 1.5px;
+  background: var(--color-red);
+  transition: inset-inline-end 0.28s var(--ease-brand);
+}
+.link-underline:hover {
+  color: var(--color-red);
+}
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  inset-inline-end: 0;
+}
+
+/* Heading blur-to-focus reveal: hide targets only while JS is active (the
+   inline head script adds .reveal-active). Inline opacity from GSAP overrides
+   this once each heading is revealed. Belt-and-suspenders reduced-motion guard. */
+html.reveal-active [data-reveal-heading] {
+  opacity: 0;
+}
+.reveal-line {
+  will-change: transform, filter, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-active [data-reveal-heading] {
+    opacity: 1;
+  }
+}
+
+/* Page-grain texture overlay — adds depth without tinting (very subtle). */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Gentle scroll-cue nudge (disabled under reduced-motion by the rule below). */
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+.animate-bounce-slow {
+  animation: nudge-down 1.8s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+html {
+  /* Lenis drives scrolling; keep the native fallback graceful. */
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Visible keyboard focus for everything interactive. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Honor reduced-motion at the document level too. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

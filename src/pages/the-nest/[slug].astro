@@ -1,0 +1,430 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import {
+  getSortedPosts,
+  readingTime,
+  formatDate,
+  coverGradient,
+  postSlug,
+  type Post,
+} from "../../lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", ({ data }) => data.draft !== true);
+  return posts.map((post) => ({
+    params: { slug: post.data.slug ?? post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const { data } = post;
+const { Content } = await render(post);
+const rt = readingTime(post);
+
+// Related: same category (excluding current), fallback to latest.
+const all = await getSortedPosts();
+const sameCat = all.filter(
+  (p) => p.id !== post.id && p.data.category === data.category,
+);
+const related = (sameCat.length ? sameCat : all.filter((p) => p.id !== post.id)).slice(0, 3);
+
+const url = new URL(`/the-nest/${postSlug(post)}`, Astro.site).toString();
+const ogImage = new URL("/og-default.jpg", Astro.site).toString();
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: data.title,
+  description: data.excerpt,
+  datePublished: data.publishDate.toISOString(),
+  author: { "@type": "Organization", name: data.author },
+  image: ogImage,
+  publisher: {
+    "@type": "Organization",
+    name: "Tall Nest Food & Beverages",
+    logo: {
+      "@type": "ImageObject",
+      url: new URL("/tallnest-logo.png", Astro.site).toString(),
+    },
+  },
+  mainEntityOfPage: url,
+};
+---
+
+<BaseLayout title={`${data.title} — The Nest`} description={data.excerpt}>
+  <script
+    slot="head"
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify(articleSchema)}
+  />
+
+  <div class="reading-progress" data-progress aria-hidden="true"></div>
+
+  <article class="section-y bg-white">
+    <div class="mx-auto max-w-[760px] px-6 md:px-10">
+      <a href="/the-nest" class="back-link">&larr; The Nest</a>
+
+      <header class="mt-6">
+        <span
+          class="art-cat"
+          style={`background:${coverGradient(data.category)}`}>{data.category}</span
+        >
+        <h1
+          data-reveal-heading
+          class="mt-5 font-display text-[clamp(2rem,4.4vw,3.4rem)] font-medium leading-[1.06] tracking-[-0.02em] text-ink text-balance"
+        >
+          {data.title}
+        </h1>
+        <p data-reveal class="standfirst">{data.excerpt}</p>
+        <p data-reveal class="art-meta">
+          {data.author} · {formatDate(data.publishDate)} · {rt} min read
+        </p>
+      </header>
+    </div>
+
+    <div class="mx-auto max-w-[1100px] px-6 md:px-10">
+      <div
+        data-reveal
+        class="art-cover"
+        style={`background:${coverGradient(data.category)}`}
+        role="img"
+        aria-label={`${data.title} — cover`}
+      >
+      </div>
+      {
+        data.coverCredit && (
+          <p class="art-credit">
+            Image:{" "}
+            <a
+              href={data.coverCreditUrl}
+              target="_blank"
+              rel="noopener nofollow"
+            >
+              {data.coverCredit}
+            </a>
+            {data.coverLicense && ` — ${data.coverLicense}`}
+          </p>
+        )
+      }
+    </div>
+
+    <div class="mx-auto max-w-[720px] px-6 md:px-10">
+      <div class="prose">
+        <Content />
+      </div>
+
+      <!-- Share + back -->
+      <div class="art-foot">
+        <div class="share" aria-label="Share this article">
+          <button type="button" class="share-btn" data-copy aria-label="Copy link">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>
+          </button>
+          <a
+            class="share-btn"
+            aria-label="Share on Facebook"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a
+            class="share-btn"
+            aria-label="Share on X"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(data.title)}`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l8-9.1L1 2h7l4.8 6.4zM17 20h1.9L7 4H5z"/></svg>
+          </a>
+          <a
+            class="share-btn"
+            aria-label="Share on LinkedIn"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v6h-4v-6a2 2 0 0 0-4 0v6h-4V8.5h4V10"/><rect x="2" y="9" width="4" height="11"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+        </div>
+        <a href="/the-nest" class="back-link">&larr; Back to The Nest</a>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <div class="mx-auto max-w-7xl px-6 md:px-10">
+          <div class="related">
+            <p class="eyebrow mb-6">More from The Nest</p>
+            <ul data-reveal-group class="related-grid">
+              {related.map((p) => (
+                <PostCard post={p} />
+              ))}
+            </ul>
+          </div>
+        </div>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    inset-inline-start: 0;
+    height: 3px;
+    width: 0;
+    background: var(--color-red);
+    z-index: 60;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reading-progress {
+      display: none;
+    }
+  }
+
+  .back-link {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-gray);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-brand);
+  }
+  .back-link:hover {
+    color: var(--color-red);
+  }
+  .art-cat {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+  .standfirst {
+    margin: 20px 0 0;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: var(--color-gray);
+  }
+  .art-meta {
+    margin: 18px 0 0;
+    font-size: 0.85rem;
+    color: var(--color-gray);
+  }
+  .art-cover {
+    margin-top: clamp(28px, 4vw, 48px);
+    aspect-ratio: 21 / 9;
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-e2);
+  }
+  /* Cover photo attribution — small, muted, low emphasis (CC BY credit). */
+  .art-credit {
+    margin: 10px 4px 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--color-gray);
+  }
+  .art-credit a {
+    color: var(--color-gray);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s var(--ease-brand);
+  }
+  .art-credit a:hover {
+    color: var(--color-red);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .art-credit a {
+      transition: none;
+    }
+  }
+
+  /* Article prose */
+  .prose {
+    margin-top: clamp(32px, 4vw, 52px);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-ink);
+  }
+  .prose :global(p) {
+    margin: 0 0 1.4em;
+    color: #34302a;
+  }
+  .prose :global(h2) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin: 1.8em 0 0.5em;
+  }
+  .prose :global(h3) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.35rem;
+    color: var(--color-ink);
+    margin: 1.6em 0 0.4em;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.4em;
+    padding-inline-start: 1.4em;
+  }
+  .prose :global(li) {
+    margin: 0.4em 0;
+    color: #34302a;
+  }
+  .prose :global(li::marker) {
+    color: var(--color-red);
+  }
+  .prose :global(a) {
+    color: var(--color-red);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose :global(a:hover) {
+    color: var(--color-red-deep);
+  }
+  .prose :global(strong) {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .prose :global(blockquote) {
+    margin: 1.6em 0;
+    padding: 0.2em 0 0.2em 1.2em;
+    border-inline-start: 3px solid var(--color-red);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: var(--color-gray);
+  }
+  .prose :global(blockquote p) {
+    margin: 0;
+  }
+  .prose :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-card);
+    margin: 1.6em 0 0.6em;
+  }
+  .prose :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-hairline);
+    margin: 2.4em 0;
+  }
+
+  .art-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: clamp(40px, 5vw, 64px);
+    padding-top: 28px;
+    border-top: 1px solid var(--color-hairline);
+  }
+  .share {
+    display: flex;
+    gap: 10px;
+  }
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    color: var(--color-gray);
+    background: #fff;
+    border: 1px solid var(--color-hairline);
+    cursor: pointer;
+    transition:
+      color 0.2s var(--ease-brand),
+      border-color 0.2s var(--ease-brand),
+      background 0.2s var(--ease-brand),
+      transform 0.2s var(--ease-brand);
+  }
+  .share-btn:hover {
+    color: #fff;
+    background: var(--color-red);
+    border-color: var(--color-red);
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .share-btn,
+    .back-link {
+      transition: none;
+    }
+  }
+
+  .related {
+    margin-top: clamp(56px, 8vw, 96px);
+  }
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 980px) {
+    .related-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Reading progress bar (disabled under reduced motion via CSS).
+  const bar = document.querySelector<HTMLElement>("[data-progress]");
+  const article = document.querySelector("article");
+  if (bar && article) {
+    const onScroll = () => {
+      const rect = article.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const scrolled = Math.min(Math.max(-rect.top, 0), Math.max(total, 1));
+      bar.style.width = `${(scrolled / Math.max(total, 1)) * 100}%`;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+  }
+
+  // Copy-link share.
+  const copyBtn = document.querySelector<HTMLButtonElement>("[data-copy]");
+  copyBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      const prev = copyBtn.getAttribute("aria-label");
+      copyBtn.setAttribute("aria-label", "Link copied");
+      copyBtn.classList.add("is-copied");
+      setTimeout(() => {
+        copyBtn.setAttribute("aria-label", prev ?? "Copy link");
+        copyBtn.classList.remove("is-copied");
+      }, 1600);
+    } catch {
+      /* clipboard unavailable */
+    }
+  });
+</script>

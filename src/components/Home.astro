@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "./Hero.astro";
+import WhatWeDo from "./WhatWeDo.astro";
+import About from "./About.astro";
+import Flagship from "./Flagship.astro";
+import Partners from "./Partners.astro";
+import Contact from "./Contact.astro";
+import NestTeaser from "./NestTeaser.astro";
+import CTACallout from "./CTACallout.astro";
+import { t } from "../i18n/utils";
+import { getSortedPosts } from "../lib/posts";
+
+const latestPosts = (await getSortedPosts()).slice(0, 3);
+---
+
+<BaseLayout>
+  <Hero t={t.hero} />
+  <WhatWeDo t={t.approach} />
+  <About t={t.about} />
+  <Flagship t={t.flagship} />
+  <Partners t={t.partners} />
+  <Contact t={t.contact} />
+  <NestTeaser posts={latestPosts} />
+  <CTACallout t={t.cta} />
+</BaseLayout>

@@ -1,0 +1,197 @@
+---
+// Flagship — Tall Nest's first brand, Jingo. One floating card carries it.
+import { type Dict } from "../i18n/utils";
+
+interface Props {
+  t: Dict["flagship"];
+}
+const { t } = Astro.props;
+const arrow = "→";
+---
+
+<section id="brands" class="section-y scroll-mt-24 bg-white">
+  <!-- Header "Jingo" nav links here (/#jingo); offset for the fixed header. -->
+  <span id="jingo" aria-hidden="true" class="block scroll-mt-24"></span>
+  <div class="mx-auto max-w-7xl px-6 md:px-10">
+    <p data-reveal class="eyebrow mb-5">{t.eyebrow}</p>
+    <h2
+      data-reveal-heading
+      class="max-w-3xl font-display text-[clamp(2rem,4vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em] text-ink text-balance"
+    >
+      {t.headingPre}<em class="text-red">{t.headingEm}</em>
+    </h2>
+
+    <article data-reveal class="flagship-card mt-12">
+      <div class="grid items-center gap-10 lg:grid-cols-[1.4fr_0.9fr] lg:gap-12">
+        <div>
+          <img
+            src="/Jingo-Logo-Red.png"
+            alt="Jingo logo"
+            width="91"
+            height="48"
+            class="h-[48px] w-auto"
+            decoding="async"
+          />
+          <p class="mt-5 max-w-[42ch] text-lg leading-relaxed text-gray">
+            {t.desc}
+          </p>
+
+          <div
+            data-reveal-group
+            class="mt-8 flex flex-wrap gap-x-10 gap-y-6 border-t border-hairline pt-7"
+          >
+            {
+              t.stats.map((s) => (
+                <div data-reveal-item>
+                  <div
+                    class="stat-n font-display text-[clamp(1.9rem,4vw,2.9rem)] font-medium leading-none text-ink"
+                    dir="ltr"
+                    data-count={s.count ?? undefined}
+                    data-suffix={s.suffix}
+                  >
+                    {s.value}
+                  </div>
+                  <div class="meta-caps mt-2 text-[0.62rem] text-gray">
+                    {s.label}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <a href="/jingo" class="btn group mt-9">
+            {t.visit}
+            <span
+              class="transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none rtl:group-hover:-translate-x-0.5"
+              aria-hidden="true">{arrow}</span
+            >
+          </a>
+        </div>
+
+        <div class="fc-art">
+          <img
+            src="/jingo-carton.jpg"
+            alt="Jingo product cartons"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </div>
+    </article>
+
+    <p data-reveal class="mt-7 text-sm text-gray">
+      <span class="font-medium text-ink">{t.more}</span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .flagship-card {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-panel);
+    padding: clamp(28px, 4vw, 52px);
+    box-shadow: var(--shadow-e2);
+    transition:
+      transform 0.4s var(--ease-brand),
+      box-shadow 0.4s var(--ease-brand);
+  }
+  .flagship-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-e3);
+  }
+  /* Red gradient accent bar down the reading-start edge (flips in RTL). */
+  .flagship-card::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: linear-gradient(var(--color-red), #e0202b);
+  }
+
+  .chip {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-hairline);
+    color: var(--color-ink);
+    background: #fff;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .chip:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--color-red) 40%, var(--color-hairline));
+  }
+
+  /* Right-side panel now holds the product photo — same footprint (height,
+     radius, overflow) as the old decorative panel, with a soft shadow. */
+  .fc-art {
+    position: relative;
+    height: 260px;
+    border-radius: 18px;
+    background: radial-gradient(120% 120% at 100% 0%, #fdf0f1 0%, var(--color-paper) 60%);
+    overflow: hidden;
+    box-shadow: var(--shadow-e1);
+  }
+  .fc-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  @media (max-width: 880px) {
+    .fc-art {
+      height: 180px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .flagship-card,
+    .chip {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Stat count-up when scrolled into view.
+  const stats = document.querySelectorAll<HTMLElement>("[data-count]");
+  stats.forEach((el) => {
+    const to = Number(el.dataset.count);
+    const suffix = el.dataset.suffix ?? "";
+    if (!Number.isFinite(to)) return;
+    if (reduce) {
+      el.textContent = `${to}${suffix}`;
+      return;
+    }
+    el.textContent = `0${suffix}`;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          io.unobserve(el);
+          let v = 0;
+          const step = Math.max(1, Math.ceil(to / 28));
+          const timer = setInterval(() => {
+            v += step;
+            if (v >= to) {
+              v = to;
+              clearInterval(timer);
+            }
+            el.textContent = `${v}${suffix}`;
+          }, 22);
+        });
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(el);
+  });
+</script>

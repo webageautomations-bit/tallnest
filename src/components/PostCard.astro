@@ -1,0 +1,108 @@
+---
+import {
+  readingTime,
+  formatDate,
+  coverGradient,
+  postSlug,
+  type Post,
+} from "../lib/posts";
+
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+const { data } = post;
+const rt = readingTime(post);
+const href = `/the-nest/${postSlug(post)}`;
+const cover = data.cover;
+---
+
+<a href={href} class="post-card card" data-reveal-item data-category={data.category}>
+  <div class="post-cover" style={`background:${coverGradient(data.category)}`}>
+    {
+      cover && (
+        <img
+          class="post-cover-img"
+          src={cover}
+          alt={data.title}
+          loading="lazy"
+          decoding="async"
+          onerror="this.style.display='none'"
+        />
+      )
+    }
+    <span class="post-cat">{data.category}</span>
+  </div>
+  <div class="post-inner">
+    <h3 class="post-title font-display">{data.title}</h3>
+    <p class="post-meta">{formatDate(data.publishDate)} · {rt} min read</p>
+  </div>
+</a>
+
+<style>
+  .post-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+  .post-cover {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    overflow: hidden;
+  }
+  .post-cover-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .post-cat {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    padding: 5px 10px;
+    border-radius: 999px;
+  }
+  /* Fill remaining height so the meta row can pin to the bottom. */
+  .post-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 22px 24px;
+  }
+  .post-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-ink);
+    margin: 0;
+    /* Clamp to 2 lines and reserve their height so 1- and 2-line titles keep
+       the meta row aligned across cards. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+  }
+  .post-meta {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 0.78rem;
+    color: var(--color-gray);
+  }
+</style>

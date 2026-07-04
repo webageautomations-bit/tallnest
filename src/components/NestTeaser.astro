@@ -1,0 +1,82 @@
+---
+import PostCard from "./PostCard.astro";
+import type { Post } from "../lib/posts";
+
+interface Props {
+  posts: Post[];
+}
+const { posts } = Astro.props;
+---
+
+{
+  posts.length > 0 && (
+    <section class="section-y bg-paper">
+      <div class="mx-auto max-w-7xl px-6 md:px-10">
+        <div class="nest-head">
+          <div>
+            <p data-reveal class="eyebrow mb-5">
+              From the Nest
+            </p>
+            <h2
+              data-reveal-heading
+              class="font-display text-[clamp(2rem,4vw,3.25rem)] font-medium leading-[1.05] tracking-[-0.02em] text-ink text-balance"
+            >
+              Latest thinking.
+            </h2>
+          </div>
+          <a data-reveal href="/the-nest" class="nest-more group">
+            Read more on The Nest
+            <span
+              class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+              aria-hidden="true">
+              &rarr;
+            </span>
+          </a>
+        </div>
+
+        <ul data-reveal-group class="nest-grid">
+          {posts.map((post) => <PostCard post={post} />)}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .nest-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: clamp(36px, 4vw, 56px);
+  }
+  .nest-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-red);
+    text-decoration: none;
+  }
+  .nest-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 980px) {
+    .nest-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .nest-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
