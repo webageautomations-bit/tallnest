@@ -427,10 +427,13 @@ const pfInput = "pf-input";
     margin: 0;
   }
 
-  /* CTA card (deep-red gradient) */
+  /* CTA card — structurally identical to the white cards (same radius, shadow,
+     border box, padding); only the colour differs. */
   .pcard-cta {
     background: linear-gradient(150deg, var(--color-red), var(--color-red-deep));
-    border-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-e2);
     color: #fff;
     padding: 0;
     transition:
@@ -439,6 +442,7 @@ const pfInput = "pf-input";
   }
   .pcard-cta:hover {
     transform: translateY(-6px);
+    box-shadow: var(--shadow-e3);
   }
   .pcard-cta::before {
     display: none;
