@@ -1,0 +1,84 @@
+---
+// Tilted ticker band — every product name from products[], each with its own
+// colour dot. Decorative (aria-hidden): the same names live on /jingo/flavours.
+// Static (not scrolling) under reduced motion.
+import { products } from "../../lib/jingo";
+---
+
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker">
+    <div class="track">
+      {
+        [0, 1].map(() => (
+          <ul class="set">
+            {products.map((p) => (
+              <li>
+                <span class="dot" style={`background:${p.color}`} />
+                {p.name}
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .ticker-wrap {
+    position: relative;
+    z-index: 4;
+    margin-top: -26px;
+    padding-block: 6px;
+    overflow: clip;
+  }
+  .ticker {
+    width: 104%;
+    margin-left: -2%;
+    transform: rotate(-2deg);
+    background: var(--jg-ink);
+    color: var(--jg-cream);
+    border-block: 2.5px solid var(--jg-ink);
+    box-shadow: 0 5px 0 var(--jg-sun);
+    overflow: hidden;
+  }
+  .track {
+    display: flex;
+    width: max-content;
+    animation: jg-marquee 90s linear infinite;
+  }
+  .set {
+    display: flex;
+    flex: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .set li {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--jg-cream);
+    flex: none;
+  }
+  @keyframes jg-marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+  }
+</style>

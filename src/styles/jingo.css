@@ -1,0 +1,208 @@
+/* ---------------------------------------------------------------------------
+   JINGO zone theme — candy-pop.
+   Imported ONLY by JingoLayout, so it is bundled only into /jingo pages.
+   Every rule is additionally keyed to html[data-zone="jingo"] (set by
+   JingoLayout), so even if this file were ever loaded elsewhere it could not
+   restyle Tall Nest. Shared plumbing (Tailwind, Lenis, reveal guards,
+   reduced-motion rules) still comes from global.css.
+
+   The visual language echoes the Jingo logo itself: ink outlines, hard offset
+   "sticker" shadows, glossy highlights, and saturated candy colour.
+--------------------------------------------------------------------------- */
+html[data-zone="jingo"] {
+  /* Brand */
+  --jg-red: #e0202b;
+  --jg-red-deep: #b8141e;
+
+  /* Base surfaces + text */
+  --jg-cream: #fff6e9; /* page base */
+  --jg-paper: #fffdf8; /* card / label surface */
+  --jg-white: #ffffff;
+  --jg-ink: #24121a; /* warm berry-black — outlines + text */
+  --jg-ink-soft: #5b4450; /* secondary text on cream / paper */
+
+  /* Candy accents */
+  --jg-sun: #ffc93c;
+  --jg-tangerine: #ff8a1f;
+  --jg-pink: #ff4f9a;
+  --jg-bubble: #ffb8d6;
+  --jg-sky: #38c6f4;
+  --jg-mint: #3fd8b0;
+  --jg-lime: #a6e04a;
+  --jg-grape: #7b3ff2;
+  --jg-choco: #4a2318;
+
+  /* Type — General Sans only (already loaded site-wide), set big and heavy. */
+  --jg-font: "General Sans", Arial, sans-serif;
+
+  /* Shape + depth */
+  --jg-line: 2.5px solid var(--jg-ink);
+  --jg-radius: 26px;
+  --jg-radius-lg: 36px;
+  --jg-shadow: 0 6px 0 var(--jg-ink);
+  --jg-shadow-lift: 0 10px 0 var(--jg-ink);
+  --jg-shadow-press: 0 2px 0 var(--jg-ink);
+  --jg-ease: cubic-bezier(0.34, 1.56, 0.64, 1); /* springy overshoot */
+
+  /* Re-point the shared semantic tokens inside the Jingo zone only, so shared
+     utilities (focus rings, .eyebrow, text-red) speak Jingo here. */
+  --color-red: var(--jg-red);
+  --color-red-deep: var(--jg-red-deep);
+  --color-ink: var(--jg-ink);
+  --color-gray: var(--jg-ink-soft);
+}
+
+html[data-zone="jingo"] body {
+  background-color: var(--jg-cream);
+  color: var(--jg-ink);
+  font-family: var(--jg-font);
+  /* Decorative candy shapes overhang their sections; clip (not hidden) keeps
+     position: sticky working on the header. */
+  overflow-x: clip;
+}
+
+html[data-zone="jingo"] ::selection {
+  background: var(--jg-sun);
+  color: var(--jg-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   Layout helpers
+--------------------------------------------------------------------------- */
+:where(html[data-zone="jingo"]) .jg-wrap {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 5vw, 40px);
+}
+
+:where(html[data-zone="jingo"]) .jg-section {
+  padding-block: clamp(4rem, 9vw, 7rem);
+}
+
+/* ---------------------------------------------------------------------------
+   Type
+--------------------------------------------------------------------------- */
+/* Sticker eyebrow — a tilted pill label. */
+:where(html[data-zone="jingo"]) .jg-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--jg-font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--jg-ink);
+  background: var(--jg-sun);
+  border: var(--jg-line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 3px 0 var(--jg-ink);
+  rotate: -2deg;
+}
+
+/* Section display heading. */
+:where(html[data-zone="jingo"]) .jg-h2 {
+  font-family: var(--jg-font);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  color: var(--jg-ink);
+  text-wrap: balance;
+}
+
+:where(html[data-zone="jingo"]) .jg-lede {
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--jg-ink-soft);
+  max-width: 52ch;
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons — chunky outlined pills that "press" like a real button.
+   Hover lift only on hover-capable pointers; :active press works on touch.
+--------------------------------------------------------------------------- */
+:where(html[data-zone="jingo"]) .jg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px; /* touch target */
+  padding: 0 26px;
+  font-family: var(--jg-font);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--jg-white);
+  background: var(--jg-red);
+  border: var(--jg-line);
+  border-radius: 999px;
+  box-shadow: 0 5px 0 var(--jg-ink);
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--jg-ease),
+    box-shadow 0.25s var(--jg-ease),
+    background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+:where(html[data-zone="jingo"]) .jg-btn--sun {
+  background: var(--jg-sun);
+  color: var(--jg-ink);
+}
+:where(html[data-zone="jingo"]) .jg-btn--paper {
+  background: var(--jg-paper);
+  color: var(--jg-ink);
+}
+:where(html[data-zone="jingo"]) .jg-btn .jg-arrow {
+  transition: transform 0.25s var(--jg-ease);
+}
+@media (hover: hover) {
+  :where(html[data-zone="jingo"]) .jg-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 var(--jg-ink);
+  }
+  :where(html[data-zone="jingo"]) .jg-btn:hover .jg-arrow {
+    transform: translateX(4px);
+  }
+}
+:where(html[data-zone="jingo"]) .jg-btn:active {
+  transform: translateY(3px);
+  box-shadow: var(--jg-shadow-press);
+}
+
+/* Sticker surface — ink outline + hard offset shadow (cards, panels). */
+:where(html[data-zone="jingo"]) .jg-sticker {
+  border: var(--jg-line);
+  border-radius: var(--jg-radius);
+  box-shadow: var(--jg-shadow);
+}
+
+/* Visible keyboard focus in Jingo ink (shared rule uses --color-red). */
+html[data-zone="jingo"] :where(a, button, [tabindex]):focus-visible {
+  outline: 3px solid var(--jg-ink);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* Gentle candy bob for decorative shapes (static under reduced motion via the
+   global reduced-motion rule, and explicitly below). */
+@keyframes jg-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-12px) rotate(calc(var(--r, 0deg) + 6deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html[data-zone="jingo"]) .jg-btn,
+  :where(html[data-zone="jingo"]) .jg-btn .jg-arrow {
+    transition: none;
+  }
+}

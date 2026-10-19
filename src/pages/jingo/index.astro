@@ -1,0 +1,22 @@
+---
+// Jingo hub — the brand zone homepage. All product content is drawn from
+// src/data/jingo-products.ts via src/lib/jingo.ts.
+import JingoLayout from "../../layouts/JingoLayout.astro";
+import JingoHero from "../../components/jingo/JingoHero.astro";
+import JingoTicker from "../../components/jingo/JingoTicker.astro";
+import JingoStats from "../../components/jingo/JingoStats.astro";
+import JingoCategories from "../../components/jingo/JingoCategories.astro";
+import JingoFlavourTeaser from "../../components/jingo/JingoFlavourTeaser.astro";
+import JingoStory from "../../components/jingo/JingoStory.astro";
+import JingoStockCTA from "../../components/jingo/JingoStockCTA.astro";
+---
+
+<JingoLayout>
+  <JingoHero />
+  <JingoTicker />
+  <JingoStats />
+  <JingoCategories />
+  <JingoFlavourTeaser />
+  <JingoStory />
+  <JingoStockCTA />
+</JingoLayout>

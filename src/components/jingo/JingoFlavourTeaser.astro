@@ -1,0 +1,194 @@
+---
+// Flavour teaser — a handful of products auto-picked from products[] (see
+// teaserProducts in lib/jingo.ts). Each card's wrapper is tinted with the
+// product's own `color`, the name set in its `textOn`. Small text (flavour,
+// price) sits on a paper label so it stays legible whatever the tint.
+import {
+  products,
+  teaserProducts,
+  categoryById,
+  textOnColor,
+} from "../../lib/jingo";
+
+const picks = teaserProducts(8).map((p) => {
+  const cat = categoryById(p.categoryId);
+  return { ...p, line: cat?.subBrand ?? cat?.name ?? "" };
+});
+---
+
+<section class="jg-section teaser" aria-labelledby="teaser-h">
+  <div class="jg-wrap">
+    <div class="head">
+      <div class="head-copy">
+        <p data-reveal class="jg-eyebrow eb-pink">Meet the flavours</p>
+        <h2 id="teaser-h" data-reveal-heading class="jg-h2">Every flavour gets its own colour.</h2>
+      </div>
+      <a data-reveal href="/jingo/flavours" class="jg-btn see-all">
+        See all {products.length} <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <ul data-reveal-group class="grid">
+      {
+        picks.map((p) => (
+          <li data-reveal-item class="cell">
+            <article class="candy jg-sticker" style={`--c:${p.color};--t:${textOnColor(p)}`}>
+              <div class="wrapper">
+                <span class="line">{p.line}</span>
+                <h3 class="name text-balance">{p.name}</h3>
+                <span class="shine" aria-hidden="true" />
+              </div>
+              <div class="label">
+                <span class="flavour">{p.flavour}</span>
+                <span class="price">{p.price}</span>
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .teaser {
+    background: var(--jg-paper);
+    border-block: 2.5px solid var(--jg-ink);
+    background-image: radial-gradient(color-mix(in srgb, var(--jg-ink) 9%, transparent) 1.5px, transparent 2px);
+    background-size: 22px 22px;
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 22px;
+    margin-bottom: clamp(28px, 5vw, 48px);
+  }
+  .head-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    max-width: 680px;
+  }
+  .eb-pink {
+    background: var(--jg-pink);
+  }
+  .see-all {
+    flex: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 760px) {
+    .grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+  }
+  .cell {
+    display: flex;
+  }
+  .candy {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    background: var(--jg-paper);
+    transition:
+      transform 0.3s var(--jg-ease),
+      box-shadow 0.3s var(--jg-ease);
+  }
+  @media (hover: hover) {
+    .candy:hover {
+      transform: translateY(-6px) rotate(-1.5deg);
+      box-shadow: var(--jg-shadow-lift);
+    }
+    .cell:nth-child(even) .candy:hover {
+      transform: translateY(-6px) rotate(1.5deg);
+    }
+  }
+
+  .wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    min-height: clamp(150px, 22vw, 200px);
+    padding: 16px;
+    background: var(--c);
+    color: var(--t);
+    border-bottom: 2.5px solid var(--jg-ink);
+  }
+  /* Crimped wrapper edge across the top. */
+  .wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 10px;
+    background: linear-gradient(-45deg, transparent 6px, rgba(255, 255, 255, 0.28) 0) 0 0 / 12px 10px repeat-x,
+      linear-gradient(45deg, transparent 6px, rgba(255, 255, 255, 0.28) 0) 0 0 / 12px 10px repeat-x;
+  }
+  .shine {
+    position: absolute;
+    top: 22px;
+    right: 16px;
+    width: 34px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    transform: rotate(-28deg);
+  }
+  .line {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+  .name {
+    font-size: clamp(1.35rem, 3.2vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+    padding: 12px 16px 14px;
+    color: var(--jg-ink);
+  }
+  .flavour {
+    font-size: 0.86rem;
+    font-weight: 500;
+    color: var(--jg-ink-soft);
+  }
+  .price {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-sun);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .candy {
+      transition: none;
+    }
+  }
+</style>

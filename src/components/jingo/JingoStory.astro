@@ -1,0 +1,126 @@
+---
+// Brand story teaser — the opening of the catalogue's About copy. Target of
+// the header's "Our Story" anchor (#story).
+---
+
+<section id="story" class="jg-section scroll-mt-24" aria-labelledby="story-h">
+  <div class="jg-wrap">
+    <div class="panel jg-sticker">
+      <div class="copy">
+        <p data-reveal class="jg-eyebrow eb-paper">Our story</p>
+        <h2 id="story-h" data-reveal-heading class="pull text-balance">
+          JINGO began with a question: why should a Rs.&nbsp;5 treat feel like an afterthought?
+        </h2>
+        <p data-reveal class="body">
+          In a market full of sweets children forget the moment they&rsquo;ve
+          finished them, we set out to build something different &mdash; a real
+          brand at pocket-money prices, with character and bold flavour, the kind
+          children recognise on the shelf and ask for by name.
+        </p>
+        <a data-reveal href="/about" class="jg-btn jg-btn--paper more">
+          Read the full story <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+
+      <ul class="chips" aria-label="What Jingo stands for">
+        <li class="chip c1">Big flavour</li>
+        <li class="chip c2">Small price</li>
+        <li class="chip c3">Pure fun</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .panel {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 32px;
+    padding: clamp(28px, 6vw, 72px);
+    background: var(--jg-sun);
+    border-radius: var(--jg-radius-lg);
+    box-shadow: 0 8px 0 var(--jg-ink);
+  }
+  /* Big decorative quote mark. */
+  .panel::before {
+    content: "\201C";
+    position: absolute;
+    top: -0.18em;
+    right: 0.06em;
+    font-size: clamp(12rem, 30vw, 22rem);
+    font-weight: 700;
+    line-height: 1;
+    color: color-mix(in srgb, var(--jg-tangerine) 55%, transparent);
+    pointer-events: none;
+  }
+  @media (min-width: 960px) {
+    .panel {
+      grid-template-columns: 1.5fr 1fr;
+      align-items: center;
+      gap: 48px;
+    }
+  }
+  .copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .eb-paper {
+    background: var(--jg-paper);
+  }
+  .pull {
+    margin-top: 20px;
+    font-size: clamp(1.8rem, 4.6vw, 3rem);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--jg-ink);
+  }
+  .body {
+    margin-top: 18px;
+    max-width: 56ch;
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.6;
+    color: var(--jg-ink);
+  }
+  .more {
+    margin-top: 26px;
+  }
+
+  .chips {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (min-width: 960px) {
+    .chips {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+  }
+  .chip {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    padding: 14px 22px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    box-shadow: 0 5px 0 var(--jg-ink);
+    color: var(--jg-ink);
+  }
+  .c1 { background: var(--jg-pink); rotate: -4deg; }
+  .c2 { background: var(--jg-sky); rotate: 3deg; }
+  .c3 { background: var(--jg-lime); rotate: -2deg; }
+  @media (min-width: 960px) {
+    .c2 { margin-inline-start: 36px; }
+    .c3 { margin-inline-start: 12px; }
+  }
+</style>

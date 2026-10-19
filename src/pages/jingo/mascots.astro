@@ -1,0 +1,40 @@
+---
+// PLACEHOLDER — the mascots page is built in a later pass. This route exists
+// so the Jingo nav never 404s.
+import JingoLayout from "../../layouts/JingoLayout.astro";
+---
+
+<JingoLayout
+  title="Mascots — Jingo"
+  description="Meet the Jingo mascots — coming soon."
+  noindex
+>
+  <section class="jg-section">
+    <div class="jg-wrap">
+      <p class="jg-eyebrow">Coming soon</p>
+      <h1 class="jg-h2 title">The Jingo crew is getting ready.</h1>
+      <p class="jg-lede lede">
+        Our mascots are almost here. In the meantime, go say hi to the flavours.
+      </p>
+      <div class="ctas">
+        <a href="/jingo/flavours" class="jg-btn jg-btn--sun">
+          See the flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <a href="/jingo" class="jg-btn jg-btn--paper">Back to Jingo</a>
+      </div>
+    </div>
+  </section>
+</JingoLayout>
+
+<style>
+  .title,
+  .lede {
+    margin-top: 20px;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+</style>

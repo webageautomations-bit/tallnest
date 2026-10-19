@@ -1,0 +1,163 @@
+---
+// Jingo zone footer — red candy base with the white logo. Repeats every nav
+// link (fallback for the mobile popover) and ties back to Tall Nest.
+import { Image } from "astro:assets";
+import logoWhite from "../../assets/jingo/jingo-logo-white.png";
+
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const storyHref = path === "/jingo" ? "#story" : "/jingo#story";
+
+const groups = [
+  {
+    title: "Explore",
+    links: [
+      { label: "Home", href: "/jingo" },
+      { label: "Flavours", href: "/jingo/flavours" },
+      { label: "Mascots", href: "/jingo/mascots" },
+      { label: "Our Story", href: storyHref },
+    ],
+  },
+  {
+    title: "For retailers",
+    links: [
+      { label: "Become a stockist", href: "/partners" },
+      { label: "Contact us", href: "/contact" },
+    ],
+  },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="jf">
+  <div class="jg-wrap jf-grid">
+    <div class="jf-brand">
+      <a href="/jingo" class="jf-logo" aria-label="Jingo — home">
+        <Image src={logoWhite} alt="Jingo" width={360} class="jf-logo-img" loading="lazy" />
+      </a>
+      <p class="jf-tag">Big flavour, small price, pure fun.</p>
+    </div>
+
+    {
+      groups.map((g) => (
+        <nav aria-label={g.title} class="jf-col">
+          <p class="jf-h">{g.title}</p>
+          <ul>
+            {g.links.map((l) => (
+              <li>
+                <a href={l.href} class="jf-link">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+
+  <div class="jg-wrap">
+    <div class="jf-base">
+      <a href="/" class="jf-parent">
+        <span aria-hidden="true">&larr;</span> A Tall Nest brand
+      </a>
+      <p>&copy; {year} Tall Nest Food &amp; Beverages</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .jf {
+    position: relative;
+    margin-top: clamp(2rem, 6vw, 4rem);
+    padding-top: clamp(3.5rem, 8vw, 5.5rem);
+    background: var(--jg-red);
+    color: var(--jg-white);
+    border-top: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius-lg) var(--jg-radius-lg) 0 0;
+  }
+  .jf-grid {
+    display: grid;
+    gap: 36px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .jf-brand {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 820px) {
+    .jf-grid {
+      grid-template-columns: 1.6fr 1fr 1fr;
+    }
+    .jf-brand {
+      grid-column: auto;
+    }
+  }
+  .jf-logo {
+    display: inline-flex;
+    border-radius: 12px;
+  }
+  .jf-logo-img {
+    width: clamp(150px, 30vw, 210px);
+    height: auto;
+  }
+  .jf-tag {
+    margin-top: 14px;
+    font-size: clamp(1.15rem, 2.4vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .jf-h {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--jg-sun);
+  }
+  .jf-col ul {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .jf-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    font-weight: 600;
+    color: var(--jg-white);
+    text-decoration: none;
+    text-underline-offset: 4px;
+  }
+  .jf-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+  .jf-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 20px;
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    padding-block: 22px 28px;
+    border-top: 2px solid rgba(255, 255, 255, 0.35);
+    font-size: 0.88rem;
+  }
+  .jf-parent {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    font-weight: 600;
+    color: var(--jg-white);
+    text-decoration: none;
+  }
+  .jf-parent:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .jf :global(a:focus-visible) {
+    outline-color: var(--jg-white);
+  }
+</style>

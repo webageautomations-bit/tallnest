@@ -1,0 +1,314 @@
+---
+// Jingo hub hero — a big red candy-wrapper panel. The white Jingo logo is the
+// LCP image (never hidden); the h1 uses the shared blur-to-focus line reveal
+// and the rest rise in via [data-reveal] — all FOUC-safe via the head guard.
+import { Image } from "astro:assets";
+import logoWhite from "../../assets/jingo/jingo-logo-white.png";
+import { categories, products, categoryList, priceRange } from "../../lib/jingo";
+
+const { min } = priceRange();
+const tagline = `${categories.length} categories, ${products.length}+ treats — ${categoryList()} — from Rs.\u00a0${min}.`;
+---
+
+<section class="hero" aria-labelledby="hero-h1">
+  <div class="hero-panel">
+    <!-- Decorative candy (CSS bob; static under reduced motion). -->
+    <div class="deco" aria-hidden="true">
+      <svg class="d d-lolly" viewBox="0 0 120 200">
+        <rect x="54" y="98" width="12" height="96" rx="6" style="fill:var(--jg-paper);stroke:var(--jg-ink)" stroke-width="5"></rect>
+        <circle cx="60" cy="60" r="54" style="fill:var(--jg-sun);stroke:var(--jg-ink)" stroke-width="5"></circle>
+        <path d="M60 60a4 4 0 0 1 8 0a8 8 0 0 1-16 0a12 12 0 0 1 24 0a16 16 0 0 1-32 0a20 20 0 0 1 40 0a24 24 0 0 1-48 0a28 28 0 0 1 56 0a32 32 0 0 1-64 0a36 36 0 0 1 72 0a40 40 0 0 1-80 0" fill="none" style="stroke:var(--jg-pink)" stroke-width="7" stroke-linecap="round"></path>
+        <ellipse cx="38" cy="30" rx="12" ry="7" transform="rotate(-30 38 30)" fill="#fff" opacity=".7"></ellipse>
+      </svg>
+      <svg class="d d-wrap" viewBox="0 0 200 110">
+        <path d="M52 55 10 18q-8 37 0 74z" style="fill:var(--jg-sky);stroke:var(--jg-ink)" stroke-width="5" stroke-linejoin="round"></path>
+        <path d="M148 55l42-37q8 37 0 74z" style="fill:var(--jg-sky);stroke:var(--jg-ink)" stroke-width="5" stroke-linejoin="round"></path>
+        <ellipse cx="100" cy="55" rx="56" ry="40" style="fill:var(--jg-sky);stroke:var(--jg-ink)" stroke-width="5"></ellipse>
+        <path d="M72 22c-8 20-8 46 0 66M100 15c-6 24-6 56 0 80M128 22c8 20 8 46 0 66" fill="none" style="stroke:var(--jg-paper)" stroke-width="6" stroke-linecap="round"></path>
+        <ellipse cx="80" cy="32" rx="12" ry="6" transform="rotate(-20 80 32)" fill="#fff" opacity=".75"></ellipse>
+      </svg>
+      <svg class="d d-star" viewBox="0 0 100 100">
+        <path d="M50 4c4 30 16 42 46 46-30 4-42 16-46 46-4-30-16-42-46-46 30-4 42-16 46-46z" style="fill:var(--jg-sun);stroke:var(--jg-ink)" stroke-width="5" stroke-linejoin="round"></path>
+      </svg>
+      <svg class="d d-star2" viewBox="0 0 100 100">
+        <path d="M50 4c4 30 16 42 46 46-30 4-42 16-46 46-4-30-16-42-46-46 30-4 42-16 46-46z" style="fill:var(--jg-paper);stroke:var(--jg-ink)" stroke-width="6" stroke-linejoin="round"></path>
+      </svg>
+      <svg class="d d-bubble" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" style="fill:var(--jg-pink);stroke:var(--jg-ink)" stroke-width="5"></circle>
+        <ellipse cx="34" cy="32" rx="12" ry="8" transform="rotate(-35 34 32)" fill="#fff" opacity=".75"></ellipse>
+      </svg>
+      <svg class="d d-dot" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="42" style="fill:var(--jg-lime);stroke:var(--jg-ink)" stroke-width="7"></circle>
+      </svg>
+    </div>
+
+    <div class="hero-inner">
+      <p data-reveal class="hero-kicker">
+        <span class="kick-dot" aria-hidden="true"></span>
+        Pakistan&rsquo;s poppiest candy
+      </p>
+
+      <Image
+        src={logoWhite}
+        alt="Jingo"
+        widths={[360, 560, 820, 1100]}
+        sizes="(min-width: 1024px) 520px, 76vw"
+        class="hero-logo"
+        loading="eager"
+        fetchpriority="high"
+      />
+
+      <h1 id="hero-h1" data-reveal-heading data-reveal-now class="hero-h1 text-balance">
+        <span class="ph">Big flavour,</span> <span class="ph hl-sun">small price,</span> <span class="ph hl-pop">pure fun.</span>
+      </h1>
+
+      <p data-reveal class="hero-sub">{tagline}</p>
+
+      <div data-reveal class="hero-ctas">
+        <a href="/jingo/flavours" class="jg-btn jg-btn--sun">
+          Explore flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <a href="/partners" class="jg-btn jg-btn--paper">Become a stockist</a>
+      </div>
+    </div>
+
+    <!-- Price sticker -->
+    <div class="price-badge" aria-hidden="true">
+      <span class="pb-from">from</span>
+      <span class="pb-rs">Rs.</span><span class="pb-n">{min}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 10px clamp(8px, 1.6vw, 18px) 0;
+  }
+  .hero-panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: min(88svh, 860px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(255, 255, 255, 0.18), transparent 70%),
+      radial-gradient(70% 60% at 50% 110%, rgba(36, 18, 26, 0.28), transparent 70%),
+      var(--jg-red);
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius-lg);
+    box-shadow: 0 8px 0 var(--jg-ink);
+    color: var(--jg-white);
+  }
+  /* Candy-dot pattern, very subtle. */
+  .hero-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.13) 2px, transparent 2.5px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(80% 70% at 50% 45%, transparent 35%, #000 90%);
+    -webkit-mask-image: radial-gradient(80% 70% at 50% 45%, transparent 35%, #000 90%);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 980px;
+    padding: clamp(56px, 10vw, 96px) clamp(18px, 5vw, 48px) clamp(84px, 11vw, 112px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--jg-ink);
+    background: var(--jg-paper);
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    padding: 8px 14px;
+    box-shadow: 0 3px 0 var(--jg-ink);
+    rotate: -2deg;
+  }
+  .kick-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--jg-red);
+  }
+
+  .hero-logo {
+    width: min(520px, 76vw);
+    height: auto;
+    margin-top: clamp(18px, 3vw, 28px);
+    filter: drop-shadow(0 6px 0 rgba(36, 18, 26, 0.25));
+  }
+
+  .hero-h1 {
+    margin-top: clamp(14px, 2.5vw, 22px);
+    font-weight: 700;
+    font-size: clamp(2.35rem, 7.4vw, 5.4rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    max-width: 17ch;
+  }
+  /* Keep each phrase whole so lines break between them, never inside. */
+  .ph {
+    white-space: nowrap;
+  }
+  .hl-sun {
+    color: var(--jg-sun);
+  }
+  .hl-pop {
+    color: var(--jg-bubble);
+  }
+
+  .hero-sub {
+    margin-top: clamp(16px, 2.5vw, 22px);
+    max-width: 50ch;
+    font-size: clamp(1rem, 2.1vw, 1.15rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: clamp(22px, 3.5vw, 32px);
+  }
+  @media (max-width: 479px) {
+    .hero-ctas {
+      flex-direction: column;
+      align-self: stretch;
+    }
+    .hero-ctas :global(.jg-btn) {
+      width: 100%;
+    }
+  }
+
+  /* Rotating price sticker (bottom-right). */
+  .price-badge {
+    position: absolute;
+    z-index: 3;
+    right: clamp(14px, 4vw, 48px);
+    bottom: clamp(26px, 5vw, 56px);
+    width: clamp(78px, 12vw, 118px);
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    color: var(--jg-ink);
+    background: var(--jg-sun);
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 50%;
+    box-shadow: 0 5px 0 var(--jg-ink);
+    transform: rotate(12deg);
+    line-height: 1;
+    pointer-events: none; /* decorative — never steal taps from the CTAs */
+  }
+  /* Phones: extra room under the stacked CTAs so the sticker sits clear. */
+  @media (max-width: 479px) {
+    .hero-inner {
+      padding-bottom: 128px;
+    }
+  }
+  .pb-from {
+    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .pb-rs {
+    font-size: clamp(0.75rem, 1.4vw, 0.95rem);
+    font-weight: 700;
+  }
+  .pb-n {
+    font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  /* Decorative candy layout. Mobile: tucked into corners, small. */
+  .deco {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .d {
+    position: absolute;
+    animation: jg-bob 6s ease-in-out infinite;
+    filter: drop-shadow(0 5px 0 rgba(36, 18, 26, 0.3));
+  }
+  .d-lolly {
+    --r: 14deg;
+    width: clamp(54px, 11vw, 130px);
+    top: clamp(10px, 4vw, 60px);
+    right: clamp(-6px, 4vw, 90px);
+    animation-delay: -1s;
+  }
+  .d-wrap {
+    --r: -16deg;
+    width: clamp(82px, 15vw, 190px);
+    bottom: clamp(18px, 10vw, 120px);
+    left: clamp(-26px, 2vw, 70px);
+    animation-duration: 7s;
+  }
+  .d-star {
+    --r: 0deg;
+    width: clamp(30px, 5vw, 64px);
+    top: clamp(70px, 12vw, 140px);
+    left: clamp(14px, 8vw, 150px);
+    animation-duration: 5s;
+    animation-delay: -2s;
+  }
+  .d-star2 {
+    --r: 20deg;
+    width: clamp(22px, 3.4vw, 44px);
+    bottom: clamp(150px, 26vw, 300px);
+    right: clamp(12px, 9vw, 190px);
+    animation-duration: 5.5s;
+  }
+  .d-bubble {
+    --r: 0deg;
+    width: clamp(34px, 6vw, 84px);
+    top: 46%;
+    right: clamp(-14px, 1.5vw, 40px);
+    animation-delay: -3s;
+  }
+  .d-dot {
+    --r: 0deg;
+    width: clamp(18px, 3vw, 40px);
+    top: clamp(26px, 6vw, 70px);
+    left: 38%;
+    animation-duration: 4.5s;
+  }
+  /* Small phones: drop the mid-panel pieces that could crowd the copy. */
+  @media (max-width: 599px) {
+    .d-bubble,
+    .d-star2,
+    .d-dot {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .d {
+      animation: none;
+      transform: rotate(var(--r, 0deg));
+    }
+  }
+</style>

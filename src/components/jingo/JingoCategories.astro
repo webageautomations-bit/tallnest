@@ -1,0 +1,232 @@
+---
+// Category showcase — every entry in categories[], each a candy-coloured
+// sticker card linking to its anchor on /jingo/flavours. The dot row is the
+// category's real product colours, straight from products[].
+import { categories, productsIn, categoryTheme, flavourLabel } from "../../lib/jingo";
+
+const cards = categories.map((c, i) => ({
+  ...c,
+  theme: categoryTheme(c.id, i),
+  dots: productsIn(c.id).map((p) => p.color),
+}));
+---
+
+<section id="range" class="jg-section scroll-mt-24" aria-labelledby="range-h">
+  <div class="jg-wrap">
+    <div class="head">
+      <p data-reveal class="jg-eyebrow">The range · {categories.length} categories</p>
+      <h2 id="range-h" data-reveal-heading class="jg-h2">Something for every craving.</h2>
+    </div>
+
+    <ul data-reveal-group class="grid">
+      {
+        cards.map((c, i) => (
+          <li data-reveal-item class:list={["cell", { "is-feature": i === 0 }]}>
+            <a
+              href={`/jingo/flavours#${c.id}`}
+              aria-label={`${c.name}${c.subBrand ? ` (${c.subBrand})` : ""}: ${flavourLabel(c.flavourCount)}, ${c.price}`}
+              class="card jg-sticker"
+              style={`--bg:${c.theme.bg};--fg:${c.theme.fg};--badge-bg:${c.theme.badgeBg};--badge-fg:${c.theme.badgeFg}`}
+            >
+              <span class="top">
+                <span class="badge">{c.subBrand ?? "Jingo"}</span>
+                <span class="price">{c.price}</span>
+              </span>
+
+              <span class="name">{c.name}</span>
+              <span class="blurb">{c.blurb}</span>
+
+              <span class="bottom">
+                <span class="dots" aria-hidden="true">
+                  {c.dots.map((color) => (
+                    <span class="dot" style={`background:${color}`} />
+                  ))}
+                </span>
+                <span class="meta">
+                  <span class="count">{flavourLabel(c.flavourCount)}</span>
+                  <span class="go" aria-hidden="true">&rarr;</span>
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: clamp(28px, 5vw, 48px);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 640px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .is-feature {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 1080px) {
+    .grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+  }
+
+  .cell {
+    display: flex;
+  }
+  .card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 260px;
+    padding: clamp(20px, 3vw, 26px);
+    background: var(--bg);
+    color: var(--fg);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.3s var(--jg-ease),
+      box-shadow 0.3s var(--jg-ease);
+  }
+  /* Glossy candy highlight, echoing the logo's shine. */
+  .card::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -30px;
+    width: 140px;
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.35), transparent);
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .card:hover {
+      transform: translateY(-6px) rotate(-1deg);
+      box-shadow: var(--jg-shadow-lift);
+    }
+    .cell:nth-child(even) .card:hover {
+      transform: translateY(-6px) rotate(1deg);
+    }
+    .card:hover .go {
+      transform: translateX(4px) rotate(-8deg);
+    }
+  }
+  .card:active {
+    transform: translateY(3px);
+    box-shadow: var(--jg-shadow-press);
+  }
+
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 7px 11px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+  }
+  .price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .name {
+    margin-top: clamp(20px, 3vw, 28px);
+    font-size: clamp(1.75rem, 3.4vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+  .is-feature .name {
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+  }
+  .blurb {
+    margin-top: 10px;
+    max-width: 38ch;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .bottom {
+    margin-top: auto;
+    padding-top: 22px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 60%;
+  }
+  .dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--jg-ink);
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: none;
+  }
+  .count {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .go {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--jg-ink);
+    background: var(--jg-paper);
+    color: var(--jg-ink);
+    font-weight: 700;
+    transition: transform 0.3s var(--jg-ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .go {
+      transition: none;
+    }
+  }
+</style>

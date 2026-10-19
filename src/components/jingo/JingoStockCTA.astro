@@ -1,0 +1,155 @@
+---
+// Stockist CTA band — routes retailers/distributors to the Tall Nest
+// partners page. Numbers come from the data file.
+import { Image } from "astro:assets";
+import carton from "../../assets/jingo/jingo-carton.jpg";
+import { categories, products, priceRange } from "../../lib/jingo";
+
+const { min } = priceRange();
+---
+
+<section class="cta-sec" aria-labelledby="cta-h">
+  <div class="jg-wrap">
+    <div class="band jg-sticker">
+      <div class="copy">
+        <p data-reveal class="jg-eyebrow">For retailers &amp; distributors</p>
+        <h2 id="cta-h" data-reveal-heading class="h text-balance">
+          Ready to stock <span class="hl">Jingo?</span>
+        </h2>
+        <p data-reveal class="sub">
+          {categories.length} categories and {products.length}+ fast-moving
+          flavours, all at pocket-money prices from Rs.&nbsp;{min}. Put the
+          poppiest candy in Pakistan on your counter.
+        </p>
+        <div data-reveal class="ctas">
+          <a href="/partners" class="jg-btn jg-btn--sun">
+            Become a stockist <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <a href="/contact" class="ghost">Talk to us</a>
+        </div>
+      </div>
+
+      <div class="art" aria-hidden="true">
+        <div class="photo">
+          <Image
+            src={carton}
+            alt=""
+            widths={[360, 560, 760]}
+            sizes="(min-width: 960px) 380px, 80vw"
+            loading="lazy"
+          />
+        </div>
+        <span class="sticker">Ships by the carton!</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-sec {
+    padding-block: 0 clamp(2rem, 5vw, 3rem);
+  }
+  .band {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 36px;
+    padding: clamp(28px, 6vw, 68px);
+    background:
+      radial-gradient(60% 80% at 0% 0%, rgba(224, 32, 43, 0.35), transparent 60%),
+      var(--jg-ink);
+    color: var(--jg-cream);
+    border-radius: var(--jg-radius-lg);
+    box-shadow: 0 8px 0 var(--jg-red);
+  }
+  @media (min-width: 960px) {
+    .band {
+      grid-template-columns: 1.3fr 1fr;
+      align-items: center;
+      gap: 48px;
+    }
+  }
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .h {
+    margin-top: 20px;
+    font-size: clamp(2.4rem, 7vw, 4.4rem);
+    font-weight: 700;
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+  }
+  .hl {
+    color: var(--jg-sun);
+  }
+  .sub {
+    margin-top: 18px;
+    max-width: 46ch;
+    font-size: clamp(1rem, 2vw, 1.12rem);
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--jg-cream) 88%, transparent);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin-top: 28px;
+  }
+  .ghost {
+    display: inline-flex;
+    align-items: center;
+    min-height: 52px;
+    padding: 0 22px;
+    border: 2.5px solid color-mix(in srgb, var(--jg-cream) 55%, transparent);
+    border-radius: 999px;
+    font-weight: 600;
+    color: var(--jg-cream);
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--jg-cream);
+  }
+  .band :global(a:focus-visible) {
+    outline-color: var(--jg-cream);
+  }
+
+  .art {
+    position: relative;
+    justify-self: center;
+    width: min(100%, 380px);
+  }
+  .photo {
+    overflow: hidden;
+    aspect-ratio: 4 / 4.2;
+    border: 2.5px solid var(--jg-cream);
+    border-radius: 28px;
+    rotate: 3deg;
+    box-shadow: 0 8px 0 var(--jg-sun);
+  }
+  .photo :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .sticker {
+    position: absolute;
+    left: -10px;
+    bottom: 22px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 10px 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-pink);
+    color: var(--jg-ink);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    rotate: -6deg;
+  }
+</style>

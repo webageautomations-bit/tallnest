@@ -1,0 +1,97 @@
+---
+// PLACEHOLDER — the full flavour showcase is built in a later pass. For now
+// this route resolves (no 404) and carries an anchor per category so the hub's
+// /jingo/flavours#<category-id> links land in the right place.
+import JingoLayout from "../../layouts/JingoLayout.astro";
+import { categories, productsIn, textOnColor, flavourLabel } from "../../lib/jingo";
+---
+
+<JingoLayout
+  title="Flavours — Jingo"
+  description="Every Jingo flavour — candies, toffees, Squizo liquid chocolates, Twist lollipops, Bublo bubblegums, Choco Chums and Mehfil nimkos."
+  noindex
+>
+  <section class="jg-section">
+    <div class="jg-wrap">
+      <p class="jg-eyebrow">Coming soon</p>
+      <h1 class="jg-h2 title">The full flavour wall is on its way.</h1>
+      <p class="jg-lede lede">
+        Here&rsquo;s a quick look at every range while we finish it.
+      </p>
+
+      <div class="cats">
+        {
+          categories.map((c) => (
+            <section id={c.id} class="cat scroll-mt-24">
+              <h2 class="cat-name">
+                {c.name}
+                {c.subBrand && <span class="cat-sub"> · {c.subBrand}</span>}
+              </h2>
+              <p class="cat-meta">
+                {flavourLabel(c.flavourCount)} · {c.price}
+              </p>
+              <ul class="chips">
+                {productsIn(c.id).map((p) => (
+                  <li class="chip" style={`background:${p.color};color:${textOnColor(p)}`}>
+                    {p.name}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+
+      <a href="/jingo" class="jg-btn back">
+        <span aria-hidden="true">&larr;</span> Back to Jingo
+      </a>
+    </div>
+  </section>
+</JingoLayout>
+
+<style>
+  .title,
+  .lede {
+    margin-top: 20px;
+  }
+  .cats {
+    display: grid;
+    gap: 40px;
+    margin-top: 48px;
+  }
+  .cat-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  .cat-sub {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--jg-ink-soft);
+  }
+  .cat-meta {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--jg-ink-soft);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chip {
+    padding: 8px 16px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .back {
+    margin-top: 56px;
+  }
+</style>
