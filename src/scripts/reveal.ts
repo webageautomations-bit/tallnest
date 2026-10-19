@@ -24,27 +24,38 @@ const EASE = "power3.out";
 export function initReveals(): void {
   if (prefersReducedMotion) return;
 
+  // fromTo (explicit visible end state) so the CSS first-paint pre-hide
+  // (html.reveal-active [data-reveal]{opacity:0}) can never leave an element
+  // stuck hidden — GSAP always animates it back to autoAlpha:1.
   gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
-    gsap.from(el, {
-      autoAlpha: 0,
-      y: 24,
-      duration: 0.6,
-      ease: EASE,
-      scrollTrigger: { trigger: el, start: "top 85%" },
-    });
+    gsap.fromTo(
+      el,
+      { autoAlpha: 0, y: 24 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.6,
+        ease: EASE,
+        scrollTrigger: { trigger: el, start: "top 85%" },
+      },
+    );
   });
 
   gsap.utils.toArray<HTMLElement>("[data-reveal-group]").forEach((group) => {
     const items = group.querySelectorAll<HTMLElement>("[data-reveal-item]");
     if (!items.length) return;
-    gsap.from(items, {
-      autoAlpha: 0,
-      y: 24,
-      duration: 0.55,
-      ease: EASE,
-      stagger: 0.1,
-      scrollTrigger: { trigger: group, start: "top 80%" },
-    });
+    gsap.fromTo(
+      items,
+      { autoAlpha: 0, y: 24 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.55,
+        ease: EASE,
+        stagger: 0.1,
+        scrollTrigger: { trigger: group, start: "top 80%" },
+      },
+    );
   });
 }
 

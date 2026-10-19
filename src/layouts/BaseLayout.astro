@@ -56,16 +56,49 @@ const organizationSchema = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- FOUC-safe: only hide headings for the reveal if JS runs and motion is
-         allowed. If JS fails or motion is reduced, headings stay fully visible. -->
+    <!-- FOUC-safe: only pre-hide reveal targets if JS runs and motion is
+         allowed, so text is never shown in its final state before animating.
+         Failsafe: if the reveal bundle never runs (load error), un-hide after a
+         few seconds so text is never permanently stuck at opacity 0. If JS is
+         disabled or motion is reduced, nothing is hidden at all. -->
     <script is:inline>
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document.documentElement.classList.add("reveal-active");
-      }
+      (function () {
+        var d = document.documentElement;
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        d.classList.add("reveal-active");
+        setTimeout(function () {
+          if (!window.__tnRevealReady) d.classList.remove("reveal-active");
+        }, 3500);
+      })();
     </script>
 
-    <!-- Fonts: Sentient (display) + General Sans (body) via Fontshare -->
+    <!-- Fonts: Sentient (display) + General Sans (body) via Fontshare.
+         Preconnect BOTH the CSS host (api) and the font-file host (cdn), then
+         preload the primary above-the-fold weights so they arrive before first
+         paint and the swap is not visible. -->
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://cdn.fontshare.com/wf/XVVLA67EPQTZD7YHR3MQPW2IQXXDTGPX/IHGNDJMSP2Y53DG23KZTPBH753PUEUB2/RNUZPHMIVMPXFHVACRGCAJ32E6WUEDVU.woff2"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://cdn.fontshare.com/wf/MFQT7HFGCR2L5ULQTW6YXYZXXHMPKLJ3/YWQ244D6TACUX5JBKATPOW5I5MGJ3G73/7YY3ZAAE3TRV2LANYOLXNHTPHLXVWTKH.woff2"
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="https://cdn.fontshare.com/wf/3RZHWSNONLLWJK3RLPEKUZOMM56GO4LJ/BPDRY7AHVI3MCDXXVXTQQ76H3UXA63S3/SB2OEB6IKZPRR6JT4GFJ2TFT6HBB6AZN.woff2"
+    />
     <link
       rel="stylesheet"
       href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,1&f[]=general-sans@400,500,600,700&display=swap"
@@ -118,6 +151,10 @@ const organizationSchema = {
     <Footer t={t} flush={flushFooter} />
 
     <script>
+      // Signal the inline-head failsafe that the reveal bundle is running, so it
+      // won't un-hide prematurely. If this bundle fails to load, the flag stays
+      // unset and the failsafe reveals everything.
+      (window as unknown as { __tnRevealReady?: boolean }).__tnRevealReady = true;
       import { initSmoothScroll } from "../scripts/smooth-scroll";
       import { initReveals, initHeadingReveals } from "../scripts/reveal";
       import { initScrollProgress } from "../scripts/scroll-progress";

@@ -198,14 +198,21 @@
 /* Heading blur-to-focus reveal: hide targets only while JS is active (the
    inline head script adds .reveal-active). Inline opacity from GSAP overrides
    this once each heading is revealed. Belt-and-suspenders reduced-motion guard. */
-html.reveal-active [data-reveal-heading] {
+html.reveal-active [data-reveal-heading],
+html.reveal-active [data-reveal],
+html.reveal-active [data-reveal-item],
+html.reveal-active [data-hero] {
   opacity: 0;
 }
 .reveal-line {
   will-change: transform, filter, opacity;
 }
+/* Safety net: if motion is reduced, nothing is hidden even under .reveal-active. */
 @media (prefers-reduced-motion: reduce) {
-  html.reveal-active [data-reveal-heading] {
+  html.reveal-active [data-reveal-heading],
+  html.reveal-active [data-reveal],
+  html.reveal-active [data-reveal-item],
+  html.reveal-active [data-hero] {
     opacity: 1;
   }
 }
