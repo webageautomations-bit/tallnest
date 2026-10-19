@@ -38,12 +38,12 @@ export const categories: JingoCategory[] = [
 export const products: JingoProduct[] = [
   // Candies (9) — Rs. 5
   { id: 'cola-candy',    name: 'Cola Candy',    flavour: 'Cola Flavoured',       categoryId: 'candies', price: 'Rs. 5', color: '#5A3A2E', textOn: 'light' },
-  { id: 'kachi-keri',    name: 'Kachi Keri',    flavour: 'Raw Mango Flavoured',  categoryId: 'candies', price: 'Rs. 5', color: '#7CB342', textOn: 'light' },
+  { id: 'kachi-keri',    name: 'Kachi Keri',    flavour: 'Raw Mango Flavoured',  categoryId: 'candies', price: 'Rs. 5', color: '#488528', textOn: 'light' },
   { id: 'tangy-candy',   name: 'Tangy Candy',   flavour: 'Orange Flavoured',     categoryId: 'candies', price: 'Rs. 5', color: '#F57C00', textOn: 'dark'  },
   { id: 'chilli-chaska', name: 'Chilli Chaska', flavour: 'Chilli Candy',         categoryId: 'candies', price: 'Rs. 5', color: '#D32F2F', textOn: 'light' },
   { id: 'chatkhari',     name: 'Chatkhari',     flavour: 'Masala Candy',         categoryId: 'candies', price: 'Rs. 5', color: '#8D4E2A', textOn: 'light' },
   { id: 'frosty',        name: 'Frosty',        flavour: 'Mint Candy',           categoryId: 'candies', price: 'Rs. 5', color: '#26C6DA', textOn: 'dark'  },
-  { id: 'chulbuli',      name: 'Chulbuli',      flavour: 'Khatti Meethi Candy',  categoryId: 'candies', price: 'Rs. 5', color: '#EC407A', textOn: 'light' },
+  { id: 'chulbuli',      name: 'Chulbuli',      flavour: 'Khatti Meethi Candy',  categoryId: 'candies', price: 'Rs. 5', color: '#D81B60', textOn: 'light' },
   { id: 'imli-blast',    name: 'Imli Blast',    flavour: 'Sour Imli Candy',      categoryId: 'candies', price: 'Rs. 5', color: '#6D4C41', textOn: 'light' },
   { id: 'falsa-frenzy',  name: 'Falsa Frenzy',  flavour: 'Wild Falsa Candy',     categoryId: 'candies', price: 'Rs. 5', color: '#7B1FA2', textOn: 'light' },
 
@@ -59,18 +59,18 @@ export const products: JingoProduct[] = [
   // Liquid Chocolates / SQUIZO (6) — Rs. 10
   { id: 'double-choco',  name: 'Double Choco',  flavour: 'Chocolate Squizo',     categoryId: 'squizo', price: 'Rs. 10', color: '#3E2723', textOn: 'light' },
   { id: 'mango-tango',   name: 'Mango Tango',   flavour: 'Mango Squizo',         categoryId: 'squizo', price: 'Rs. 10', color: '#FFB300', textOn: 'dark'  },
-  { id: 'caramel-swirl', name: 'Caramel Swirl', flavour: 'Caramel Squizo',       categoryId: 'squizo', price: 'Rs. 10', color: '#B8762F', textOn: 'light' },
+  { id: 'caramel-swirl', name: 'Caramel Swirl', flavour: 'Caramel Squizo',       categoryId: 'squizo', price: 'Rs. 10', color: '#9A5F1E', textOn: 'light' },
   { id: 'hazelnut',      name: 'Hazelnut',      flavour: 'Hazelnut Squizo',      categoryId: 'squizo', price: 'Rs. 10', color: '#8D6E63', textOn: 'light' },
   { id: 'malai-magic',   name: 'Malai Magic',   flavour: 'Malai Squizo',         categoryId: 'squizo', price: 'Rs. 10', color: '#E6C9A8', textOn: 'dark'  },
   { id: 'berry-blast',   name: 'Berry Blast',   flavour: 'Berry Squizo',         categoryId: 'squizo', price: 'Rs. 10', color: '#AD1457', textOn: 'light' },
 
   // Lollipops / TWIST (6) — Rs. 10
   { id: 'aam-twist',     name: 'Aam Twist',     flavour: 'Mango Lollipop',       categoryId: 'lollipops', price: 'Rs. 10', color: '#FBC02D', textOn: 'dark'  },
-  { id: 'saib-twist',    name: 'Saib Twist',    flavour: 'Apple Lollipop',       categoryId: 'lollipops', price: 'Rs. 10', color: '#43A047', textOn: 'light' },
+  { id: 'saib-twist',    name: 'Saib Twist',    flavour: 'Apple Lollipop',       categoryId: 'lollipops', price: 'Rs. 10', color: '#2E7D32', textOn: 'light' },
   { id: 'imli-twist',    name: 'Imli Twist',    flavour: 'Imli Lollipop',        categoryId: 'lollipops', price: 'Rs. 10', color: '#6D4C41', textOn: 'light' },
   { id: 'tangy-twist',   name: 'Tangy Twist',   flavour: 'Orange Lollipop',      categoryId: 'lollipops', price: 'Rs. 10', color: '#F57C00', textOn: 'dark'  },
   { id: 'cola-twist',    name: 'Cola Twist',    flavour: 'Cola Lollipop',        categoryId: 'lollipops', price: 'Rs. 10', color: '#5A3A2E', textOn: 'light' },
-  { id: 'chilli-twist',  name: 'Chilli Twist',  flavour: 'Chilli Lollipop',      categoryId: 'lollipops', price: 'Rs. 10', color: '#E53935', textOn: 'light' },
+  { id: 'chilli-twist',  name: 'Chilli Twist',  flavour: 'Chilli Lollipop',      categoryId: 'lollipops', price: 'Rs. 10', color: '#C62828', textOn: 'light' },
 
   // Bubblegums / BUBLO (3) — Rs. 10
   { id: 'orangey-bublo', name: 'Orangey Bublo', flavour: 'Orange Bubblegum',     categoryId: 'bubblegums', price: 'Rs. 10', color: '#FB8C00', textOn: 'dark' },

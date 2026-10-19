@@ -22,7 +22,7 @@ import { categories, productsIn, textOnColor, flavourLabel } from "../../lib/jin
       <div class="cats">
         {
           categories.map((c) => (
-            <section id={c.id} class="cat scroll-mt-24">
+            <section id={c.id} class="cat jg-anchor">
               <h2 class="cat-name">
                 {c.name}
                 {c.subBrand && <span class="cat-sub"> · {c.subBrand}</span>}

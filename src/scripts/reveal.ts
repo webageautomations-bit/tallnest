@@ -80,6 +80,9 @@ export async function initHeadingReveals(): Promise<void> {
 
   // Correct line breaks require the real fonts to be in place first.
   await document.fonts.ready;
+  // Let an initial hash jump (smooth-scroll's honorInitialHash runs in rAF)
+  // settle first, so "already scrolled past" below is measured correctly.
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
   const played = new WeakSet<HTMLElement>();
   const splits = new Map<HTMLElement, SplitText>();
@@ -102,6 +105,15 @@ export async function initHeadingReveals(): Promise<void> {
 
   const buildOne = (el: HTMLElement) => {
     if (played.has(el)) {
+      gsap.set(el, { opacity: 1, visibility: "visible" });
+      return;
+    }
+    // Already scrolled past (e.g. arrived via an anchor further down): show it
+    // statically. Animating offscreen gains nothing, and the split → revert
+    // re-wrap can change its line count, shifting everything below — including
+    // the anchor the visitor just landed on.
+    if (el.getBoundingClientRect().bottom <= 0) {
+      played.add(el);
       gsap.set(el, { opacity: 1, visibility: "visible" });
       return;
     }

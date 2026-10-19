@@ -80,6 +80,14 @@ html[data-zone="jingo"] ::selection {
   padding-block: clamp(4rem, 9vw, 7rem);
 }
 
+/* In-page anchor target. scroll-margin-top is the single source of anchor
+   offset site-wide (Lenis, native scrollIntoView and no-JS hash jumps all
+   honour it; smooth-scroll.ts adds no offset of its own). Jingo's sticky
+   header is 70px, so land 16px below it. */
+:where(html[data-zone="jingo"]) .jg-anchor {
+  scroll-margin-top: 86px;
+}
+
 /* ---------------------------------------------------------------------------
    Type
 --------------------------------------------------------------------------- */

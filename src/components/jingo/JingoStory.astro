@@ -1,9 +1,10 @@
 ---
-// Brand story teaser — the opening of the catalogue's About copy. Target of
-// the header's "Our Story" anchor (#story).
+// Brand story — the catalogue's About copy (intro, promise, Tall Nest
+// backing). Jingo owns its story: this section (#story) is the target of the
+// header/footer "Our Story" links.
 ---
 
-<section id="story" class="jg-section scroll-mt-24" aria-labelledby="story-h">
+<section id="story" class="jg-section jg-anchor" aria-labelledby="story-h">
   <div class="jg-wrap">
     <div class="panel jg-sticker">
       <div class="copy">
@@ -14,12 +15,23 @@
         <p data-reveal class="body">
           In a market full of sweets children forget the moment they&rsquo;ve
           finished them, we set out to build something different &mdash; a real
-          brand at pocket-money prices, with character and bold flavour, the kind
-          children recognise on the shelf and ask for by name.
+          brand at pocket-money prices. One with character, bold flavours, and
+          packs kids recognise on the shelf and ask for by name. From tangy
+          candies to rich liquid chocolate, JINGO isn&rsquo;t just another sweet
+          at the counter. It&rsquo;s the one children remember.
         </p>
-        <a data-reveal href="/about" class="jg-btn jg-btn--paper more">
-          Read the full story <span class="jg-arrow" aria-hidden="true">&rarr;</span>
-        </a>
+        <p data-reveal class="body">
+          Every JINGO product delivers three things: flavour crafted for the
+          tastes children love most, fun built into every wrapper and pack, and
+          value that makes saying yes easy. It&rsquo;s a promise to kids &mdash;
+          and to the shopkeepers who keep them coming back.
+        </p>
+        <p data-reveal class="body">
+          JINGO is a brand of Tall Nest Group &mdash; a growing house of brands
+          built on deep industry experience, combining seasoned confectionery and
+          FMCG veterans with expertise in international trade and modern digital
+          marketing.
+        </p>
       </div>
 
       <ul class="chips" aria-label="What Jingo stands for">
@@ -84,9 +96,6 @@
     font-size: clamp(1rem, 2vw, 1.12rem);
     line-height: 1.6;
     color: var(--jg-ink);
-  }
-  .more {
-    margin-top: 26px;
   }
 
   .chips {
