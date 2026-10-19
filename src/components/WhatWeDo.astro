@@ -27,9 +27,11 @@ const stepIcons = [
       {t.heading}
     </h2>
 
-    <div class="flow">
+    <div class="flow" data-flow>
       <span class="flow-line" aria-hidden="true"></span>
-      <ol data-reveal-group class="flow-grid">
+      <span class="flow-fill" aria-hidden="true"></span>
+      <span class="flow-dot" aria-hidden="true"></span>
+      <ol class="flow-grid">
         {
           t.steps.map((s, i) => (
             <li data-reveal-item class="step">
@@ -67,6 +69,38 @@ const stepIcons = [
     transform: scaleX(var(--grow, 1));
     transform-origin: left center;
     z-index: 0;
+  }
+  /* Red progress fill drawn over the hairline; grows left->right on scrub.
+     Empty by default (no flash); reduced-motion shows it full. */
+  .flow-fill {
+    position: absolute;
+    top: 6px;
+    inset-inline-start: 4px;
+    inset-inline-end: 4px;
+    height: 2px;
+    background: #93221e;
+    transform: scaleX(0);
+    transform-origin: left center;
+    z-index: 0;
+  }
+  :global(html[dir="rtl"]) .flow-fill {
+    transform-origin: right center;
+  }
+  /* One traveling dot riding the leading edge of the fill (shown by JS). */
+  .flow-dot {
+    position: absolute;
+    top: 7px;
+    inset-inline-start: 4px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #93221e;
+    box-shadow:
+      0 0 0 6px rgba(147, 34, 30, 0.12),
+      0 0 16px 3px rgba(147, 34, 30, 0.28);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
   }
   .flow-grid {
     position: relative;
@@ -131,26 +165,117 @@ const stepIcons = [
     .node {
       top: 24px;
     }
+    /* Stacked layout has no traveling line. */
+    .flow-fill,
+    .flow-dot {
+      display: none;
+    }
+  }
+  /* Reduced motion / no animation: static final state — fill full, dot gone,
+     nodes solid (default), columns visible (reveal-active never applied). */
+  @media (prefers-reduced-motion: reduce) {
+    .flow-fill {
+      transform: scaleX(1);
+    }
+    .flow-dot {
+      display: none;
+    }
   }
 </style>
 
 <script>
+  // Reuses the shared GSAP + ScrollTrigger instance (ESM singleton — registering
+  // is idempotent, no second GSAP is added).
   import { gsap } from "gsap";
   import { ScrollTrigger } from "gsap/ScrollTrigger";
   gsap.registerPlugin(ScrollTrigger);
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const line = document.querySelector<HTMLElement>("#approach .flow-line");
-  if (line && !reduce) {
-    gsap.fromTo(
-      line,
-      { "--grow": 0 },
-      {
-        "--grow": 1,
-        duration: 0.9,
-        ease: "power3.out",
-        scrollTrigger: { trigger: "#approach .flow", start: "top 78%", once: true },
-      },
-    );
+  const flow = document.querySelector<HTMLElement>("#approach .flow");
+  const section = document.querySelector<HTMLElement>("#approach");
+
+  if (flow && section && !reduce) {
+    const fill = flow.querySelector<HTMLElement>(".flow-fill")!;
+    const dot = flow.querySelector<HTMLElement>(".flow-dot")!;
+    const nodes = Array.from(flow.querySelectorAll<HTMLElement>(".node"));
+    const steps = Array.from(flow.querySelectorAll<HTMLElement>(".step"));
+    const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+    const mm = gsap.matchMedia();
+
+    // Desktop / tablet (row layout): one scrubbed timeline — a traveling dot on
+    // the leading edge of a growing red fill; each node snaps solid and its
+    // column (number + title + copy) reveals as the dot arrives, in sequence.
+    mm.add("(min-width: 761px)", () => {
+      let trackW = 1;
+      let fracs: number[] = [];
+
+      const measure = () => {
+        const fr = flow.getBoundingClientRect();
+        const trackLeft = fr.left + 4;
+        trackW = Math.max(1, fr.width - 8);
+        fracs = nodes.map((n) => {
+          const nr = n.getBoundingClientRect();
+          return clamp((nr.left + nr.width / 2 - trackLeft) / trackW);
+        });
+      };
+
+      const render = (p: number) => {
+        gsap.set(fill, { scaleX: p });
+        gsap.set(dot, { x: p * trackW });
+        nodes.forEach((n, i) => {
+          const arrive = clamp((p - (fracs[i] - 0.03)) / 0.06);
+          gsap.set(n, { opacity: 0.25 + 0.75 * arrive });
+        });
+        steps.forEach((c, i) => {
+          const ct = clamp((p - fracs[i]) / 0.14);
+          const e = 1 - Math.pow(1 - ct, 2); // power2.out
+          gsap.set(c, { opacity: e, y: 24 * (1 - e) });
+        });
+      };
+
+      gsap.set(dot, { xPercent: -50, yPercent: -50, autoAlpha: 1 });
+      measure();
+
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: "top 80%",
+        end: "top 30%",
+        scrub: 1,
+        invalidateOnRefresh: true,
+        onRefresh: (self) => {
+          measure();
+          render(self.progress);
+        },
+        onUpdate: (self) => render(self.progress),
+      });
+      render(st.progress);
+
+      return () => {
+        st.kill();
+        gsap.set([fill, dot, ...nodes, ...steps], { clearProps: "all" });
+      };
+    });
+
+    // Mobile (stacked): no traveling line — a simple staggered fade-up.
+    mm.add("(max-width: 760px)", () => {
+      const t = gsap.fromTo(
+        steps,
+        { autoAlpha: 0, y: 20 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.5,
+          ease: "power2.out",
+          stagger: 0.12,
+          scrollTrigger: { trigger: section, start: "top 78%" },
+        },
+      );
+      return () => {
+        t.scrollTrigger?.kill();
+        t.kill();
+        gsap.set(steps, { clearProps: "all" });
+      };
+    });
   }
 </script>
