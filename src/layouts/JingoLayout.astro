@@ -27,6 +27,12 @@ interface Props {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** Opt a page out of indexing (none currently do). */
   noindex?: boolean;
+  /** Scroll-reveal motion bundle (GSAP reveals + Lenis). Arcade game pages
+   *  turn it off: they have no reveal content and run their own loop. */
+  motion?: boolean;
+  /** Floating WhatsApp button — off on game pages so it never sits over the
+   *  play area / touch controls. */
+  floatingWhatsApp?: boolean;
 }
 
 const {
@@ -40,6 +46,8 @@ const {
   imageHeight,
   jsonLd,
   noindex = false,
+  motion = true,
+  floatingWhatsApp = true,
 } = Astro.props;
 
 // Jingo Brand + its parent Organization (Organization.brand → Jingo) + WebSite,
@@ -50,7 +58,7 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr" data-zone="jingo">
+<html lang="en" dir="ltr" data-zone="jingo" data-motion={motion ? undefined : "off"}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -60,6 +68,7 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
          pre-hidden when JS runs and motion is allowed, with a failsafe that
          un-hides everything if the reveal bundle never arrives. No JS or
          reduced motion: nothing is ever hidden. -->
+    {motion && (
     <script is:inline>
       (function () {
         var d = document.documentElement;
@@ -70,6 +79,7 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
         }, 3500);
       })();
     </script>
+    )}
 
     <!-- Fonts: General Sans only (same Fontshare family as Tall Nest — no new
          webfont). Jingo's display type is General Sans 700, so preload the
@@ -127,7 +137,7 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
     </main>
     <JingoFooter />
     <SocialRail links={jingoSocials} theme="jingo" />
-    <FloatingWhatsApp />
+    {floatingWhatsApp && <FloatingWhatsApp />}
 
     <script>
       // Tell the inline-head failsafe the page bundle is running.
@@ -139,7 +149,10 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
       // Motion (GSAP + ScrollTrigger + SplitText reveals, Lenis on desktop)
       // loads only when motion is allowed — reduced-motion visitors never
       // download it. If the chunk fails, un-hide everything at once.
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (
+        document.documentElement.dataset.motion !== "off" &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
         import("../scripts/motion")
           .then((m) => m.initMotion())
           .catch(() => document.documentElement.classList.remove("reveal-active"));

@@ -1,0 +1,319 @@
+---
+// /jingo/arcade — the Jingo Arcade hub. Cards come from the registry
+// (src/data/jingo-arcade.ts): 'live' games link to /jingo/arcade/<slug>,
+// 'soon' games render as disabled cards with a "Coming soon" badge.
+// Deliberately light: no game code ships here — each game's JS lives on its
+// own route and loads only when that game is opened.
+import { Image } from "astro:assets";
+import JingoLayout from "../../../layouts/JingoLayout.astro";
+import { games } from "../../../data/jingo-arcade";
+import { mascots } from "../../../data/jingo-mascots";
+import { mascotImage } from "../../../lib/jingo";
+import { textOnFor } from "../../../lib/color";
+
+const cards = games.map((g, i) => {
+  const mascot = mascots.find((m) => m.id === g.mascotId);
+  if (!mascot) throw new Error(`jingo-arcade: unknown mascotId "${g.mascotId}" (${g.slug})`);
+  return {
+    ...g,
+    live: g.status === "live",
+    href: `/jingo/arcade/${g.slug}`,
+    num: String(i + 1).padStart(2, "0"),
+    img: mascotImage(mascot.image),
+    mascotLabel: mascot.label,
+    fg: textOnFor(g.accentColor) === "light" ? "var(--jg-white)" : "var(--jg-ink)",
+  };
+});
+const liveCount = cards.filter((c) => c.live).length;
+---
+
+<JingoLayout
+  title="Jingo Arcade — Free Candy Games Starring the Jingo Crew"
+  description="Play the Jingo Arcade: a flavour quiz, a memory match, a counter-rush, a chilli nerve test and a mascot runner — quick, free games made for your phone."
+>
+  <section class="ar-hero" aria-labelledby="arcade-h1">
+    <div class="jg-wrap">
+      <a href="/jingo" class="ar-backlink">
+        <span aria-hidden="true">&larr;</span> Back to Jingo
+      </a>
+      <p class="jg-eyebrow ar-eyebrow">Jingo Arcade</p>
+      <h1 id="arcade-h1" class="ar-h1" data-reveal-heading data-reveal-now>
+        Play with the Jingo crew.
+      </h1>
+      <p class="jg-lede ar-lede" data-reveal>
+        {cards.length} quick games starring the Jingo flavours and their candy
+        characters. Free, no sign-up, made for your phone.
+      </p>
+    </div>
+  </section>
+
+  <section class="ar-games" aria-label="Games">
+    <div class="jg-wrap">
+      <ul class="ar-grid" role="list" data-reveal-group>
+        {
+          cards.map((c, i) => (
+            <li data-reveal-item>
+              {c.live ? (
+                <a href={c.href} class="ar-card" style={`--accent:${c.accentColor};--fg:${c.fg}`}>
+                  <span class="ar-num" aria-hidden="true">{c.num}</span>
+                  {c.img && (
+                    <Image
+                      src={c.img}
+                      alt=""
+                      width={180}
+                      widths={[180, 360]}
+                      sizes="180px"
+                      quality={72}
+                      class="ar-art"
+                      loading={i < 2 ? "eager" : "lazy"}
+                    />
+                  )}
+                  <span class="ar-body">
+                    <h2 class="ar-name">{c.name}</h2>
+                    <span class="ar-blurb">{c.blurb}</span>
+                    <span class="ar-cta">
+                      Play <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+                    </span>
+                  </span>
+                </a>
+              ) : (
+                <div class="ar-card is-soon" style={`--accent:${c.accentColor};--fg:${c.fg}`}>
+                  <span class="ar-num" aria-hidden="true">{c.num}</span>
+                  {c.img && (
+                    <Image
+                      src={c.img}
+                      alt=""
+                      width={180}
+                      widths={[180, 360]}
+                      sizes="180px"
+                      quality={72}
+                      class="ar-art"
+                      loading={i < 2 ? "eager" : "lazy"}
+                    />
+                  )}
+                  <span class="ar-body">
+                    <h2 class="ar-name">{c.name}</h2>
+                    <span class="ar-blurb">{c.blurb}</span>
+                    <span class="ar-soon">Coming soon</span>
+                  </span>
+                </div>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+      {
+        liveCount === 0 && (
+          <p class="ar-note">
+            The arcade is warming up &mdash; the first games open soon. Meanwhile,{" "}
+            <a href="/jingo/mascots">meet the crew</a>.
+          </p>
+        )
+      }
+    </div>
+  </section>
+</JingoLayout>
+
+<style>
+  .ar-hero {
+    padding-block: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .ar-backlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 4px;
+    font-weight: 600;
+    color: var(--jg-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .ar-eyebrow {
+    display: flex;
+    width: fit-content;
+    margin-top: 14px;
+  }
+  .ar-h1 {
+    margin-top: 16px;
+    font-size: clamp(2.5rem, 9vw, 5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    color: var(--jg-ink);
+    text-wrap: balance;
+  }
+  .ar-lede {
+    margin-top: 16px;
+  }
+
+  .ar-games {
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+  }
+  .ar-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(16px, 3vw, 24px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 640px) {
+    .ar-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1000px) {
+    .ar-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .ar-grid > li {
+    display: flex;
+  }
+
+  .ar-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius);
+    background: var(--accent);
+    color: var(--fg);
+    box-shadow: 0 6px 0 var(--jg-ink);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.3s var(--jg-ease),
+      box-shadow 0.3s var(--jg-ease);
+  }
+  a.ar-card:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--jg-ink);
+  }
+  @media (hover: hover) {
+    a.ar-card:hover {
+      transform: translateY(-4px) rotate(-0.6deg);
+      box-shadow: 0 10px 0 var(--jg-ink);
+    }
+    a.ar-card:hover .ar-art {
+      transform: rotate(-6deg) scale(1.06);
+    }
+    a.ar-card:hover .jg-arrow {
+      transform: translateX(4px);
+    }
+  }
+  .ar-num {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  /* Fixed art height so every card body starts on the same line. */
+  .ar-art {
+    align-self: center;
+    width: auto;
+    max-width: 70%;
+    height: 132px;
+    object-fit: contain;
+    margin-top: 18px;
+    filter: drop-shadow(0 6px 0 rgba(36, 18, 26, 0.25));
+    transition: transform 0.35s var(--jg-ease);
+  }
+  .ar-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 18px 20px 20px;
+    background: var(--jg-paper);
+    border-top: 2.5px solid var(--jg-ink);
+    color: var(--jg-ink);
+  }
+  .ar-name {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .ar-blurb {
+    color: var(--jg-ink-soft);
+    line-height: 1.45;
+  }
+  .ar-cta,
+  .ar-soon {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-weight: 700;
+  }
+  .ar-cta {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-red);
+    color: var(--jg-white);
+    box-shadow: 0 3px 0 var(--jg-ink);
+  }
+  .ar-cta .jg-arrow {
+    transition: transform 0.25s var(--jg-ease);
+  }
+
+  /* Coming soon — visibly disabled, not a link. */
+  .is-soon {
+    box-shadow: 0 6px 0 rgba(36, 18, 26, 0.35);
+    border-style: dashed;
+    cursor: default;
+  }
+  .is-soon .ar-art {
+    filter: grayscale(0.7) opacity(0.75);
+  }
+  .is-soon .ar-num {
+    opacity: 0.7;
+  }
+  .ar-soon {
+    padding: 8px 14px;
+    border: 2px dashed var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-cream);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    rotate: -2deg;
+  }
+
+  .ar-note {
+    margin-top: 24px;
+    color: var(--jg-ink-soft);
+  }
+  .ar-note a {
+    color: var(--jg-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ar-card,
+    .ar-art,
+    .ar-cta .jg-arrow {
+      transition: none;
+    }
+    a.ar-card:hover,
+    a.ar-card:hover .ar-art {
+      transform: none;
+    }
+  }
+</style>

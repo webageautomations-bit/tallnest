@@ -1,0 +1,54 @@
+---
+// Jingo Arcade — the shell every game plugs into.
+// Wraps JingoLayout (Jingo header/footer + theme) and adds the game chrome:
+// a "← Arcade" back link, the game title (h1) and a full-bleed, mobile-first
+// play area (the default slot). Name + accent come from the registry entry
+// for `slug` in src/data/jingo-arcade.ts.
+//
+// Game pages ship only their own JS: the scroll-reveal motion bundle is off
+// (no reveal content here) and the floating WhatsApp button is hidden so it
+// can never sit over the play area. Each game's script lives in its page, so
+// Astro code-splits it to that route.
+import JingoLayout from "./JingoLayout.astro";
+import { gameBySlug } from "../data/jingo-arcade";
+import { textOnFor } from "../lib/color";
+import "../styles/arcade.css";
+
+interface Props {
+  slug: string;
+  /** <title> override; defaults to "<game name> — Jingo Arcade". */
+  title?: string;
+  description?: string;
+}
+
+const { slug, title, description } = Astro.props;
+const game = gameBySlug(slug);
+if (!game) throw new Error(`ArcadeGameLayout: no game "${slug}" in jingo-arcade.ts`);
+
+const onAccent = textOnFor(game.accentColor) === "light" ? "var(--jg-white)" : "var(--jg-ink)";
+---
+
+<JingoLayout
+  title={title ?? `${game.name} — Jingo Arcade`}
+  description={description ?? `${game.name}: ${game.blurb} A free game in the Jingo Arcade.`}
+  motion={false}
+  floatingWhatsApp={false}
+>
+  <div class="ag" data-game={game.slug} style={`--ag-accent:${game.accentColor};--ag-on-accent:${onAccent}`}>
+    <div class="ag-bar">
+      <a href="/jingo/arcade" class="ag-back">
+        <span aria-hidden="true">&larr;</span> Arcade
+      </a>
+      <h1 class="ag-title">{game.name}</h1>
+    </div>
+    <div class="ag-stage">
+      <slot />
+      <noscript>
+        <p class="ag-noscript">
+          This game needs JavaScript. Switch it on to play &mdash; or browse
+          <a href="/jingo/flavours">all the Jingo flavours</a> instead.
+        </p>
+      </noscript>
+    </div>
+  </div>
+</JingoLayout>

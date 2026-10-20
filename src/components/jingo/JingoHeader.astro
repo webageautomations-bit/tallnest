@@ -17,6 +17,7 @@ const links = [
   { label: "Home", href: "/jingo", current: onHub },
   { label: "Flavours", href: "/jingo/flavours", current: path.startsWith("/jingo/flavours") },
   { label: "Mascots", href: "/jingo/mascots", current: path.startsWith("/jingo/mascots") },
+  { label: "Arcade", href: "/jingo/arcade", current: path.startsWith("/jingo/arcade") },
   // On-page anchor for now; resolves from any Jingo page.
   { label: "Our Story", href: onHub ? "#story" : "/jingo#story", current: false },
 ];
@@ -226,6 +227,7 @@ const links = [
     border: 2px solid transparent;
     font-size: 0.98rem;
     font-weight: 600;
+    white-space: nowrap;
     color: var(--jg-ink);
     text-decoration: none;
     transition:
@@ -437,6 +439,12 @@ const links = [
   @media (min-width: 900px) and (max-width: 1099px) {
     .jh-dl-verb {
       display: none;
+    }
+    .jh-nav ul {
+      gap: 2px;
+    }
+    .jh-link {
+      padding: 0 12px;
     }
   }
 
