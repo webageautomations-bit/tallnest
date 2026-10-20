@@ -1,0 +1,102 @@
+---
+// Jingo Arcade — how every game shares a result.
+// navigator.share where available (native sheet); otherwise a WhatsApp link
+// (https://wa.me/?text=…) plus a Copy button. Games update the message at
+// runtime with setShare() from src/scripts/arcade/share.ts; `message` / `url`
+// here are the initial values (the WhatsApp link works with them as-is).
+import { whatsappGlyph } from "../../data/contact";
+
+interface Props {
+  message: string;
+  /** Absolute URL appended to the message (e.g. the game's page). */
+  url?: string;
+  label?: string;
+  class?: string;
+}
+
+const { message, url = "", label = "Share your result", class: className } = Astro.props;
+const text = url ? `${message} ${url}` : message;
+const waHref = `https://wa.me/?text=${encodeURIComponent(text)}`;
+---
+
+<div class:list={["sr", className]} data-share data-message={message} data-url={url}>
+  <p class="sr-label">{label}</p>
+  <div class="sr-actions">
+    <button type="button" class="jg-btn sr-native" data-share-native hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+      Share result
+    </button>
+    <div class="sr-fallback" data-share-fallback>
+      <a
+        href={waHref}
+        class="jg-btn sr-wa"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-share-wa
+      >
+        <span class="sr-wa-icon" set:html={whatsappGlyph} />
+        WhatsApp
+        <span class="sr-only">(opens WhatsApp in a new tab)</span>
+      </a>
+      <button type="button" class="jg-btn jg-btn--paper" data-share-copy>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        Copy
+      </button>
+    </div>
+  </div>
+  <p class="sr-status" data-share-status role="status" aria-live="polite"></p>
+</div>
+
+<script>
+  import { initShare } from "../../scripts/arcade/share";
+  initShare();
+</script>
+
+<style>
+  .sr {
+    margin-top: 22px;
+  }
+  .sr-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .sr-actions,
+  .sr-fallback {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .sr-actions {
+    margin-top: 10px;
+  }
+  /* `hidden` must beat .jg-btn's display (author rules outrank the UA one). */
+  .sr [hidden] {
+    display: none !important;
+  }
+  .sr-wa {
+    background: #25d366;
+    color: var(--jg-ink);
+  }
+  .sr-wa-icon {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+  }
+  .sr-status {
+    min-height: 1.4em;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

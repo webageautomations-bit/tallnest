@@ -1,0 +1,462 @@
+---
+// /jingo/arcade/chilli — "Chilli Chaska Challenge": one-button push-your-luck.
+// Hold to heat up (score climbs, accelerating); release to bank. Hold past the
+// hidden, per-round random burst point and the round's score is lost.
+// 5 rounds per run. The star is the mascot of the Chilli Chaska candy, looked
+// up from jingo-mascots.ts / jingo-products.ts (not hardcoded).
+import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../components/arcade/ShareResult.astro";
+import { mascots } from "../../../data/jingo-mascots";
+import { productById } from "../../../lib/jingo";
+import { mascotSrc, packSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+
+const CANDY_ID = "chilli-chaska"; // the candy this game is named after
+const candy = productById(CANDY_ID);
+const mascot = mascots.find((m) => m.relatedProductIds.includes(CANDY_ID));
+if (!candy || !mascot) throw new Error(`Chilli Chaska Challenge: "${CANDY_ID}" product/mascot missing`);
+
+const ROUNDS = 5;
+const img = await mascotSrc(mascot.image, 480);
+const pack = await packSrc(candy.id, 160, 72);
+const url = gameUrl(Astro.site, "chilli");
+const data = { rounds: ROUNDS, url, candy: candy.name };
+---
+
+<ArcadeGameLayout
+  slug="chilli"
+  title="Chilli Chaska Challenge — Jingo Arcade Nerve Game"
+  description="Hold your nerve: press and hold to heat up the Chilli Chaska mascot, release to bank your score — but hold too long and it bursts. Five rounds."
+>
+  <div class="cc" data-chilli>
+    <!-- Intro -->
+    <section class="ag-screen ag-panel ag-panel--accent cc-intro" data-screen="intro" aria-labelledby="cc-intro-h">
+      <div class="cc-intro-row">
+        <div>
+          <h2 id="cc-intro-h" class="ag-display">How hot can you go?</h2>
+          <p class="ag-sub">
+            Press and <b>hold</b> the button. The heat rises and your score climbs
+            faster and faster. Let go to bank it &mdash; but hold past the burst
+            point and you lose that round. The burst point changes every round.
+          </p>
+        </div>
+        <img class="cc-intro-pack" src={pack.src} width={pack.w} height={pack.h} alt={`${candy.name} pack`} decoding="async" />
+      </div>
+      <p class="cc-controls">{ROUNDS} rounds &middot; Hold the button, or hold <kbd>Space</kbd></p>
+      <p class="cc-best" data-intro-best></p>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn jg-btn--paper" data-start>
+          Take the challenge <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Play -->
+    <section class="ag-screen cc-play" data-screen="play" hidden aria-label="Chilli Chaska Challenge">
+      <div class="cc-hud">
+        <span class="ag-chip"><span class="ag-chip-label">Round</span> <b data-hud-round>1/{ROUNDS}</b></span>
+        <span class="ag-chip"><span class="ag-chip-label">Banked</span> <b data-hud-total>0</b></span>
+      </div>
+      <ol class="cc-rounds" role="list" aria-label="Round results" data-rounds></ol>
+
+      <div class="cc-stage" data-stage style="--heat:0">
+        <div class="cc-glow" aria-hidden="true"></div>
+        <div class="cc-flames" aria-hidden="true">
+          <span class="cc-flame"></span><span class="cc-flame"></span><span class="cc-flame"></span>
+        </div>
+        <div class="cc-mascot-wrap">
+          <img class="cc-mascot" src={img.src} width={img.w} height={img.h} alt={`The Jingo ${mascot.label} character`} decoding="async" />
+          <span class="cc-sweat cc-sweat--1" aria-hidden="true"></span>
+          <span class="cc-sweat cc-sweat--2" aria-hidden="true"></span>
+        </div>
+        <p class="cc-burst" data-burst hidden>BURNT!</p>
+        <p class="cc-points" data-points aria-hidden="true">0</p>
+      </div>
+
+      <div class="cc-meter-row">
+        <span class="cc-meter-label">Heat</span>
+        <div
+          class="cc-meter"
+          role="meter"
+          aria-label="Heat"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          data-meter
+        >
+          <span class="cc-meter-fill" data-meter-fill></span>
+        </div>
+        <b class="cc-meter-num" data-heat-num>0%</b>
+      </div>
+
+      <p class="cc-msg" data-msg>Press and hold to start round 1.</p>
+
+      <button type="button" class="cc-hold" data-hold>
+        <span data-hold-label>Hold to heat up</span>
+      </button>
+    </section>
+
+    <!-- End -->
+    <section class="ag-screen ag-panel cc-end" data-screen="end" hidden aria-labelledby="cc-end-h">
+      <p class="cc-kicker">Run complete</p>
+      <h2 id="cc-end-h" class="ag-display" tabindex="-1" data-end-title>You banked 0.</h2>
+      <p class="ag-new" data-end-new hidden>New best run!</p>
+      <ol class="cc-rounds cc-rounds--end" role="list" aria-label="Round results" data-end-rounds></ol>
+      <dl class="ag-stats">
+        <div class="ag-stat"><dt>Total banked</dt><dd data-end-total>0</dd></div>
+        <div class="ag-stat"><dt>Rounds burnt</dt><dd data-end-burnt>0</dd></div>
+        <div class="ag-stat"><dt>Best run</dt><dd data-end-best>0</dd></div>
+      </dl>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn" data-again>Play again</button>
+      </div>
+      <ShareResult message="I'm taking the Chilli Chaska Challenge in the Jingo Arcade. Your turn." url={url} />
+    </section>
+
+    <p class="ag-sr" aria-live="polite" data-live></p>
+  </div>
+
+  <script is:inline type="application/json" id="chilli-data" set:html={jsonForScript(data)} />
+</ArcadeGameLayout>
+
+<script>
+  import { initChilli } from "../../../scripts/arcade/chilli";
+  initChilli();
+</script>
+
+<style>
+  .cc {
+    max-width: 640px;
+    margin-inline: auto;
+    scroll-margin-top: calc(var(--jg-header-h) + 8px);
+  }
+  .cc-intro-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .cc-intro-pack {
+    flex: none;
+    width: clamp(70px, 20vw, 120px);
+    height: auto;
+    rotate: 6deg;
+    filter: drop-shadow(0 6px 0 rgba(36, 18, 26, 0.3));
+  }
+  .cc-controls,
+  .cc-best,
+  .cc-kicker {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .cc-best:empty {
+    display: none;
+  }
+  .cc-controls kbd {
+    padding: 2px 8px;
+    border: 2px solid currentColor;
+    border-radius: 8px;
+    font-family: inherit;
+  }
+
+  /* HUD */
+  .cc-hud {
+    display: flex;
+    gap: 8px;
+  }
+  .cc-rounds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    min-height: 34px;
+  }
+  .cc-rounds :global(li) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .cc-rounds :global(li.is-burnt) {
+    background: #ffb3b3;
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+  }
+  .cc-rounds :global(li.is-banked) {
+    background: #b9efc9;
+  }
+
+  /* Stage — heat (0..1) drives every tension cue. */
+  .cc-stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: clamp(230px, 38svh, 340px);
+    margin-top: 10px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius);
+    overflow: hidden;
+    background: color-mix(in srgb, #ff3b1f calc(var(--heat) * 55%), var(--jg-paper));
+    box-shadow: 0 5px 0 var(--jg-ink);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .cc-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 75%, rgba(255, 201, 60, 0.9), transparent 60%);
+    opacity: var(--heat);
+  }
+  .cc-flames {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    translate: -50% 0;
+    transform-origin: 50% 100%;
+    transform: scaleY(var(--heat));
+    opacity: min(1, calc(var(--heat) * 2));
+  }
+  .cc-flame {
+    width: 70px;
+    height: 150px;
+    border-radius: 50% 50% 40% 40% / 70% 70% 30% 30%;
+    background: linear-gradient(180deg, transparent, #ffc93c 30%, #ff8a1f 60%, #e0202b);
+    animation: cc-flicker 0.32s ease-in-out infinite alternate;
+  }
+  .cc-flame:nth-child(2) {
+    height: 190px;
+    width: 86px;
+    animation-delay: -0.15s;
+  }
+  .cc-flame:nth-child(3) {
+    animation-delay: -0.08s;
+  }
+  @keyframes cc-flicker {
+    to {
+      transform: scaleY(0.82) skewX(4deg);
+    }
+  }
+  /* Absolutely placed so its height resolves against the fixed-height stage.
+     Centred with `translate` so the shake/pop `transform` animations compose. */
+  .cc-mascot-wrap {
+    position: absolute;
+    left: 50%;
+    bottom: 5%;
+    height: 78%;
+    aspect-ratio: 898 / 1100;
+    translate: -50% 0;
+  }
+  .cc-mascot {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    transform: scale(calc(1 + var(--heat) * 0.14));
+    filter: saturate(calc(1 + var(--heat) * 1.3)) drop-shadow(0 0 calc(var(--heat) * 18px) rgba(224, 32, 43, 0.9));
+  }
+  .cc-stage.is-shaking .cc-mascot-wrap {
+    animation: cc-shake 0.1s linear infinite;
+  }
+  @keyframes cc-shake {
+    0% {
+      transform: translate(calc(var(--heat) * -7px), 0) rotate(calc(var(--heat) * -3deg));
+    }
+    50% {
+      transform: translate(calc(var(--heat) * 7px), calc(var(--heat) * 2px)) rotate(calc(var(--heat) * 3deg));
+    }
+    100% {
+      transform: translate(calc(var(--heat) * -7px), 0) rotate(calc(var(--heat) * -3deg));
+    }
+  }
+  .cc-sweat {
+    position: absolute;
+    width: 14px;
+    height: 20px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: #9fe0ff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .cc-sweat--1 {
+    top: 18%;
+    left: 4%;
+  }
+  .cc-sweat--2 {
+    top: 26%;
+    right: 2%;
+  }
+  .cc-stage.is-sweating .cc-sweat {
+    opacity: 1;
+    animation: cc-drip 0.9s ease-in infinite;
+  }
+  .cc-stage.is-sweating .cc-sweat--2 {
+    animation-delay: -0.45s;
+  }
+  @keyframes cc-drip {
+    to {
+      transform: translateY(26px);
+      opacity: 0;
+    }
+  }
+  .cc-points {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    padding: 4px 12px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .cc-burst {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: clamp(2.6rem, 12vw, 4.4rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--jg-white);
+    -webkit-text-stroke: 3px var(--jg-ink);
+    paint-order: stroke fill;
+    text-shadow: 0 6px 0 var(--jg-ink);
+    background: radial-gradient(circle, rgba(255, 201, 60, 0.95) 0 30%, rgba(224, 32, 43, 0.85) 31% 55%, transparent 56%);
+    animation: cc-boom 0.45s var(--jg-ease) both;
+  }
+  @keyframes cc-boom {
+    from {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+  }
+  .cc-stage.is-burnt .cc-mascot-wrap {
+    animation: cc-pop 0.45s ease-out forwards;
+  }
+  @keyframes cc-pop {
+    60% {
+      transform: scale(1.35);
+      opacity: 0.8;
+    }
+    to {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  /* Heat meter */
+  .cc-meter-row {
+    display: grid;
+    grid-template-columns: auto 1fr 3.4em;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .cc-meter-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .cc-meter {
+    height: 18px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    overflow: hidden;
+  }
+  .cc-meter-fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ffc93c, #ff8a1f 50%, #e0202b);
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+  .cc-meter-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .cc-msg {
+    min-height: 1.5em;
+    margin-top: 10px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* The one big button — thumb-sized, no text selection / callout on hold. */
+  .cc-hold {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 96px;
+    margin-top: 12px;
+    border: 3px solid var(--jg-ink);
+    border-radius: 28px;
+    background: var(--jg-red);
+    box-shadow: 0 7px 0 var(--jg-ink);
+    color: var(--jg-white);
+    font: inherit;
+    font-size: clamp(1.25rem, 5vw, 1.6rem);
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease,
+      background-color 0.15s ease;
+  }
+  .cc-hold.is-held {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 var(--jg-ink);
+    background: var(--jg-red-deep);
+  }
+  .cc-hold:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  .cc-hold:focus-visible {
+    border-radius: 28px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* Playable, just static: no shake, no flames/sweat, no pops. The heat
+       meter, percentage and stage colour still show the tension. */
+    .cc-flames,
+    .cc-sweat {
+      display: none;
+    }
+    .cc-stage.is-shaking .cc-mascot-wrap,
+    .cc-stage.is-burnt .cc-mascot-wrap,
+    .cc-burst {
+      animation: none;
+    }
+    .cc-stage.is-burnt .cc-mascot-wrap {
+      opacity: 0.35;
+    }
+    .cc-mascot {
+      transform: none;
+    }
+    .cc-hold {
+      transition: none;
+    }
+  }
+</style>

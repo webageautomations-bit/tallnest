@@ -1,0 +1,327 @@
+---
+// /jingo/arcade/match — "Flavour Match": a memory pair game with the pack
+// renders. Pairs are drawn at random from src/data/jingo-products.ts (every
+// product with a render in src/assets/jingo/products/<id>.png).
+// Easy 6 pairs · Medium 8 · Hard 12. Moves + time; best per difficulty is kept
+// with the arcade storage helper.
+import { getImage } from "astro:assets";
+import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../components/arcade/ShareResult.astro";
+import { products, packImage } from "../../../lib/jingo";
+import { packSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+import logoWhite from "../../../assets/jingo/jingo-logo-white.png";
+
+const levels = [
+  { id: "easy", label: "Easy", pairs: 6 },
+  { id: "medium", label: "Medium", pairs: 8 },
+  { id: "hard", label: "Hard", pairs: 12 },
+];
+
+const pool = await Promise.all(
+  products
+    .filter((p) => packImage(p.id))
+    .map(async (p) => ({ id: p.id, name: p.name, tint: p.tint, img: await packSrc(p.id, 240, 70) })),
+);
+const maxPairs = Math.max(...levels.map((l) => l.pairs));
+if (pool.length < maxPairs) throw new Error(`Flavour Match needs ${maxPairs} pack renders, found ${pool.length}`);
+
+const logo = await getImage({ src: logoWhite, width: 200, format: "webp", quality: 80 });
+const url = gameUrl(Astro.site, "match");
+const data = {
+  levels,
+  pool,
+  logo: { src: logo.src, w: Number(logo.attributes.width), h: Number(logo.attributes.height) },
+  url,
+};
+---
+
+<ArcadeGameLayout
+  slug="match"
+  title="Flavour Match — Jingo Arcade Memory Game"
+  description="Flip the cards, pair the Jingo packs, clear the board. A free memory game with three difficulty levels, made for your phone."
+>
+  <div class="fm" data-match>
+    <!-- Intro: pick a difficulty -->
+    <section class="ag-screen ag-panel ag-panel--accent fm-intro" data-screen="intro" aria-labelledby="fm-intro-h">
+      <h2 id="fm-intro-h" class="ag-display">Pair the packs.</h2>
+      <p class="ag-sub">
+        Flip two cards at a time and match the identical Jingo packs. Clear the
+        board in as few moves as you can.
+      </p>
+      <p class="fm-pick-label">Choose your level</p>
+      <ul class="fm-levels" role="list">
+        {
+          levels.map((l) => (
+            <li>
+              <button type="button" class="fm-level" data-level={l.id}>
+                <span class="fm-level-name">{l.label}</span>
+                <span class="fm-level-pairs">{l.pairs} pairs</span>
+                <span class="fm-level-best" data-best-for={l.id}>No best yet</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Board -->
+    <section class="ag-screen fm-play" data-screen="play" hidden aria-label="Game board">
+      <div class="fm-hud">
+        <div class="ag-hud">
+          <span class="ag-chip"><span class="ag-chip-label">Level</span> <b data-hud-level>Easy</b></span>
+          <span class="ag-chip"><span class="ag-chip-label">Moves</span> <b data-hud-moves>0</b></span>
+          <span class="ag-chip"><span class="ag-chip-label">Time</span> <b data-hud-time>0s</b></span>
+          <span class="ag-chip"><span class="ag-chip-label">Pairs</span> <b data-hud-pairs>0/6</b></span>
+        </div>
+        <div class="fm-hud-actions">
+          <button type="button" class="fm-text-btn" data-restart>Restart</button>
+          <button type="button" class="fm-text-btn" data-change>Change level</button>
+        </div>
+      </div>
+      <div class="fm-board" data-board></div>
+    </section>
+
+    <!-- Win -->
+    <section class="ag-screen ag-panel fm-win" data-screen="win" hidden aria-labelledby="fm-win-h">
+      <p class="fm-kicker" data-win-level>Easy</p>
+      <h2 id="fm-win-h" class="ag-display" tabindex="-1">Board cleared!</h2>
+      <p class="ag-new" data-win-new hidden>New best!</p>
+      <dl class="ag-stats">
+        <div class="ag-stat"><dt>Moves</dt><dd data-win-moves>0</dd></div>
+        <div class="ag-stat"><dt>Time</dt><dd data-win-time>0s</dd></div>
+        <div class="ag-stat"><dt>Your best</dt><dd data-win-best>—</dd></div>
+      </dl>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn" data-again>Play again</button>
+        <button type="button" class="jg-btn jg-btn--paper" data-change>Change level</button>
+      </div>
+      <ShareResult message="I'm playing Flavour Match in the Jingo Arcade. Beat it." url={url} />
+    </section>
+
+    <p class="ag-sr" aria-live="polite" data-live></p>
+  </div>
+
+  <script is:inline type="application/json" id="match-data" set:html={jsonForScript(data)} />
+</ArcadeGameLayout>
+
+<script>
+  import { initMatch } from "../../../scripts/arcade/match";
+  initMatch();
+</script>
+
+<style>
+  .fm {
+    max-width: 760px;
+    margin-inline: auto;
+    scroll-margin-top: calc(var(--jg-header-h) + 12px);
+  }
+  .fm-kicker,
+  .fm-pick-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .fm-pick-label {
+    margin-top: 24px;
+  }
+  .fm-levels {
+    display: grid;
+    gap: 12px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 560px) {
+    .fm-levels {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .fm-level {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    min-height: 64px;
+    padding: 14px 18px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 20px;
+    background: var(--jg-paper);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    color: var(--jg-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.2s var(--jg-ease),
+      box-shadow 0.2s var(--jg-ease);
+  }
+  .fm-level:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  @media (hover: hover) {
+    .fm-level:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--jg-ink);
+    }
+  }
+  .fm-level:focus-visible {
+    border-radius: 20px;
+  }
+  .fm-level-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .fm-level-pairs {
+    font-weight: 600;
+  }
+  .fm-level-best {
+    font-size: 0.85rem;
+    color: var(--jg-ink-soft);
+  }
+
+  /* HUD */
+  .fm-hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    margin-bottom: 14px;
+  }
+  .fm-hud .ag-chip {
+    padding: 6px 12px;
+    min-height: 36px;
+  }
+  .fm-hud-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .fm-text-btn {
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    background: none;
+    color: var(--jg-ink);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  /* Board — 3 columns for Easy on phones, 4 otherwise; wider screens spread. */
+  .fm-board {
+    --cols: 4;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: clamp(8px, 2vw, 12px);
+    margin-inline: auto;
+  }
+  .fm-board[data-level="easy"] {
+    --cols: 3;
+    max-width: 480px;
+  }
+  .fm-board[data-level="medium"] {
+    max-width: 560px;
+  }
+  @media (min-width: 640px) {
+    .fm-board[data-level="easy"] {
+      --cols: 4;
+      max-width: 600px;
+    }
+    .fm-board[data-level="hard"] {
+      --cols: 6;
+    }
+  }
+
+  /* Card — 3D flip. Back = Jingo branding; front = the pack on its tint. */
+  .fm-board :global(.mc) {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    border: 0;
+    background: none;
+    perspective: 800px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fm-board :global(.mc:focus-visible) {
+    border-radius: 16px;
+  }
+  .fm-board :global(.mc-inner) {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.45s var(--jg-ease);
+  }
+  .fm-board :global(.mc.is-up .mc-inner) {
+    transform: rotateY(180deg);
+  }
+  .fm-board :global(.mc-face) {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 16px;
+    box-shadow: 0 4px 0 var(--jg-ink);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+  .fm-board :global(.mc-back) {
+    background:
+      radial-gradient(circle at 20% 22%, rgba(255, 255, 255, 0.28) 0 7%, transparent 8%),
+      radial-gradient(circle at 80% 78%, rgba(255, 201, 60, 0.75) 0 9%, transparent 10%),
+      radial-gradient(circle at 84% 18%, rgba(255, 79, 154, 0.6) 0 6%, transparent 7%),
+      var(--jg-red);
+  }
+  .fm-board :global(.mc-back img) {
+    width: 72%;
+    height: auto;
+    rotate: -8deg;
+    filter: drop-shadow(0 2px 0 rgba(36, 18, 26, 0.45));
+  }
+  .fm-board :global(.mc-front) {
+    transform: rotateY(180deg);
+    background: var(--tint, var(--jg-paper));
+  }
+  .fm-board :global(.mc-front img) {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+  }
+  .fm-board :global(.mc.is-matched .mc-face) {
+    box-shadow: 0 0 0 3px var(--jg-sun), 0 4px 0 var(--jg-ink);
+  }
+  .fm-board :global(.mc.is-matched) {
+    cursor: default;
+  }
+  .fm-board :global(.mc.is-miss .mc-front) {
+    border-color: var(--jg-red);
+  }
+  @media (hover: hover) {
+    .fm-board :global(.mc:not(.is-up):hover .mc-inner) {
+      transform: translateY(-3px) rotate(-1deg);
+    }
+  }
+
+  .fm-win .ag-display {
+    font-size: clamp(2.2rem, 8vw, 3.6rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fm-level {
+      transition: none;
+    }
+    .fm-board :global(.mc-inner) {
+      transition: none;
+    }
+    .fm-board :global(.mc:not(.is-up):hover .mc-inner) {
+      transform: none;
+    }
+  }
+</style>

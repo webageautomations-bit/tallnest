@@ -35,5 +35,6 @@
 - [Jingo](https://www.tallnest.com/jingo/): the Jingo brand hub.
 - [Jingo flavours](https://www.tallnest.com/jingo/flavours/): all 35 products by category, with prices and pack formats.
 - [Jingo mascots](https://www.tallnest.com/jingo/mascots/): nine characters, one for each Jingo candy.
+- [Jingo Arcade](https://www.tallnest.com/jingo/arcade/): free browser games starring the Jingo flavours and characters — a flavour quiz, a memory match, a counter-rush, a chilli nerve test and a mascot runner.
 - [Media](https://www.tallnest.com/media/): photos from the Jingo distributor launch event.
 - [The Nest](https://www.tallnest.com/the-nest/): articles on confectionery, FMCG brands and distribution in Pakistan.

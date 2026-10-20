@@ -1,0 +1,227 @@
+/* ---------------------------------------------------------------------------
+   JINGO ARCADE — shared game chrome + building blocks.
+   Imported by ArcadeGameLayout only (so only game pages carry it), and keyed
+   to the Jingo zone like jingo.css. Each game page adds its own scoped styles
+   on top. --ag-accent / --ag-on-accent come from the game's registry entry.
+--------------------------------------------------------------------------- */
+
+/* Author display rules (e.g. .jg-btn's inline-flex) would beat the UA
+   [hidden] rule — games toggle screens with `hidden`, so make it win. */
+html[data-zone="jingo"] .ag [hidden] {
+  display: none !important;
+}
+/* Headings that games focus from script (tabindex="-1") so screen readers
+   land on the new screen — no ring, they aren't interactive. */
+html[data-zone="jingo"] .ag [tabindex="-1"]:focus {
+  outline: none;
+}
+
+:where(html[data-zone="jingo"]) .ag {
+  --ag-gutter: clamp(12px, 4vw, 32px);
+  position: relative;
+  padding-bottom: clamp(2.5rem, 7vw, 4.5rem);
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--ag-accent) 26%, transparent) 0 22%, transparent 23%),
+    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--jg-sun) 40%, transparent) 0 9%, transparent 10%),
+    var(--jg-cream);
+}
+
+/* --- Game chrome bar ------------------------------------------------------ */
+:where(html[data-zone="jingo"]) .ag-bar {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding: clamp(14px, 3vw, 24px) var(--ag-gutter) clamp(10px, 2vw, 16px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+:where(html[data-zone="jingo"]) .ag-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px 0 12px;
+  border: 2.5px solid var(--jg-ink);
+  border-radius: 999px;
+  background: var(--jg-paper);
+  box-shadow: 0 3px 0 var(--jg-ink);
+  color: var(--jg-ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s var(--jg-ease), box-shadow 0.2s ease;
+}
+:where(html[data-zone="jingo"]) .ag-back:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--jg-ink);
+}
+@media (hover: hover) {
+  :where(html[data-zone="jingo"]) .ag-back:hover {
+    transform: translateX(-2px);
+  }
+}
+:where(html[data-zone="jingo"]) .ag-title {
+  min-width: 0;
+  font-size: clamp(1.15rem, 3.6vw, 1.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--jg-ink);
+  text-wrap: balance;
+}
+
+/* --- Play area: full-bleed on phones, centred column above ---------------- */
+:where(html[data-zone="jingo"]) .ag-stage {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-inline: var(--ag-gutter);
+}
+
+/* --- Building blocks ------------------------------------------------------ */
+/* A game "screen" (intro / play / result). Games show one at a time. */
+:where(html[data-zone="jingo"]) .ag-screen {
+  animation: ag-in 0.35s var(--jg-ease) both;
+}
+@keyframes ag-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+:where(html[data-zone="jingo"]) .ag-panel {
+  background: var(--jg-paper);
+  border: var(--jg-line);
+  border-radius: var(--jg-radius);
+  box-shadow: var(--jg-shadow);
+  padding: clamp(20px, 5vw, 40px);
+}
+:where(html[data-zone="jingo"]) .ag-panel--accent {
+  background: var(--ag-accent);
+  color: var(--ag-on-accent);
+}
+
+:where(html[data-zone="jingo"]) .ag-display {
+  font-size: clamp(2rem, 7.5vw, 3.6rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+:where(html[data-zone="jingo"]) .ag-sub {
+  margin-top: 12px;
+  font-size: clamp(1rem, 2.4vw, 1.15rem);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+:where(html[data-zone="jingo"]) .ag-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* Score / status readouts. */
+:where(html[data-zone="jingo"]) .ag-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+:where(html[data-zone="jingo"]) .ag-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 2px solid var(--jg-ink);
+  border-radius: 999px;
+  background: var(--jg-paper);
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+:where(html[data-zone="jingo"]) .ag-chip b {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+:where(html[data-zone="jingo"]) .ag-chip-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--jg-ink-soft);
+}
+
+/* Big stat on result screens. */
+:where(html[data-zone="jingo"]) .ag-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+:where(html[data-zone="jingo"]) .ag-stat {
+  padding: 12px 14px;
+  border: 2px solid var(--jg-ink);
+  border-radius: 18px;
+  background: var(--jg-white);
+  color: var(--jg-ink);
+}
+:where(html[data-zone="jingo"]) .ag-stat dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--jg-ink-soft);
+}
+:where(html[data-zone="jingo"]) .ag-stat dd {
+  margin: 4px 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+:where(html[data-zone="jingo"]) .ag-new {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 2px solid var(--jg-ink);
+  border-radius: 999px;
+  background: var(--jg-sun);
+  font-weight: 700;
+  font-size: 0.85rem;
+  rotate: -2deg;
+}
+
+/* Visually hidden, still announced (live regions, labels). */
+:where(html[data-zone="jingo"]) .ag-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:where(html[data-zone="jingo"]) .ag-noscript {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 2.5px solid var(--jg-ink);
+  border-radius: 18px;
+  background: var(--jg-sun);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html[data-zone="jingo"]) .ag-screen {
+    animation: none;
+  }
+  :where(html[data-zone="jingo"]) .ag-back {
+    transition: none;
+  }
+}

@@ -57,7 +57,13 @@ export default function motionPreload() {
         let n = 0;
         for (const file of htmlFiles(root)) {
           const html = readFileSync(file, "utf8");
-          if (!html.includes("</head>") || html.includes('http-equiv="refresh"')) continue;
+          // Skip redirect stubs and pages that opt out of the motion bundle
+          // (JingoLayout motion={false} → <html data-motion="off">, e.g. games).
+          if (
+            !html.includes("</head>") ||
+            html.includes('http-equiv="refresh"') ||
+            html.includes('data-motion="off"')
+          ) continue;
           writeFileSync(file, html.replace("</head>", `${tags}</head>`));
           n++;
         }

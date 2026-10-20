@@ -1,0 +1,363 @@
+---
+// /jingo/arcade/counter — "Counter Rush". Customers ask for a Jingo product by
+// name; tap the right pack on the shelf before their patience runs out.
+// Products (names, tints, pack renders) come from jingo-products.ts and the
+// customers are the crew from jingo-mascots.ts. Rules / ramp / lookalikes live
+// in src/scripts/arcade/counter-logic.ts.
+import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../components/arcade/ShareResult.astro";
+import { products, packImage } from "../../../lib/jingo";
+import { mascots } from "../../../data/jingo-mascots";
+import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+import { SHIFT, LIVES } from "../../../scripts/arcade/counter-logic";
+
+const shelfProducts = await Promise.all(
+  products
+    .filter((p) => packImage(p.id))
+    .map(async (p) => ({
+      id: p.id,
+      name: p.name,
+      flavour: p.flavour,
+      categoryId: p.categoryId,
+      tint: p.tint,
+      img: await packSrc(p.id, 200, 70),
+    })),
+);
+const customers = await Promise.all(
+  mascots.map(async (m) => ({ id: m.id, label: m.label, color: m.color, img: await mascotSrc(m.image, 180, 72) })),
+);
+const url = gameUrl(Astro.site, "counter");
+const data = { products: shelfProducts, customers, url };
+---
+
+<ArcadeGameLayout
+  slug="counter"
+  title="Counter Rush — Jingo Arcade Speed Game"
+  description="Serve the queue at the Jingo counter: customers ask for flavours by name, you grab the right pack before they lose patience. Watch out for lookalikes."
+>
+  <div class="ct" data-counter>
+    <!-- Intro -->
+    <section class="ag-screen ag-panel ag-panel--accent" data-screen="intro" aria-labelledby="ct-intro-h">
+      <h2 id="ct-intro-h" class="ag-display">You&rsquo;re on the counter.</h2>
+      <p class="ag-sub">
+        Customers ask for a Jingo flavour by name. Tap the right pack before
+        their patience runs out. Serve {SHIFT} to finish your shift &mdash; you
+        have {LIVES} lives.
+      </p>
+      <ul class="ct-rules" role="list">
+        <li><b>Right pack:</b> points, and a combo for every streak.</li>
+        <li><b>Wrong pack:</b> their patience drops fast.</li>
+        <li><b>Too slow:</b> they walk out and you lose a life.</li>
+      </ul>
+      <p class="ct-best" data-intro-best></p>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn" data-start>
+          Open the counter <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Play -->
+    <section class="ag-screen ct-play" data-screen="play" hidden aria-label="Counter">
+      <div class="ct-hud">
+        <span class="ag-chip"><span class="ag-chip-label">Score</span> <b data-hud-score>0</b></span>
+        <span class="ag-chip ct-combo" data-hud-combo-chip><span class="ag-chip-label">Combo</span> <b data-hud-combo>×1</b></span>
+        <span class="ag-chip"><span class="ag-chip-label">Served</span> <b data-hud-served>0/{SHIFT}</b></span>
+        <span class="ag-chip ct-lives" role="img" aria-label={`Lives: ${LIVES}`} data-hud-lives-chip>
+          <span class="ag-chip-label">Lives</span>
+          <span class="ct-hearts" data-hud-lives aria-hidden="true"></span>
+        </span>
+      </div>
+
+      <div class="ct-customer" data-customer>
+        <img class="ct-avatar" data-avatar alt="" width="180" height="220" decoding="async" />
+        <div class="ct-bubble">
+          <p class="ct-request" data-request aria-live="assertive"></p>
+          <div class="ct-patience" aria-hidden="true">
+            <span class="ct-patience-fill" data-patience></span>
+          </div>
+          <p class="ct-level" data-level>Level 1</p>
+        </div>
+      </div>
+
+      <div class="ct-shelf" data-shelf role="group" aria-label="Shelf"></div>
+    </section>
+
+    <!-- End -->
+    <section class="ag-screen ag-panel ct-end" data-screen="end" hidden aria-labelledby="ct-end-h">
+      <p class="ct-kicker" data-end-kicker>Shift over</p>
+      <h2 id="ct-end-h" class="ag-display" tabindex="-1" data-end-title>Counter closed.</h2>
+      <p class="ag-new" data-end-new hidden>New best!</p>
+      <dl class="ag-stats">
+        <div class="ag-stat"><dt>Served</dt><dd data-end-served>0</dd></div>
+        <div class="ag-stat"><dt>Score</dt><dd data-end-score>0</dd></div>
+        <div class="ag-stat"><dt>Best combo</dt><dd data-end-combo>×1</dd></div>
+        <div class="ag-stat"><dt>Best score</dt><dd data-end-best>0</dd></div>
+      </dl>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn" data-again>Play again</button>
+      </div>
+      <ShareResult message="I'm working the Jingo counter in Counter Rush. Think you're faster?" url={url} />
+    </section>
+
+    <p class="ag-sr" aria-live="polite" data-live></p>
+  </div>
+
+  <script is:inline type="application/json" id="counter-data" set:html={jsonForScript(data)} />
+</ArcadeGameLayout>
+
+<script>
+  import { initCounter } from "../../../scripts/arcade/counter";
+  initCounter();
+</script>
+
+<style>
+  .ct {
+    max-width: 720px;
+    margin-inline: auto;
+    scroll-margin-top: calc(var(--jg-header-h) + 8px);
+  }
+  .ct-rules {
+    display: grid;
+    gap: 6px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .ct-best,
+  .ct-kicker {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ct-best:empty {
+    display: none;
+  }
+
+  /* HUD */
+  .ct-hud {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .ct-hud .ag-chip {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-height: 48px;
+    padding: 4px 6px;
+    border-radius: 16px;
+    text-align: center;
+  }
+  .ct-hud .ag-chip-label {
+    font-size: 0.62rem;
+  }
+  .ct-combo.is-hot {
+    background: var(--jg-sun);
+  }
+  .ct-hearts {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--jg-red);
+    line-height: 1.2;
+  }
+  .ct-hearts :global(.off) {
+    color: color-mix(in srgb, var(--jg-ink) 22%, transparent);
+  }
+
+  /* Customer */
+  .ct-customer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 22px;
+    background: var(--c-color, var(--jg-paper));
+    background: color-mix(in srgb, var(--c-color, var(--jg-sun)) 30%, var(--jg-paper));
+    box-shadow: 0 4px 0 var(--jg-ink);
+  }
+  .ct-avatar {
+    flex: none;
+    width: clamp(56px, 10svh, 80px);
+    height: auto;
+  }
+  .ct-customer.is-new .ct-avatar {
+    animation: ct-arrive 0.35s var(--jg-ease) both;
+  }
+  .ct-customer.is-happy .ct-avatar {
+    animation: ct-hop 0.4s var(--jg-ease);
+  }
+  .ct-customer.is-cross .ct-avatar {
+    animation: ct-shake 0.35s linear;
+  }
+  @keyframes ct-arrive {
+    from {
+      transform: translateX(-30px) rotate(-10deg);
+      opacity: 0;
+    }
+  }
+  @keyframes ct-hop {
+    40% {
+      transform: translateY(-10px) rotate(6deg);
+    }
+  }
+  @keyframes ct-shake {
+    20%,
+    60% {
+      transform: translateX(-5px) rotate(-4deg);
+    }
+    40%,
+    80% {
+      transform: translateX(5px) rotate(4deg);
+    }
+  }
+  .ct-bubble {
+    flex: 1;
+    min-width: 0;
+  }
+  .ct-request {
+    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    min-height: 2.3em;
+    display: flex;
+    align-items: center;
+  }
+  .ct-patience {
+    height: 14px;
+    margin-top: 8px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    overflow: hidden;
+  }
+  .ct-patience-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: #3fbf6a;
+    transform-origin: left center;
+    will-change: transform;
+  }
+  .ct-patience-fill.is-low {
+    background: var(--jg-red);
+  }
+  .ct-patience-fill.is-mid {
+    background: var(--jg-sun);
+  }
+  .ct-level {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--jg-ink-soft);
+  }
+
+  /* Shelf — thumb zone, 2–3 columns, generous tiles. */
+  .ct-shelf {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 22px;
+    background: #f3dcc0;
+  }
+  .ct-shelf[data-size="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 640px) {
+    .ct-shelf[data-size="4"] {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .ct-shelf[data-size="9"] {
+      gap: 10px;
+    }
+  }
+  .ct-shelf :global(.ct-pack) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 44px;
+    padding: 8px 6px 6px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 16px;
+    background: var(--tint, var(--jg-paper));
+    box-shadow: 0 3px 0 var(--jg-ink);
+    color: var(--jg-ink);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.15s var(--jg-ease),
+      box-shadow 0.15s var(--jg-ease);
+  }
+  .ct-shelf :global(.ct-pack:active) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  .ct-shelf :global(.ct-pack:focus-visible) {
+    border-radius: 16px;
+  }
+  .ct-shelf :global(.ct-pack img) {
+    width: 100%;
+    max-width: 92px;
+    aspect-ratio: 3 / 4;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+  }
+  .ct-shelf[data-size="4"] :global(.ct-pack img) {
+    max-width: 110px;
+  }
+  /* Full 3×3 shelf: smaller art so all three rows fit a phone screen. */
+  .ct-shelf[data-size="9"] :global(.ct-pack img) {
+    width: auto;
+    height: clamp(56px, 10.5svh, 96px);
+  }
+  .ct-shelf :global(.ct-pack-name) {
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+  }
+  .ct-shelf :global(.ct-pack.is-right) {
+    background: #8fe3a8;
+    transform: translateY(-3px);
+  }
+  .ct-shelf :global(.ct-pack.is-wrong) {
+    background: #ffb3b3;
+    animation: ct-shake 0.35s linear;
+  }
+  .ct-shelf.is-locked {
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-customer.is-new .ct-avatar,
+    .ct-customer.is-happy .ct-avatar,
+    .ct-customer.is-cross .ct-avatar,
+    .ct-shelf :global(.ct-pack.is-wrong) {
+      animation: none;
+    }
+    .ct-shelf :global(.ct-pack) {
+      transition: none;
+    }
+    .ct-shelf :global(.ct-pack.is-right) {
+      transform: none;
+    }
+  }
+</style>

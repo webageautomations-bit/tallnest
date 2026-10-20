@@ -139,6 +139,12 @@ const total = String(crew.length).padStart(2, "0");
           <WhatsAppCTA theme="jingo" />
         </div>
       </div>
+      <a href="/jingo/arcade" class="arcade-card jg-sticker" data-reveal>
+        <span class="arcade-kicker">Jingo Arcade</span>
+        <span class="arcade-title">Play with the crew</span>
+        <span class="arcade-sub">Quick games starring the Jingo characters &mdash; made for your phone.</span>
+        <span class="arcade-go" aria-hidden="true">&rarr;</span>
+      </a>
     </div>
   </section>
 
@@ -427,6 +433,67 @@ const total = String(crew.length).padStart(2, "0");
     margin-top: 22px;
   }
 
+  /* Arcade link — a sticker card under the close band. */
+  .arcade-card {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    margin-top: 20px;
+    padding: 20px 76px 20px 22px;
+    background: var(--jg-sun);
+    color: var(--jg-ink);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.25s var(--jg-ease),
+      box-shadow 0.25s var(--jg-ease);
+  }
+  .arcade-kicker {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .arcade-title {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .arcade-sub {
+    color: var(--jg-ink-soft);
+  }
+  .arcade-go {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-top: -23px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-red);
+    color: var(--jg-white);
+    font-size: 1.3rem;
+    font-weight: 700;
+    transition: transform 0.25s var(--jg-ease);
+  }
+  .arcade-card:active {
+    transform: translateY(3px);
+    box-shadow: var(--jg-shadow-press);
+  }
+  @media (hover: hover) {
+    .arcade-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--jg-shadow-lift);
+    }
+    .arcade-card:hover .arcade-go {
+      transform: translateX(4px);
+    }
+  }
+
   /* --- Reduced motion: static crew -------------------------------------- */
   @media (prefers-reduced-motion: reduce) {
     .bob,
@@ -437,7 +504,9 @@ const total = String(crew.length).padStart(2, "0");
       transform: none;
     }
     .figure,
-    .chip {
+    .chip,
+    .arcade-card,
+    .arcade-go {
       transition: none;
     }
     .m-card:hover .figure,

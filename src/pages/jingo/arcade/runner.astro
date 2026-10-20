@@ -1,0 +1,315 @@
+---
+// /jingo/arcade/runner — "Mascot Runner": a light, vanilla-Canvas endless
+// runner. Pick one of the crew (jingo-mascots.ts); the run is themed with
+// that mascot's colour. Collect Jingo packs (jingo-products.ts renders) and
+// jump the crates. Controls: tap / click / Space / ↑ to jump, again in
+// mid-air to DOUBLE-JUMP.
+// Reduced motion: a clear notice and a static "not suitable" state first;
+// the visitor can still opt in.
+import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../components/arcade/ShareResult.astro";
+import { mascots } from "../../../data/jingo-mascots";
+import { games } from "../../../data/jingo-arcade";
+import { products, packImage } from "../../../lib/jingo";
+import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+
+const crew = await Promise.all(
+  mascots.map(async (m) => ({
+    id: m.id,
+    label: m.label,
+    color: m.color,
+    textOn: m.textOn,
+    img: await mascotSrc(m.image, 200, 75),
+  })),
+);
+// Pack pickups: every render is available, but a run only loads a handful.
+const packs = await Promise.all(
+  products.filter((p) => packImage(p.id)).map(async (p) => ({ id: p.id, img: await packSrc(p.id, 96, 70) })),
+);
+// Calmer alternatives offered under reduced motion (live, non-runner games).
+const calmer = games.filter((g) => g.status === "live" && (g.slug === "quiz" || g.slug === "match"));
+const url = gameUrl(Astro.site, "runner");
+const data = { crew, packs, url };
+---
+
+<ArcadeGameLayout
+  slug="runner"
+  title="Mascot Runner — Jingo Arcade Endless Runner"
+  description="Pick a Jingo candy character and run: jump the crates, grab the Jingo packs, and see how far you get. A free endless runner made for your phone."
+>
+  <div class="rn" data-runner>
+    <!-- Reduced-motion notice (shown instead of the game when the device asks for less motion) -->
+    <section class="ag-screen ag-panel rn-rm" data-screen="rm" hidden aria-labelledby="rn-rm-h">
+      <p class="rn-kicker">Heads up</p>
+      <h2 id="rn-rm-h" class="rn-rm-h">This one moves a lot.</h2>
+      <p class="ag-sub">
+        Mascot Runner is a fast game with a screen that scrolls the whole time.
+        Your device is set to reduce motion, so we&rsquo;ve kept it switched off.
+      </p>
+      {
+        calmer.length > 0 && (
+          <>
+            <p class="rn-kicker rn-kicker--gap">Calmer games</p>
+            <div class="ag-actions">
+              {calmer.map((g) => (
+                <a href={`/jingo/arcade/${g.slug}`} class="jg-btn jg-btn--sun">
+                  {g.name}
+                </a>
+              ))}
+            </div>
+          </>
+        )
+      }
+      <button type="button" class="rn-optin" data-optin>I understand &mdash; show the runner anyway</button>
+    </section>
+
+    <!-- Character select -->
+    <section class="ag-screen ag-panel ag-panel--accent rn-select" data-screen="select" hidden aria-labelledby="rn-select-h">
+      <h2 id="rn-select-h" class="ag-display">Pick your runner.</h2>
+      <p class="ag-sub">
+        Tap, click or press <kbd>Space</kbd> to jump &mdash; tap again in mid-air
+        to <b>double-jump</b>. Grab packs, dodge crates.
+      </p>
+      <div class="rn-crew" role="radiogroup" aria-label="Characters">
+        {
+          crew.map((m, i) => (
+            <button
+              type="button"
+              role="radio"
+              class="rn-pick"
+              data-pick={m.id}
+              aria-checked={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              style={`--m:${m.color}`}
+            >
+              <img src={m.img.src} width={m.img.w} height={m.img.h} alt="" loading="lazy" decoding="async" />
+              <span>{m.label}</span>
+            </button>
+          ))
+        }
+      </div>
+      <p class="rn-best" data-select-best></p>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn jg-btn--paper" data-go>
+          <span>Run as <span data-go-name>{crew[0].label}</span></span> <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Play -->
+    <section class="ag-screen rn-play" data-screen="play" hidden aria-label="Mascot Runner">
+      <div class="rn-stage" data-stage tabindex="0" aria-label="Game area. Tap, click or press Space to jump.">
+        <canvas class="rn-canvas" data-canvas width="600" height="400"></canvas>
+
+        <button type="button" class="rn-pause" data-pause aria-label="Pause">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1.5" fill="currentColor"/></svg>
+        </button>
+
+      </div>
+      <div class="rn-over ag-panel" data-over hidden>
+        <div class="rn-over-card">
+          <h2 id="rn-over-h" class="rn-over-h" tabindex="-1">Splat!</h2>
+          <p class="ag-new" data-over-new hidden>New best!</p>
+          <dl class="ag-stats">
+            <div class="ag-stat"><dt>Score</dt><dd data-over-score>0</dd></div>
+            <div class="ag-stat"><dt>Distance</dt><dd data-over-dist>0m</dd></div>
+            <div class="ag-stat"><dt>Packs</dt><dd data-over-packs>0</dd></div>
+            <div class="ag-stat"><dt>Best</dt><dd data-over-best>0</dd></div>
+          </dl>
+          <div class="ag-actions">
+            <button type="button" class="jg-btn" data-again>Run again</button>
+            <button type="button" class="jg-btn jg-btn--paper" data-change>Change runner</button>
+          </div>
+          <ShareResult message="I'm running in Mascot Runner in the Jingo Arcade. Beat it." url={url} />
+        </div>
+      </div>
+      <p class="rn-help">Tap anywhere on the game, click, or press <kbd>Space</kbd> / <kbd>&uarr;</kbd> to jump. Tap again in mid-air to double-jump.</p>
+    </section>
+
+    <p class="ag-sr" aria-live="polite" data-live></p>
+  </div>
+
+  <script is:inline type="application/json" id="runner-data" set:html={jsonForScript(data)} />
+</ArcadeGameLayout>
+
+<script>
+  import { initRunner } from "../../../scripts/arcade/runner";
+  initRunner();
+</script>
+
+<style>
+  .rn {
+    max-width: 900px;
+    margin-inline: auto;
+    scroll-margin-top: calc(var(--jg-header-h) + 8px);
+  }
+  .rn kbd {
+    padding: 1px 7px;
+    border: 2px solid currentColor;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.9em;
+  }
+  .rn-kicker,
+  .rn-best {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .rn-kicker--gap {
+    margin-top: 22px;
+  }
+  .rn-best {
+    margin-top: 16px;
+  }
+  .rn-best:empty {
+    display: none;
+  }
+
+  /* Reduced-motion notice */
+  .rn-rm-h {
+    margin-top: 8px;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .rn-optin {
+    min-height: 44px;
+    margin-top: 20px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--jg-ink);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  /* Character select — 3×3 */
+  .rn-crew {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .rn-pick {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-height: 44px;
+    padding: 10px 6px 8px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--m) 26%, var(--jg-paper));
+    box-shadow: 0 3px 0 var(--jg-ink);
+    color: var(--jg-ink);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.2s var(--jg-ease),
+      box-shadow 0.2s var(--jg-ease);
+  }
+  .rn-pick img {
+    width: auto;
+    height: clamp(58px, 16vw, 96px);
+  }
+  .rn-pick[aria-checked="true"] {
+    background: var(--m);
+    box-shadow: 0 0 0 3px var(--jg-paper), 0 0 0 6px var(--jg-ink);
+    transform: translateY(-2px);
+  }
+  .rn-pick[aria-checked="true"] span {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--jg-paper);
+  }
+  .rn-pick:focus-visible {
+    border-radius: 18px;
+  }
+
+  /* Stage */
+  .rn-stage {
+    position: relative;
+    border: 3px solid var(--jg-ink);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 6px 0 var(--jg-ink);
+    background: var(--jg-paper);
+    touch-action: none; /* taps go straight to the game — no scroll/zoom delay */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rn-stage:focus-visible {
+    outline: 3px solid var(--jg-ink);
+    outline-offset: 3px;
+    border-radius: 22px;
+  }
+  .rn-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 600 / 400;
+  }
+  .rn-pause {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    color: var(--jg-ink);
+    cursor: pointer;
+  }
+  /* Game over — a card under the (frozen) canvas: on phones the canvas is
+     only ~220px tall, too small to hold it as an overlay. */
+  .rn-over {
+    margin-top: 14px;
+    padding: clamp(16px, 4vw, 28px);
+  }
+  .rn-over-h {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    outline: none;
+  }
+  .rn-over .ag-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 560px) {
+    .rn-over .ag-stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .rn-help {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: var(--jg-ink-soft);
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rn-pick {
+      transition: none;
+    }
+    .rn-pick[aria-checked="true"] {
+      transform: none;
+    }
+  }
+</style>
