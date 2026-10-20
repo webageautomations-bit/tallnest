@@ -4,6 +4,7 @@
 import { Image } from "astro:assets";
 import carton from "../../assets/jingo/jingo-carton.jpg";
 import { categories, products, priceRange } from "../../lib/jingo";
+import WhatsAppCTA from "../WhatsAppCTA.astro";
 
 const { min } = priceRange();
 ---
@@ -22,7 +23,10 @@ const { min } = priceRange();
           poppiest candy in Pakistan on your counter.
         </p>
         <div data-reveal class="ctas">
-          <a href="/partners" class="jg-btn jg-btn--sun">
+          <!-- Primary: WhatsApp distributor inquiry. /partners stays as the
+               secondary (form) route. -->
+          <WhatsAppCTA theme="jingo" />
+          <a href="/partners" class="jg-btn jg-btn--paper">
             Become a stockist <span class="jg-arrow" aria-hidden="true">&rarr;</span>
           </a>
           <a href="/contact" class="ghost">Talk to us</a>

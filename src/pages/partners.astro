@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import WhatsAppCTA from "../components/WhatsAppCTA.astro";
 
 const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_KEY";
 
@@ -76,8 +77,8 @@ const pfInput = "pf-input";
 ---
 
 <BaseLayout
-  title="Partner with Tall Nest — Distributors & Retail"
-  description="Stock Tall Nest brands. Pocket-money pricing, a full fast-moving range, reliable supply, and national distribution. Become a distributor or retail partner."
+  title="Become a Jingo Distributor in Pakistan | Tall Nest Group"
+  description="Distribute Jingo confectionery in your area: 7 categories, 35+ fast-moving products at Rs. 5–50. Apply to become a Tall Nest Group distributor."
 >
   <!-- Intro -->
   <section class="section-y bg-white">
@@ -284,6 +285,12 @@ const pfInput = "pf-input";
       >
         Tell us about your business.
       </h2>
+
+      <!-- Quickest route: WhatsApp (alongside the form, not replacing it). -->
+      <div data-reveal class="wa-row">
+        <WhatsAppCTA theme="corporate" />
+        <p class="wa-note">Quickest reply on WhatsApp &mdash; or use the form below.</p>
+      </div>
 
       <form
         id="partner-form"
@@ -841,6 +848,18 @@ const pfInput = "pf-input";
     .faq-icon::after {
       transition: none;
     }
+  }
+
+  .wa-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    margin: 28px 0 8px;
+  }
+  .wa-note {
+    font-size: 0.92rem;
+    color: var(--color-gray);
   }
 </style>
 

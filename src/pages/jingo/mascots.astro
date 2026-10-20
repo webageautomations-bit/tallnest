@@ -1,7 +1,8 @@
 ---
-// /jingo/mascots — "Meet the crew": Jingo's flavour mascots. Characters come
-// from src/data/jingo-mascots.ts; their products (chips) resolve against
-// src/data/jingo-products.ts. Renders: src/assets/jingo/mascots/<image>.png.
+// /jingo/mascots — "Meet the crew": the 9 candy mascots, one per Jingo candy.
+// Characters come from src/data/jingo-mascots.ts; each one's candy (chip)
+// resolves against src/data/jingo-products.ts.
+// Renders: src/assets/jingo/mascots/<image>.png.
 //
 // Motion layering (so GSAP reveals never fight CSS transforms):
 //   .stage [data-reveal]  → GSAP entrance (inline transform)
@@ -11,6 +12,7 @@
 import { Image } from "astro:assets";
 import JingoLayout from "../../layouts/JingoLayout.astro";
 import JingoStockCTA from "../../components/jingo/JingoStockCTA.astro";
+import WhatsAppCTA from "../../components/WhatsAppCTA.astro";
 import { mascots } from "../../data/jingo-mascots";
 import {
   products,
@@ -22,17 +24,14 @@ import {
 } from "../../lib/jingo";
 
 const crew = mascots.map((m, i) => {
-  const related = m.relatedProductIds
-    .map((id) => productById(id))
-    .filter((p): p is NonNullable<typeof p> => !!p)
-    .map((p) => {
-      const cat = categoryById(p.categoryId);
-      return { ...p, shelf: cat ? shelfLabel(cat) : "", textColor: textOnColor(p) };
-    });
+  // Exactly one candy per mascot (enforced in jingo-mascots.ts).
+  const p = productById(m.relatedProductIds[0])!;
+  const cat = categoryById(p.categoryId);
+  const candy = { ...p, shelf: cat ? shelfLabel(cat) : "", textColor: textOnColor(p) };
   return {
     ...m,
     img: mascotImage(m.image),
-    related,
+    candy,
     // Number badge sits on the mascot's own colour → its contrast-derived textOn.
     badgeText: m.textOn === "light" ? "var(--jg-white)" : "var(--jg-ink)",
     num: String(i + 1).padStart(2, "0"),
@@ -44,46 +43,22 @@ const total = String(crew.length).padStart(2, "0");
 ---
 
 <JingoLayout
-  title="Mascots — Meet the Jingo crew"
-  description="Meet the Jingo crew — the flavour characters behind Jingo's candies, lollipops, bubblegums and more."
+  title="Jingo Mascots — Meet the 9 Candy Characters"
+  description="Meet the Jingo crew: nine characters, one for each Jingo candy — Cola, Raw Mango, Orange, Chilli, Masala, Mint, Khatti Meethi, Imli and Falsa."
 >
   <!-- Hero ---------------------------------------------------------------->
   <section class="hero" aria-labelledby="crew-h1">
     <div class="hero-panel">
       <div class="hero-copy">
-        <p data-reveal class="jg-eyebrow eb-paper">{crew.length} flavour characters</p>
+        <p data-reveal class="jg-eyebrow eb-paper">{crew.length} candy characters</p>
         <h1 id="crew-h1" data-reveal-heading data-reveal-now class="h1 text-balance">
           Meet the <span class="hl">crew.</span>
         </h1>
         <p data-reveal class="lede">
-          The characters behind the flavours &mdash; one for every big taste in
-          the Jingo range. Say hi, then go find their packs.
+          The characters behind our {crew.length} candy flavours &mdash; say hi,
+          then go find their packs.
         </p>
       </div>
-
-      <ul class="lineup" aria-label="Jump to a character">
-        {
-          crew.map((m) => (
-            <li>
-              <a href={`#${m.id}`} class="crew-link" style={`--c:${m.color}`}>
-                <span class="bob" style={m.bob}>
-                  {m.img && (
-                    <Image
-                      src={m.img}
-                      alt=""
-                      widths={[120, 200, 280]}
-                      sizes="(min-width: 960px) 120px, (min-width: 720px) 10vw, 28vw"
-                      loading="eager"
-                      class="crew-img"
-                    />
-                  )}
-                </span>
-                <span class="crew-name">{m.label}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
     </div>
   </section>
 
@@ -126,23 +101,18 @@ const total = String(crew.length).padStart(2, "0");
                 <h2 id={`${m.id}-h`} data-reveal-heading class="name text-balance">
                   {m.label}
                 </h2>
-                <p data-reveal class="stars">
-                  Stars in {m.related.length} Jingo flavour{m.related.length === 1 ? "" : "s"}
-                </p>
-                <ul data-reveal class="chips">
-                  {m.related.map((p) => (
-                    <li>
-                      <a
-                        href={`/jingo/flavours#${p.categoryId}`}
-                        class="chip"
-                        style={`--pc:${p.color};--pt:${p.textColor}`}
-                      >
-                        {p.name}
-                        <span class="chip-shelf">{p.shelf}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+                <p data-reveal class="stars">The face of</p>
+                <div data-reveal class="candy">
+                  <a
+                    href={`/jingo/flavours#${m.candy.categoryId}`}
+                    class="chip"
+                    style={`--pc:${m.candy.color};--pt:${m.candy.textColor}`}
+                  >
+                    {m.candy.name}
+                    <span class="chip-shelf">{m.candy.shelf}</span>
+                  </a>
+                  <p class="candy-meta">{m.candy.flavour} &middot; {m.candy.price}</p>
+                </div>
               </div>
             </article>
           </div>
@@ -161,9 +131,12 @@ const total = String(crew.length).padStart(2, "0");
         <p data-reveal class="close-sub">
           Taste the whole crew &mdash; all {products.length} Jingo flavours in one place.
         </p>
-        <a data-reveal href="/jingo/flavours" class="jg-btn jg-btn--sun close-btn">
-          See all {products.length} flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
-        </a>
+        <div data-reveal class="close-ctas">
+          <a href="/jingo/flavours" class="jg-btn jg-btn--sun">
+            See all {products.length} flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+          <WhatsAppCTA theme="jingo" />
+        </div>
       </div>
     </div>
   </section>
@@ -179,7 +152,7 @@ const total = String(crew.length).padStart(2, "0");
   .hero-panel {
     position: relative;
     overflow: hidden;
-    padding: clamp(40px, 7vw, 76px) clamp(18px, 5vw, 56px) clamp(24px, 4vw, 40px);
+    padding: clamp(44px, 8vw, 88px) clamp(18px, 5vw, 56px);
     background-color: var(--jg-bubble);
     background-image: radial-gradient(rgba(255, 255, 255, 0.45) 2px, transparent 2.5px);
     background-size: 26px 26px;
@@ -187,10 +160,8 @@ const total = String(crew.length).padStart(2, "0");
     border-radius: var(--jg-radius-lg);
     box-shadow: 0 8px 0 var(--jg-ink);
   }
-  /* Keep hero content within the standard content width (as .jg-wrap), so
-     the lineup never runs into the right-edge social rail on wide screens. */
-  .hero-copy,
-  .lineup {
+  /* Keep hero content within the standard content width (as .jg-wrap). */
+  .hero-copy {
     max-width: 1160px;
     margin-inline: auto;
   }
@@ -220,68 +191,6 @@ const total = String(crew.length).padStart(2, "0");
     font-size: clamp(1.02rem, 2.2vw, 1.2rem);
     line-height: 1.5;
     color: var(--jg-ink);
-  }
-
-  .lineup {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 8px;
-    margin: clamp(26px, 5vw, 44px) 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  @media (min-width: 720px) {
-    .lineup {
-      grid-template-columns: repeat(9, minmax(0, 1fr));
-      gap: 6px;
-    }
-  }
-  .crew-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    min-height: 44px;
-    padding: 6px 2px 8px;
-    border-radius: 18px;
-    color: var(--jg-ink);
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.3s var(--jg-ease), background-color 0.2s ease;
-  }
-  .crew-link :global(.crew-img) {
-    display: block;
-    width: 100%;
-    max-width: 120px;
-    height: auto;
-    aspect-ratio: 9 / 11;
-    object-fit: contain;
-    filter: drop-shadow(0 6px 0 rgba(36, 18, 26, 0.18));
-  }
-  .crew-link .bob {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-  }
-  .crew-name {
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    text-align: center;
-    line-height: 1.1;
-  }
-  @media (hover: hover) {
-    .crew-link:hover {
-      transform: translateY(-6px) rotate(-4deg);
-      background: color-mix(in srgb, var(--c) 22%, transparent);
-    }
-    .lineup li:nth-child(even) .crew-link:hover {
-      transform: translateY(-6px) rotate(4deg);
-    }
-  }
-  .crew-link:active {
-    transform: scale(0.94);
   }
 
   /* --- Idle float (shared) ---------------------------------------------- */
@@ -428,13 +337,18 @@ const total = String(crew.length).padStart(2, "0");
     text-transform: uppercase;
     color: var(--jg-ink-soft);
   }
-  .chips {
+  /* The one candy this character fronts: chip (its pack colour) + details. */
+  .candy {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 10px;
-    margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
+    margin-top: 12px;
+  }
+  .candy-meta {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--jg-ink-soft);
   }
   .chip {
     display: inline-flex;
@@ -504,7 +418,11 @@ const total = String(crew.length).padStart(2, "0");
     line-height: 1.5;
     color: var(--jg-ink);
   }
-  .close-btn {
+  .close-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
     margin-top: 22px;
   }
 
@@ -518,14 +436,11 @@ const total = String(crew.length).padStart(2, "0");
       transform: none;
     }
     .figure,
-    .crew-link,
     .chip {
       transition: none;
     }
     .m-card:hover .figure,
-    .m-card.flip:hover .figure,
-    .crew-link:hover,
-    .lineup li:nth-child(even) .crew-link:hover {
+    .m-card.flip:hover .figure {
       transform: none;
     }
   }

@@ -1,0 +1,209 @@
+---
+// Floating WhatsApp button (both zones) — distributor inquiries.
+// Fixed bottom-right. On hover-capable desktops a "Distributor inquiry" label
+// slides out (a white pill: white text on WhatsApp green would fail contrast).
+// A small script lifts it just enough to clear any footer text it would cover
+// at the bottom of the page, then drops it back. Reduced motion: no pulse, no
+// easing on the lift.
+import { WHATSAPP_DISTRIBUTOR, whatsappGlyph } from "../data/contact";
+---
+
+<a
+  href={WHATSAPP_DISTRIBUTOR}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="fwa"
+  aria-label="Become a Jingo distributor on WhatsApp"
+  data-fwa
+>
+  <span class="fwa-label" aria-hidden="true">Distributor inquiry</span>
+  <span class="fwa-btn">
+    <span class="fwa-icon" set:html={whatsappGlyph} />
+  </span>
+</a>
+
+<style>
+  .fwa {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 48; /* above content + social rail (45); below headers (50) & menus */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transform: translateY(calc(var(--fwa-lift, 0px) * -1));
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  @media (min-width: 1024px) {
+    .fwa {
+      right: 24px;
+      bottom: 24px;
+    }
+  }
+  .fwa-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 10px 24px -8px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
+  }
+  .fwa-icon {
+    display: block;
+    width: 30px;
+    height: 30px;
+  }
+  /* Gentle attention pulse — three rings, then still. */
+  .fwa-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.55);
+    animation: fwa-pulse 2.4s ease-out 1.2s 3;
+    pointer-events: none;
+  }
+  @keyframes fwa-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.55);
+    }
+    80%,
+    100% {
+      box-shadow: 0 0 0 16px rgba(37, 211, 102, 0);
+    }
+  }
+
+  .fwa-label {
+    display: none;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: #fff;
+    color: #1e1b16;
+    font-family: "General Sans", Arial, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow:
+      0 0 0 1px rgba(30, 27, 22, 0.08),
+      0 10px 24px -10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateX(8px);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  /* Desktop with a real pointer: label slides out on hover / keyboard focus. */
+  @media (hover: hover) and (min-width: 1024px) {
+    .fwa-label {
+      display: block;
+    }
+    .fwa:hover .fwa-label,
+    .fwa:focus-visible .fwa-label {
+      opacity: 1;
+      transform: none;
+    }
+    .fwa:hover .fwa-btn {
+      transform: translateY(-2px);
+    }
+  }
+  .fwa:active .fwa-btn {
+    transform: scale(0.95);
+  }
+  .fwa:focus-visible {
+    outline: none;
+  }
+  .fwa:focus-visible .fwa-btn {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 5px #1e1b16,
+      0 10px 24px -8px rgba(0, 0, 0, 0.35);
+  }
+
+  @media print {
+    .fwa {
+      display: none !important;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fwa,
+    .fwa-btn,
+    .fwa-label {
+      transition: none;
+    }
+    .fwa-btn::after {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Keep the button clear of footer content: when the footer is on screen,
+  // lift the button just above any footer text / icon it would overlap.
+  const btn = document.querySelector<HTMLElement>("[data-fwa]");
+  const footer = document.querySelector<HTMLElement>("footer");
+  if (btn && footer) {
+    const MARGIN = 10;
+    const rectsOf = (root: HTMLElement): DOMRect[] => {
+      const out: DOMRect[] = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let n: Node | null;
+      while ((n = walker.nextNode())) {
+        if (!n.textContent?.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()) if (r.width && r.height) out.push(r);
+      }
+      root.querySelectorAll("img, svg, button, input").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width && r.height) out.push(r);
+      });
+      return out;
+    };
+
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const f = footer.getBoundingClientRect();
+      let lift = 0;
+      if (f.top < innerHeight) {
+        // Button box at its resting (un-lifted) position.
+        btn.style.setProperty("--fwa-lift", "0px");
+        const b = btn.querySelector(".fwa-btn")!.getBoundingClientRect();
+        let top = b.top;
+        let bottom = b.bottom;
+        const obstacles = rectsOf(footer);
+        for (let guard = 0; guard < 40; guard++) {
+          const hit = obstacles.find(
+            (r) =>
+              r.right > b.left - MARGIN &&
+              r.left < b.right + MARGIN &&
+              r.bottom > top - MARGIN &&
+              r.top < bottom + MARGIN,
+          );
+          if (!hit) break;
+          bottom = hit.top - MARGIN;
+          top = bottom - b.height;
+        }
+        lift = Math.max(0, b.bottom - bottom);
+      }
+      btn.style.setProperty("--fwa-lift", `${Math.round(lift)}px`);
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", onScroll, { passive: true });
+    addEventListener("load", update);
+    update();
+  }
+</script>

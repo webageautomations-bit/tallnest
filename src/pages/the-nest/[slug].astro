@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ORG_ID } from "../../lib/schema";
 import PostCard from "../../components/PostCard.astro";
 import {
   getSortedPosts,
@@ -35,35 +36,32 @@ const sameCat = all.filter(
 const related = (sameCat.length ? sameCat : all.filter((p) => p.id !== post.id)).slice(0, 3);
 
 const url = new URL(`/the-nest/${postSlug(post)}`, Astro.site).toString();
-const ogImage = new URL("/og-default.jpg", Astro.site).toString();
+// Share image: the post's cover photo when it has one, else the Tall Nest card.
+const ogPath = data.cover ?? "/og/tallnest-og.jpg";
+const ogImage = new URL(ogPath, Astro.site).toString();
 
 const articleSchema = {
-  "@context": "https://schema.org",
   "@type": "Article",
   headline: data.title,
   description: data.excerpt,
   datePublished: data.publishDate.toISOString(),
-  author: { "@type": "Organization", name: data.author },
+  author: data.author === "Tall Nest" ? { "@id": ORG_ID } : { "@type": "Person", name: data.author },
   image: ogImage,
-  publisher: {
-    "@type": "Organization",
-    name: "Tall Nest Food & Beverages",
-    logo: {
-      "@type": "ImageObject",
-      url: new URL("/tallnest-logo.png", Astro.site).toString(),
-    },
-  },
+  publisher: { "@id": ORG_ID },
   mainEntityOfPage: url,
 };
 ---
 
-<BaseLayout title={`${data.title} — The Nest`} description={data.excerpt}>
-  <script
-    slot="head"
-    is:inline
-    type="application/ld+json"
-    set:html={JSON.stringify(articleSchema)}
-  />
+<BaseLayout
+  title={`${data.title} | Tall Nest`}
+  description={data.excerpt}
+  image={ogPath}
+  imageWidth={data.cover ? undefined : 1200}
+  imageHeight={data.cover ? undefined : 630}
+  imageAlt={data.cover ? data.title : "Tall Nest Group — Food & Beverages"}
+  type="article"
+  jsonLd={articleSchema}
+>
 
   <div class="reading-progress" data-progress aria-hidden="true"></div>
 

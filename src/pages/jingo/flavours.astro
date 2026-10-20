@@ -29,8 +29,8 @@ const sections = categories.map((c, i) => ({
 ---
 
 <JingoLayout
-  title="Flavours — Jingo"
-  description="Every Jingo flavour — candies, toffees, Squizo liquid chocolates, Twist lollipops, Bublo bubblegums, Choco Chums and Mehfil nimkos."
+  title="All 35 Jingo Flavours — Candies, Toffees, Lollipops & More"
+  description="Browse all 35 Jingo flavours: candies, toffees, Squizo liquid chocolates, Twist lollipops, Bublo bubblegums, Choco Chums bunties and Mehfil nimkos — from Rs. 5."
 >
   <div class="wall">
     <!-- Intro ("All" in the jump bar) -->
@@ -45,9 +45,6 @@ const sections = categories.map((c, i) => ({
           {" "}{products.length} flavours, all at pocket-money prices from
           Rs.&nbsp;{min}.
         </p>
-        <ul class="palette" aria-hidden="true">
-          {products.map((p) => <li style={`background:${p.color}`} />)}
-        </ul>
       </div>
     </section>
 
@@ -123,20 +120,6 @@ const sections = categories.map((c, i) => ({
   }
   .lede {
     margin-top: 18px;
-  }
-  .palette {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 26px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  .palette li {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid var(--jg-ink);
   }
 
   .cat {

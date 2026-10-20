@@ -48,8 +48,8 @@
     position: relative;
     overflow: hidden;
     display: grid;
-    gap: 32px;
-    padding: clamp(28px, 6vw, 72px);
+    row-gap: clamp(32px, 5vw, 44px);
+    padding: clamp(32px, 7vw, 88px);
     background: var(--jg-sun);
     border-radius: var(--jg-radius-lg);
     box-shadow: 0 8px 0 var(--jg-ink);
@@ -66,13 +66,16 @@
     color: color-mix(in srgb, var(--jg-tangerine) 55%, transparent);
     pointer-events: none;
   }
-  @media (min-width: 960px) {
+  /* Desktop: text column (comfortable measure) | pill stack, centred
+     against the text. */
+  @media (min-width: 1024px) {
     .panel {
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 48px;
+      column-gap: clamp(48px, 6vw, 96px);
     }
   }
+
   .copy {
     position: relative;
     display: flex;
@@ -83,53 +86,58 @@
     background: var(--jg-paper);
   }
   .pull {
-    margin-top: 20px;
-    font-size: clamp(1.8rem, 4.6vw, 3rem);
+    margin-top: 24px;
+    max-width: 22ch;
+    font-size: clamp(1.8rem, 4.4vw, 2.9rem);
     font-weight: 700;
-    line-height: 1.04;
+    line-height: 1.06;
     letter-spacing: -0.035em;
     color: var(--jg-ink);
   }
+  /* Body: ~65ch measure, even rhythm between the three paragraphs. */
   .body {
-    margin-top: 18px;
-    max-width: 56ch;
-    font-size: clamp(1rem, 2vw, 1.12rem);
-    line-height: 1.6;
+    max-width: 65ch;
+    font-size: clamp(1.02rem, 1.6vw, 1.14rem);
+    line-height: 1.7;
     color: var(--jg-ink);
   }
+  .pull + .body {
+    margin-top: 28px;
+  }
+  .body + .body {
+    margin-top: 1.15em;
+  }
 
+  /* Pills — "what Jingo stands for": an equal-width stack on one shared
+     axis (under the text on mobile, beside it on desktop). */
   .chips {
     position: relative;
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    width: max-content;
+    justify-items: stretch;
+    gap: 16px;
   }
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     .chips {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      gap: 22px;
     }
   }
   .chip {
-    font-size: clamp(1.25rem, 3vw, 2rem);
+    font-size: clamp(1.2rem, 2.6vw, 1.75rem);
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1;
-    padding: 14px 22px;
+    text-align: center;
+    padding: 14px 24px;
     border: 2.5px solid var(--jg-ink);
     border-radius: 999px;
     box-shadow: 0 5px 0 var(--jg-ink);
     color: var(--jg-ink);
   }
-  .c1 { background: var(--jg-pink); rotate: -4deg; }
-  .c2 { background: var(--jg-sky); rotate: 3deg; }
+  .c1 { background: var(--jg-pink); rotate: -3deg; }
+  .c2 { background: var(--jg-sky); rotate: 2deg; }
   .c3 { background: var(--jg-lime); rotate: -2deg; }
-  @media (min-width: 960px) {
-    .c2 { margin-inline-start: 36px; }
-    .c3 { margin-inline-start: 12px; }
-  }
 </style>

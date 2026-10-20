@@ -54,6 +54,25 @@ for (const [path, mod] of Object.entries(packFiles)) {
 export const packImage = (id: string): ImageMetadata | undefined =>
   packById.get(id)?.img;
 
+// Mascot renders — src/assets/jingo/mascots/<image>.png, optimised by astro:assets.
+const mascotFiles = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/jingo/mascots/*.png",
+  { eager: true },
+);
+const mascotById = new Map(
+  Object.entries(mascotFiles).map(([path, mod]) => [
+    (path.split("/").pop() ?? "").replace(/\.png$/, ""),
+    mod.default,
+  ]),
+);
+
+/** Transparent mascot render for an image id, if present. */
+export const mascotImage = (id: string): ImageMetadata | undefined =>
+  mascotById.get(id);
+
+export const productById = (id: string): JingoProduct | undefined =>
+  products.find((p) => p.id === id);
+
 export const categoryById = (id: string): JingoCategory | undefined =>
   categories.find((c) => c.id === id);
 

@@ -4,6 +4,11 @@
 // and Esc built in). The JingoFooter repeats every link as a further fallback.
 import { Image } from "astro:assets";
 import logoRed from "../../assets/jingo/jingo-logo-red.png";
+// Parent brand: the deep-red Tall Nest logo reads on the cream header bar.
+import tallNestLogo from "../../assets/tallnest/tallnest-logo.png";
+
+const CATALOGUE = "/jingo-catalogue-2026.pdf";
+const downloadIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 20h14"/></svg>`;
 
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const onHub = path === "/jingo";
@@ -19,6 +24,7 @@ const links = [
 
 <header id="jingo-header" class="jh">
   <div class="jg-wrap jh-row">
+    <!-- Jingo — the zone's primary brand, far left. -->
     <a href="/jingo" class="jh-logo" aria-label="Jingo — home">
       <Image
         src={logoRed}
@@ -49,8 +55,26 @@ const links = [
     </nav>
 
     <div class="jh-end">
-      <a href="/" class="jh-back">
-        <span aria-hidden="true">&larr;</span> Tall Nest
+      <a
+        href={CATALOGUE}
+        download
+        class="jh-dl"
+        aria-label="Download Jingo catalogue (PDF)"
+      >
+        <span class="jh-dl-icon" set:html={downloadIcon} />
+        <span><span class="jh-dl-verb">Download </span>Catalogue</span>
+      </a>
+      <!-- "Part of Tall Nest" mark, pinned far right (desktop). On narrow
+           widths it lives in the mobile menu instead. -->
+      <span class="jh-divider" aria-hidden="true"></span>
+      <a href="/" class="jh-parent" aria-label="Tall Nest home">
+        <Image
+          src={tallNestLogo}
+          alt="Tall Nest"
+          width={160}
+          class="jh-parent-img"
+          loading="eager"
+        />
       </a>
       <button
         type="button"
@@ -99,8 +123,17 @@ const links = [
       ))
     }
   </ul>
-  <a href="/" class="jm-back">
-    <span aria-hidden="true">&larr;</span> Back to Tall Nest
+  <a
+    href={CATALOGUE}
+    download
+    class="jm-dl"
+    aria-label="Download Jingo catalogue (PDF)"
+  >
+    <span class="jh-dl-icon" set:html={downloadIcon} />
+    Download Catalogue
+  </a>
+  <a href="/" class="jm-parent" aria-label="Tall Nest home">
+    <Image src={tallNestLogo} alt="Tall Nest" width={160} class="jm-parent-img" loading="lazy" />
   </a>
 </div>
 
@@ -124,6 +157,35 @@ const links = [
     justify-content: space-between;
     gap: 16px;
     min-height: 68px;
+  }
+  /* "Part of Tall Nest" mark — far right on desktop (hidden on narrow widths,
+     where the mobile menu carries it). */
+  .jh-parent {
+    display: none;
+    align-items: center;
+    min-height: 44px; /* tap target */
+    padding-inline: 2px;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease, transform 0.25s var(--jg-ease);
+  }
+  .jh-parent-img {
+    height: 30px;
+    width: auto;
+  }
+  @media (hover: hover) {
+    .jh-parent:hover {
+      transform: translateY(-1px);
+      opacity: 0.85;
+    }
+  }
+  .jh-divider {
+    display: none;
+    width: 2px;
+    height: 30px;
+    margin-inline: 6px 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--jg-ink) 25%, transparent);
   }
   .jh-logo {
     display: inline-flex;
@@ -185,24 +247,51 @@ const links = [
   .jh-end {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
-  .jh-back {
-    display: inline-flex;
+  /* Download Catalogue — candy-pop red pill, compact so it doesn't out-shout
+     the nav. Desktop only in the bar; the mobile menu has a full-width one. */
+  .jh-dl {
+    display: none;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     min-height: 44px;
-    padding: 0 14px;
+    padding: 0 16px 0 13px;
+    border: 2.5px solid var(--jg-ink);
     border-radius: 999px;
-    font-size: 0.85rem;
+    background: var(--jg-red);
+    color: var(--jg-white);
+    box-shadow: 0 3px 0 var(--jg-ink);
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--jg-ink-soft);
+    white-space: nowrap;
     text-decoration: none;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.25s var(--jg-ease),
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
   }
-  .jh-back:hover {
-    color: var(--jg-ink);
-    background: color-mix(in srgb, var(--jg-ink) 7%, transparent);
+  .jh-dl-icon {
+    display: inline-flex;
+  }
+  @media (hover: hover) {
+    .jh-dl:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 var(--jg-ink);
+    }
+    .jh-dl:hover :global(svg) {
+      animation: jh-dl-nudge 0.6s var(--jg-ease);
+    }
+  }
+  .jh-dl:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  @keyframes jh-dl-nudge {
+    40% {
+      transform: translateY(3px);
+    }
   }
   .jh-menu-btn {
     display: inline-flex;
@@ -223,19 +312,21 @@ const links = [
     box-shadow: 0 1px 0 var(--jg-ink);
   }
 
-  /* Mobile: hide the small back link next to the menu below 420px (it lives
-     in the menu sheet too). */
-  @media (max-width: 419px) {
-    .jh-back {
-      display: none;
-    }
-  }
   @media (min-width: 900px) {
     .jh-nav {
       display: block;
     }
     .jh-menu-btn {
       display: none;
+    }
+    .jh-dl {
+      display: inline-flex;
+    }
+    .jh-divider {
+      display: block;
+    }
+    .jh-parent {
+      display: inline-flex;
     }
   }
 
@@ -306,22 +397,58 @@ const links = [
   .jm-link.is-current {
     box-shadow: inset 0 0 0 3px var(--jg-paper);
   }
-  .jm-back {
+  /* Menu: full-width download button + Tall Nest logo (back to parent). */
+  .jm-dl {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    margin-top: 14px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 20px;
+    background: var(--jg-red);
+    color: var(--jg-white);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jm-dl:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--jg-ink);
+  }
+  .jm-parent {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
     min-height: 48px;
-    margin-top: 12px;
-    padding: 0 8px;
-    font-weight: 600;
-    color: var(--jg-ink);
-    text-decoration: none;
+    margin-top: 14px;
+    padding: 0 6px;
+    border-radius: 10px;
+  }
+  .jm-parent-img {
+    height: 30px;
+    width: auto;
+  }
+
+  /* 900–1099px: icon + "Catalogue" only, so the bar never crowds the nav
+     (the accessible name stays "Download Jingo catalogue (PDF)"). */
+  @media (min-width: 900px) and (max-width: 1099px) {
+    .jh-dl-verb {
+      display: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .jh-logo-img,
-    .jh-link {
+    .jh-link,
+    .jh-parent,
+    .jh-dl {
       transition: none;
+    }
+    .jh-dl:hover :global(svg) {
+      animation: none;
     }
   }
 </style>

@@ -10,10 +10,11 @@ interface Props {
 const { t, flush = false } = Astro.props;
 
 const navLinks = [
-  { label: t.nav.about, href: "#about" },
-  { label: t.nav.partners, href: "#partners" },
-  { label: t.nav.theNest, href: "#brands" },
-  { label: t.nav.contact, href: "#contact" },
+  { label: t.nav.about, href: "/about" },
+  { label: t.nav.partners, href: "/partners" },
+  { label: t.nav.theNest, href: "/the-nest" },
+  { label: t.nav.media, href: "/media" },
+  { label: t.nav.contact, href: "/contact" },
 ];
 
 const phones = [
