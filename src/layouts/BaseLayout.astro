@@ -66,6 +66,9 @@ const graph = [organizationNode, websiteNode, ...pageNodes];
     </script>
 
     <!-- Fonts: Sentient (display) + General Sans (body) via Fontshare.
+         Static faces only (Sentient 400/500, General Sans 400–700 — all used;
+         the variable Sentient face is not requested, so the preloaded static
+         500 is the one that renders and nothing is downloaded twice).
          Preconnect BOTH the CSS host (api) and the font-file host (cdn), then
          preload the primary above-the-fold weights so they arrive before first
          paint and the swap is not visible. -->
@@ -92,9 +95,15 @@ const graph = [organizationNode, websiteNode, ...pageNodes];
       crossorigin
       href="https://cdn.fontshare.com/wf/3RZHWSNONLLWJK3RLPEKUZOMM56GO4LJ/BPDRY7AHVI3MCDXXVXTQQ76H3UXA63S3/SB2OEB6IKZPRR6JT4GFJ2TFT6HBB6AZN.woff2"
     />
+    <!-- One stylesheet per family: Fontshare's multi-family parser is
+         order-sensitive (some combinations silently drop a family). -->
     <link
       rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,1&f[]=general-sans@400,500,600,700&display=swap"
+      href="https://api.fontshare.com/v2/css?f[]=sentient@400,500&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap"
     />
 
     <SEOHead
@@ -126,17 +135,22 @@ const graph = [organizationNode, websiteNode, ...pageNodes];
     <FloatingWhatsApp />
 
     <script>
-      // Signal the inline-head failsafe that the reveal bundle is running, so it
+      // Signal the inline-head failsafe that the page bundle is running, so it
       // won't un-hide prematurely. If this bundle fails to load, the flag stays
       // unset and the failsafe reveals everything.
       (window as unknown as { __tnRevealReady?: boolean }).__tnRevealReady = true;
-      import { initSmoothScroll } from "../scripts/smooth-scroll";
-      import { initReveals, initHeadingReveals } from "../scripts/reveal";
+      import { initAnchors } from "../scripts/anchors";
       import { initScrollProgress } from "../scripts/scroll-progress";
-      initSmoothScroll();
-      initReveals();
-      initHeadingReveals();
+      initAnchors();
       initScrollProgress();
+      // Motion (GSAP + ScrollTrigger + SplitText reveals, Lenis on desktop)
+      // loads only when motion is allowed — reduced-motion visitors never
+      // download it. If the chunk fails, un-hide everything at once.
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        import("../scripts/motion")
+          .then((m) => m.initMotion())
+          .catch(() => document.documentElement.classList.remove("reveal-active"));
+      }
     </script>
   </body>
 </html>

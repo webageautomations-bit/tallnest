@@ -185,16 +185,19 @@ const stepIcons = [
 
 <script>
   // Reuses the shared GSAP + ScrollTrigger instance (ESM singleton — registering
-  // is idempotent, no second GSAP is added).
-  import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
-  gsap.registerPlugin(ScrollTrigger);
-
+  // is idempotent, no second GSAP is added). Loaded only when motion is allowed.
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const flow = document.querySelector<HTMLElement>("#approach .flow");
   const section = document.querySelector<HTMLElement>("#approach");
 
-  if (flow && section && !reduce) {
+  if (flow && section && !reduce) void runFlow(flow, section);
+
+  async function runFlow(flow: HTMLElement, section: HTMLElement) {
+    const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]);
+    gsap.registerPlugin(ScrollTrigger);
     const fill = flow.querySelector<HTMLElement>(".flow-fill")!;
     const dot = flow.querySelector<HTMLElement>(".flow-dot")!;
     const nodes = Array.from(flow.querySelectorAll<HTMLElement>(".node"));

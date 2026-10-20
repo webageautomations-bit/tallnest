@@ -91,17 +91,7 @@
     "labelWeb": "Website",
     "address": "DHA Phase 6, Lahore",
     "careersHeading": "Careers",
-    "careersLine": "We're a growing food & beverage company building our first brand, and always open to sharp confectionery, sales, and marketing people. Reach out above.",
-    "formName": "Name",
-    "formEmail": "Email",
-    "formCompany": "Company",
-    "formCompanyOptional": "(optional)",
-    "formMessage": "Message",
-    "formSubmit": "Send message",
-    "statusUnconfigured": "Form isn't connected yet — add your Web3Forms key to enable sending.",
-    "statusSending": "Sending…",
-    "statusSuccess": "Thanks — your message is on its way. We'll be in touch.",
-    "statusError": "Something went wrong. Please try again, or call us instead."
+    "careersLine": "We're a growing food & beverage company building our first brand, and always open to sharp confectionery, sales, and marketing people. Reach out above."
   },
   "footer": {
     "tagline": "Food & Beverages",

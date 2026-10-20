@@ -80,6 +80,16 @@ export async function initHeadingReveals(): Promise<void> {
 
   // Correct line breaks require the real fonts to be in place first.
   await document.fonts.ready;
+  // fonts.ready can resolve before a face has even been requested; make sure
+  // each heading's exact face is loaded so line breaks are measured right.
+  await Promise.all(
+    heads.map((h) => {
+      const cs = getComputedStyle(h);
+      return document.fonts
+        .load(`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`)
+        .catch(() => undefined);
+    }),
+  );
   // Let an initial hash jump (smooth-scroll's honorInitialHash runs in rAF)
   // settle first, so "already scrolled past" below is measured correctly.
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -117,12 +127,46 @@ export async function initHeadingReveals(): Promise<void> {
       gsap.set(el, { opacity: 1, visibility: "visible" });
       return;
     }
+    // Natural (unsplit) height — the layout the heading must end in.
+    const naturalH = el.getBoundingClientRect().height;
     const split = new SplitText(el, {
       type: "lines",
       mask: "lines",
       linesClass: "reveal-line",
       aria: "auto",
     });
+
+    // SplitText treats each word as unbreakable, so a heading that naturally
+    // wraps inside a word (e.g. after the hyphen in "pocket-money") splits
+    // into a different number of lines and would collapse/grow when the split
+    // is reverted — a layout shift. In that case reveal the heading as one
+    // block instead: same blur/rise/fade, zero reflow.
+    if (Math.abs(el.getBoundingClientRect().height - naturalH) > 1) {
+      split.revert();
+      gsap.set(el, { autoAlpha: 0, y: 24, filter: "blur(12px)", willChange: "transform, filter, opacity" });
+      const animateBlock = () =>
+        gsap.to(el, {
+          autoAlpha: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.8,
+          ease: EASE,
+          onComplete: () => {
+            played.add(el);
+            gsap.set(el, { clearProps: "transform,filter,willChange" });
+            cleanup(el);
+          },
+        });
+      if (el.hasAttribute("data-reveal-now")) {
+        animateBlock();
+      } else {
+        triggers.set(
+          el,
+          ScrollTrigger.create({ trigger: el, start: "top 82%", once: true, onEnter: animateBlock }),
+        );
+      }
+      return;
+    }
     splits.set(el, split);
 
     gsap.set(el, { autoAlpha: 1 }); // reveal container; lines are hidden below

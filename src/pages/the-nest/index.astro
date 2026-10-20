@@ -7,7 +7,9 @@ import {
   formatDate,
   coverGradient,
   postSlug,
+  coverImage,
 } from "../../lib/posts";
+import { Image } from "astro:assets";
 
 const posts = await getSortedPosts();
 const [featured, ...rest] = posts;
@@ -40,14 +42,14 @@ const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
               class="featured-cover"
               style={`background:${coverGradient(featured.data.category)}`}
             >
-              {featured.data.cover && (
-                <img
+              {coverImage(featured.data.cover) && (
+                <Image
                   class="featured-cover-img"
-                  src={featured.data.cover}
+                  src={coverImage(featured.data.cover)!}
                   alt={featured.data.title}
+                  widths={[480, 800, 1100]}
+                  sizes="(min-width: 1024px) 640px, 100vw"
                   loading="lazy"
-                  decoding="async"
-                  onerror="this.style.display='none'"
                 />
               )}
               <span class="post-cat">{featured.data.category}</span>

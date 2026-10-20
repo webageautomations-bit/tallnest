@@ -43,3 +43,18 @@ export function coverGradient(category: string): string {
       return "linear-gradient(135deg, #93221e 0%, #c23a30 100%)";
   }
 }
+
+// Cover photos through astro:assets: frontmatter keeps the public path
+// ("/blog/x.jpg", also used for og:image), the page renders the optimised
+// copy from src/assets/blog/x.jpg when present.
+import type { ImageMetadata } from "astro";
+const coverFiles = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/blog/*.{jpg,jpeg,png,webp}",
+  { eager: true },
+);
+export function coverImage(path?: string): ImageMetadata | undefined {
+  if (!path) return undefined;
+  const file = path.split("/").pop();
+  const hit = Object.entries(coverFiles).find(([k]) => k.endsWith(`/${file}`));
+  return hit?.[1].default;
+}

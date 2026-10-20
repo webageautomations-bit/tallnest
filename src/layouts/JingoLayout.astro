@@ -130,15 +130,20 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
     <FloatingWhatsApp />
 
     <script>
-      // Tell the inline-head failsafe the reveal bundle is running.
+      // Tell the inline-head failsafe the page bundle is running.
       (window as unknown as { __tnRevealReady?: boolean }).__tnRevealReady = true;
-      import { initSmoothScroll } from "../scripts/smooth-scroll";
-      import { initReveals, initHeadingReveals } from "../scripts/reveal";
+      import { initAnchors } from "../scripts/anchors";
       import { initCountUps } from "../scripts/count-up";
-      initSmoothScroll();
-      initReveals();
-      initHeadingReveals();
+      initAnchors();
       initCountUps();
+      // Motion (GSAP + ScrollTrigger + SplitText reveals, Lenis on desktop)
+      // loads only when motion is allowed — reduced-motion visitors never
+      // download it. If the chunk fails, un-hide everything at once.
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        import("../scripts/motion")
+          .then((m) => m.initMotion())
+          .catch(() => document.documentElement.classList.remove("reveal-active"));
+      }
     </script>
   </body>
 </html>

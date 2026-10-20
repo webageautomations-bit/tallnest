@@ -1,8 +1,19 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import WhatsAppCTA from "../components/WhatsAppCTA.astro";
+import { categories, products, priceRange } from "../lib/jingo";
+import { WHATSAPP_DISTRIBUTOR, PHONE_DISPLAY, PHONE_TEL, EMAIL } from "../data/contact";
 
-const WEB3FORMS_ACCESS_KEY = "YOUR_WEB3FORMS_KEY";
+// Facts used across the page (and the FAQPage schema) — derived from the
+// product data so counts / prices can't drift from the catalogue.
+const nCats = categories.length; // 7
+const nProducts = products.length; // 35
+const { min, max } = priceRange(); // Rs. 5 – Rs. 50
+const pricePoints = [
+  ...new Set(categories.flatMap((c) => (c.price.match(/\d+/g) ?? []).map(Number))),
+].sort((a, b) => a - b); // 5, 10, 20, 50
+const priceList = `Rs. ${pricePoints.slice(0, -1).join(", ")} and ${pricePoints.at(-1)}`;
+const cat = (id: string) => categories.find((c) => c.id === id)!;
 
 // Why-partner benefits — Lucide-style line icons (stroke uses currentColor).
 const benefits = [
@@ -13,7 +24,7 @@ const benefits = [
   },
   {
     title: "Full range, one brand",
-    line: "7 categories and 40+ SKUs to fill the counter.",
+    line: `${nCats} categories and ${nProducts}+ products to fill the counter.`,
     icon: `<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`,
   },
   {
@@ -27,74 +38,159 @@ const benefits = [
     icon: `<path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/>`,
   },
   {
-    title: "National reach",
-    line: "A distributor network and in-house sales force.",
+    title: "Territories available",
+    line: "Exclusive areas open across Pakistan for committed partners.",
     icon: `<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/>`,
   },
 ];
 
 // Commercials — headline stats + supply-chain flow.
-// NOTE: pack ratios are PLACEHOLDERS — confirm before publishing.
 const stats = [
-  { n: "Rs. 5–50", l: "Price points" },
-  { n: "7", l: "Categories" },
-  { n: "40+", l: "SKUs" },
+  { n: `Rs. ${min}–${max}`, l: "Price points" },
+  { n: String(nCats), l: "Categories" },
+  { n: `${nProducts}+`, l: "Products" },
 ];
 const flow = [
   {
-    v: "50 pcs / box*",
+    v: "50 pcs / box",
     k: "Inner pack",
     icon: `<path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5M12 13v8"/>`,
   },
   {
-    v: "36 box / carton*",
+    v: "36 box / carton",
     k: "Outer carton",
     icon: `<rect x="3" y="7" width="18" height="13" rx="1"/><path d="M3 7l3-4h12l3 4M12 7v13"/>`,
   },
   {
-    v: "Nationwide",
-    k: "Distribution",
+    v: "Across Pakistan",
+    k: "Territories open",
     icon: `<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/>`,
   },
 ];
 
 const steps = [
-  { title: "Enquire", line: "Send us your details and territory using the form below." },
-  { title: "Samples & terms", line: "We share samples, price lists, and trade terms." },
-  { title: "Onboard", line: "We agree territory, margins, and first order." },
-  { title: "Stock & sell", line: "Reliable resupply and marketing support, ongoing." },
+  { title: "Enquire", line: "Message us on WhatsApp — or call or email — with your company, city and the area you can cover." },
+  { title: "Territory & coverage", line: "We discuss the territory and how you will cover it." },
+  { title: "Agree terms", line: "Monthly commitment, exclusivity, advance payment and delivery." },
+  { title: "Opening order", line: "You place your first order — typically fulfilled in 3–5 working days." },
 ];
 
 const faqs = [
+  {
+    q: "How do I become a Jingo distributor?",
+    a: "Message us on WhatsApp at +92 317 827 6277, or call or email us, with your company, city and the area you can cover. We then discuss the territory and how you will cover it, agree terms — the monthly commitment, exclusivity, advance payment and delivery — and you place your opening order.",
+  },
+  {
+    q: "Which areas are available?",
+    a: "Jingo is appointing distributors across Pakistan — in Punjab, Sindh, Khyber Pakhtunkhwa, Balochistan, Islamabad, Azad Kashmir and Gilgit-Baltistan. Territories are available in major markets such as Lahore, Karachi, Islamabad and Rawalpindi, Faisalabad, Multan, Peshawar and Quetta, and in smaller towns too: Jingo is built for B- and C-tier towns.",
+  },
   { q: "What's the minimum order quantity?", a: "Sole distributorships carry a minimum commitment of Rs. 30 million per month. That reflects the scale of an exclusive territory — full coverage, consistent stock, and a partnership built for real volume." },
   { q: "Do you offer exclusive territories?", a: "Yes. We grant exclusive coverage where a distributor commits to fully covering the area and the order value justifies the territory. Protected territories reward the partners who invest in building the market." },
   { q: "What are the payment terms?", a: "Advance payment on all orders. As the relationship matures and a track record builds, terms can be revisited together." },
   { q: "What are typical lead times?", a: "Typically 3–5 working days. Timelines vary slightly by region and are coordinated with you in advance — once we commit a delivery window, we deliver on it." },
+  {
+    q: "What products does Jingo offer?",
+    a: `Jingo covers ${nCats} categories and ${nProducts}+ products: candies (${cat("candies").flavourCount} flavours) and toffees (${cat("toffees").flavourCount}) at Rs. 5; Squizo liquid chocolates (${cat("squizo").flavourCount}), Twist lollipops (${cat("lollipops").flavourCount}) and Bublo bubblegums (${cat("bubblegums").flavourCount}) at Rs. 10; Choco Chums bunties at Rs. 5 and Rs. 10; and Mehfil nimkos (${cat("nimkos").flavourCount}) at Rs. 10, Rs. 20 and Rs. 50.`,
+  },
+  {
+    q: "Who is Tall Nest Group?",
+    a: "Tall Nest Group is a Pakistani food and beverage company based in Lahore that builds consumer brands. Jingo, its confectionery brand, is the first.",
+  },
+];
+
+// FAQPage structured data — question/answer text is the visible copy above.
+const faqSchema = {
+  "@type": "FAQPage",
+  "@id": "https://tallnest.com/partners/#faq",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+// "At a glance" — machine-extractable facts.
+const glance = [
+  { k: "Brand", v: "Jingo, by Tall Nest Group" },
+  { k: "Categories", v: `${nCats} categories, ${nProducts}+ products — candies, toffees, liquid chocolates, lollipops, bubblegums, bunties and nimkos` },
+  { k: "Price points", v: `${priceList} (Rs. ${min} to Rs. ${max})` },
+  { k: "MOQ", v: "Rs. 30 million per month (sole distributorship)" },
+  { k: "Territory", v: "Exclusive rights where full coverage is committed; territories available across Pakistan" },
+  { k: "Payment", v: "Advance payment on all orders" },
+  { k: "Lead time", v: "Typically 3–5 working days" },
+];
+
+// Territories available — regions and their major markets.
+const regions = [
+  { r: "Punjab", m: "Lahore, Faisalabad, Multan, Gujranwala, Sialkot, Sargodha and Bahawalpur" },
+  { r: "Islamabad & Rawalpindi", m: "The twin cities — Islamabad Capital Territory and Rawalpindi" },
+  { r: "Sindh", m: "Karachi, Hyderabad and Sukkur" },
+  { r: "Khyber Pakhtunkhwa", m: "Peshawar, Mardan and Abbottabad" },
+  { r: "Balochistan", m: "Quetta" },
+  { r: "Azad Kashmir & Gilgit-Baltistan", m: "Open to distributors who can cover these regions" },
 ];
 
 const arrowIcon = `<path d="M5 12h14M13 6l6 6-6 6"/>`;
-const pfInput = "pf-input";
 ---
 
 <BaseLayout
   title="Become a Jingo Distributor in Pakistan | Tall Nest Group"
-  description="Distribute Jingo confectionery in your area: 7 categories, 35+ fast-moving products at Rs. 5–50. Apply to become a Tall Nest Group distributor."
+  description="Jingo confectionery is appointing distributors across Pakistan. Exclusive territories, 35+ products from Rs. 5. Enquire on WhatsApp."
+  jsonLd={faqSchema}
 >
-  <!-- Intro -->
+  <!-- Intro: H1 + quotable summary + at a glance -->
   <section class="section-y bg-white">
     <div class="mx-auto max-w-7xl px-6 md:px-10">
-      <p data-reveal class="eyebrow mb-6">For distributors &amp; retail</p>
-      <h1
-        data-reveal-heading
-        class="max-w-3xl font-display text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.04] tracking-[-0.02em] text-ink text-balance"
-      >
-        A range that <em class="text-red">sells itself.</em>
-      </h1>
-      <p data-reveal class="mt-7 max-w-[58ch] text-lg leading-relaxed text-gray">
-        We don't just sell product — we build relationships. Reliable supply,
-        strong margins, a growing range, and a team that markets the brand
-        alongside you.
-      </p>
+      <div class="intro-grid">
+        <div>
+          <p data-reveal class="eyebrow mb-6">For distributors</p>
+          <h1
+            data-reveal-heading
+            class="max-w-3xl font-display text-[clamp(2.4rem,5vw,4rem)] font-medium leading-[1.04] tracking-[-0.02em] text-ink text-balance"
+          >
+            Become a Jingo Distributor in <em class="text-red">Pakistan</em>
+          </h1>
+          <p data-reveal class="summary">
+            Tall Nest Group is a Pakistani food and beverage company based in
+            Lahore. Its confectionery brand, Jingo, is appointing distributors
+            across Pakistan, and territories are available now. The Jingo range
+            covers {nCats} categories and {nProducts}+ products &mdash; candies,
+            toffees, liquid chocolates, lollipops, bubblegums, bunties and nimkos
+            &mdash; priced from Rs.&nbsp;{min} to Rs.&nbsp;{max}. Sole
+            distributorships carry a minimum commitment of Rs.&nbsp;30 million per
+            month, with exclusive territory rights where full coverage is
+            committed. Orders are on advance payment and are typically fulfilled
+            in 3&ndash;5 working days.
+          </p>
+          <div data-reveal class="intro-ctas">
+            <WhatsAppCTA theme="corporate-solid" />
+            <a href="#enquire" class="link-underline intro-alt">Or call or email us</a>
+          </div>
+        </div>
+
+        <aside data-reveal class="glance panel" aria-labelledby="glance-h">
+          <h2 id="glance-h" class="eyebrow">At a glance</h2>
+          <dl class="glance-list">
+            {
+              glance.map((g) => (
+                <div class="glance-row">
+                  <dt>{g.k}</dt>
+                  <dd>{g.v}</dd>
+                </div>
+              ))
+            }
+            <div class="glance-row">
+              <dt>Contact</dt>
+              <dd>
+                WhatsApp{" "}
+                <a href={WHATSAPP_DISTRIBUTOR} target="_blank" rel="noopener noreferrer" class="link-underline" dir="ltr">+92 317 827 6277</a>
+                {" "}&middot;{" "}
+                <a href="mailto:hello@tallnest.com" class="link-underline">hello@tallnest.com</a>
+              </dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -132,7 +228,7 @@ const pfInput = "pf-input";
         }
         <li data-reveal-item class="pcard pcard-cta group">
           <a href="#enquire" class="cta-link">
-            <h3 class="font-display">Ready to stock Tall Nest?</h3>
+            <h3 class="font-display">Ready to distribute Jingo?</h3>
             <span class="go">
               Become a partner
               <svg
@@ -217,8 +313,8 @@ const pfInput = "pf-input";
         </div>
 
         <p class="foot">
-          * Pack ratios are indicative placeholders — confirm exact case
-          configurations with us per SKU.
+          Pack ratios shown are for candies and toffees; case configurations
+          vary by category &mdash; see the Jingo catalogue or ask us per SKU.
         </p>
       </div>
     </div>
@@ -232,7 +328,7 @@ const pfInput = "pf-input";
         data-reveal-heading
         class="max-w-2xl font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
       >
-        Become a partner in four steps.
+        Become a Jingo distributor in four steps.
       </h2>
       <div class="flow" data-flow>
         <span class="flow-line" aria-hidden="true"></span>
@@ -253,10 +349,56 @@ const pfInput = "pf-input";
     </div>
   </section>
 
+  <!-- Territories available -->
+  <section id="territories" class="section-y bg-white scroll-mt-24">
+    <div class="mx-auto max-w-7xl px-6 md:px-10">
+      <p data-reveal class="eyebrow mb-6">Territories available</p>
+      <h2
+        data-reveal-heading
+        class="max-w-3xl font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
+      >
+        Appointing Jingo distributors across Pakistan.
+      </h2>
+      <p data-reveal class="terr-lede">
+        We are inviting distributors in every province and region, and
+        territories are available now. A territory is assigned when a
+        distributor commits to covering it, so the markets below are open
+        &mdash; not already taken.
+      </p>
+
+      <ul data-reveal-group class="regions">
+        {
+          regions.map((r) => (
+            <li data-reveal-item class="region">
+              <h3 class="region-name font-display">{r.r}</h3>
+              <p class="region-markets">{r.m}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p data-reveal class="terr-note">
+        Jingo is priced for corner shops and general stores, so it is built for
+        B- and C-tier towns as much as for the big cities. If your strength is a
+        district, a cluster of smaller towns or a single city, that territory is
+        open too.
+      </p>
+      <div data-reveal class="terr-cta">
+        <WhatsAppCTA theme="corporate-solid" label="Ask about your territory" />
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section class="section-y bg-white">
     <div class="mx-auto max-w-3xl px-6 md:px-10">
-      <p data-reveal class="eyebrow mb-6">Questions</p>
+      <p data-reveal class="eyebrow mb-5">Questions</p>
+      <h2
+        data-reveal-heading
+        class="mb-8 font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-medium leading-[1.08] tracking-[-0.02em] text-ink text-balance"
+      >
+        Jingo distributor FAQs
+      </h2>
       <ul data-reveal-group class="faq">
         {
           faqs.map((f) => (
@@ -275,7 +417,7 @@ const pfInput = "pf-input";
     </div>
   </section>
 
-  <!-- Inquiry form -->
+  <!-- Enquire: WhatsApp first, phone & email alongside -->
   <section id="enquire" class="section-y bg-paper scroll-mt-24">
     <div class="mx-auto max-w-3xl px-6 md:px-10">
       <p data-reveal class="eyebrow mb-5">Become a partner</p>
@@ -286,55 +428,29 @@ const pfInput = "pf-input";
         Tell us about your business.
       </h2>
 
-      <!-- Quickest route: WhatsApp (alongside the form, not replacing it). -->
-      <div data-reveal class="wa-row">
-        <WhatsAppCTA theme="corporate" />
-        <p class="wa-note">Quickest reply on WhatsApp &mdash; or use the form below.</p>
+      <p data-reveal class="enq-lede">
+        Message us on WhatsApp with your company, city and the area you can
+        cover &mdash; we&rsquo;ll take it from there.
+      </p>
+
+      <div data-reveal class="enq card">
+        <WhatsAppCTA theme="corporate-solid" intent="distributor" class="enq-btn" />
+        <p class="enq-or">Prefer to call or email?</p>
+        <div class="enq-alt">
+          <a href={PHONE_TEL} class="enq-link" dir="ltr">
+            <span class="enq-ic" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>
+            </span>
+            <span><span class="enq-k">Call</span>{PHONE_DISPLAY}</span>
+          </a>
+          <a href={`mailto:${EMAIL}`} class="enq-link" dir="ltr">
+            <span class="enq-ic" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            </span>
+            <span><span class="enq-k">Email</span>{EMAIL}</span>
+          </a>
+        </div>
       </div>
-
-      <form
-        id="partner-form"
-        action="https://api.web3forms.com/submit"
-        method="POST"
-        class="pf card"
-        novalidate
-        data-msg-unconfigured="Form isn't connected yet — add your Web3Forms key to enable sending."
-        data-msg-sending="Sending…"
-        data-msg-success="Thanks — we'll be in touch about partnering."
-        data-msg-error="Something went wrong. Please try again, or call us instead."
-      >
-        <input type="hidden" name="access_key" value={WEB3FORMS_ACCESS_KEY} />
-        <input type="hidden" name="subject" value="New partner enquiry — Tall Nest" />
-        <input type="hidden" name="from_name" value="Tall Nest website" />
-        <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
-
-        <div class="pf-field">
-          <input id="pf-name" name="name" type="text" required autocomplete="name" placeholder=" " class={pfInput} />
-          <label for="pf-name">Name <span aria-hidden="true">*</span></label>
-        </div>
-        <div class="pf-field">
-          <input id="pf-company" name="company" type="text" required autocomplete="organization" placeholder=" " class={pfInput} />
-          <label for="pf-company">Company <span aria-hidden="true">*</span></label>
-        </div>
-        <div class="pf-field">
-          <input id="pf-phone" name="phone" type="tel" required autocomplete="tel" dir="ltr" placeholder=" " class={pfInput} />
-          <label for="pf-phone">Phone <span aria-hidden="true">*</span></label>
-        </div>
-        <div class="pf-field">
-          <input id="pf-region" name="city_region" type="text" required placeholder=" " class={pfInput} />
-          <label for="pf-region">City / Region <span aria-hidden="true">*</span></label>
-        </div>
-        <div class="pf-field">
-          <textarea id="pf-message" name="message" rows="3" placeholder=" " class={pfInput}></textarea>
-          <label for="pf-message">Message</label>
-        </div>
-
-        <button type="submit" class="btn group w-full">
-          Send enquiry
-          <span class="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true">→</span>
-        </button>
-        <p data-form-status role="status" aria-live="polite" class="min-h-5 text-sm"></p>
-      </form>
     </div>
   </section>
 </BaseLayout>
@@ -782,59 +898,6 @@ const pfInput = "pf-input";
     color: var(--color-gray);
   }
 
-  /* Floating-label form (matches the contact panel styling) */
-  .pf {
-    margin-top: clamp(28px, 4vw, 44px);
-    padding: clamp(28px, 4vw, 44px);
-    display: flex;
-    flex-direction: column;
-    gap: 26px;
-  }
-  .pf-field {
-    position: relative;
-  }
-  .pf-input {
-    width: 100%;
-    background: transparent;
-    border: 0;
-    border-bottom: 1.5px solid var(--color-hairline);
-    border-radius: 0;
-    padding: 22px 2px 8px;
-    font-family: var(--font-body);
-    font-size: 1rem;
-    color: var(--color-ink);
-    transition: border-color 0.2s var(--ease-brand);
-  }
-  textarea.pf-input {
-    resize: vertical;
-    min-height: 64px;
-  }
-  .pf-input:focus {
-    outline: none;
-    border-color: var(--color-red);
-  }
-  .pf-field label {
-    position: absolute;
-    inset-inline-start: 2px;
-    top: 20px;
-    color: var(--color-gray);
-    pointer-events: none;
-    transition:
-      top 0.2s var(--ease-brand),
-      font-size 0.2s var(--ease-brand),
-      color 0.2s var(--ease-brand);
-  }
-  .pf-input:focus + label,
-  .pf-input:not(:placeholder-shown) + label {
-    top: 0;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    color: var(--color-red);
-  }
-  .pf-field label span {
-    color: var(--color-red);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .pcard,
     .pcard-cta,
@@ -842,32 +905,197 @@ const pfInput = "pf-input";
     .pcard::before,
     .pcard-cta .go svg,
     .node,
-    .pf-input,
-    .pf-field label,
+    .enq-link,
     .faq-icon::before,
     .faq-icon::after {
       transition: none;
     }
   }
 
-  .wa-row {
+  /* Enquire block (WhatsApp first) */
+  .enq-lede {
+    margin-top: 16px;
+    max-width: 52ch;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--color-gray);
+  }
+  .enq {
+    margin-top: clamp(24px, 4vw, 36px);
+    padding: clamp(24px, 4vw, 40px);
+  }
+  .enq :global(.enq-btn) {
+    width: 100%;
+    min-height: 56px;
+    font-size: 1.02rem;
+  }
+  .enq-or {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-hairline);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .enq-alt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    margin-top: 6px;
+  }
+  .enq-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-brand);
+  }
+  .enq-link:hover {
+    color: var(--color-red);
+  }
+  .enq-ic {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--color-red);
+    background: color-mix(in srgb, var(--color-red) 8%, transparent);
+  }
+  .enq-k {
+    display: inline-block;
+    margin-inline-end: 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+  }
+
+  /* --- Intro: summary + at a glance ------------------------------------ */
+  .intro-grid {
+    display: grid;
+    gap: clamp(32px, 5vw, 56px);
+    align-items: start;
+  }
+  @media (min-width: 1024px) {
+    .intro-grid {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    }
+  }
+  .summary {
+    margin-top: 26px;
+    max-width: 64ch;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    color: var(--color-ink);
+  }
+  .intro-ctas {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px 18px;
-    margin: 28px 0 8px;
+    gap: 14px 22px;
+    margin-top: 30px;
   }
-  .wa-note {
-    font-size: 0.92rem;
+  .intro-alt {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .glance {
+    padding: clamp(22px, 3vw, 32px);
+  }
+  .glance-list {
+    margin: 14px 0 0;
+  }
+  .glance-row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--color-hairline);
+  }
+  .glance-row:first-child {
+    border-top: 0;
+  }
+  .glance-row dt {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--color-gray);
+    padding-top: 3px;
+  }
+  .glance-row dd {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+  }
+  /* Contact links: comfortable 44px tap targets inside the list. */
+  .glance-row dd a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  @media (max-width: 479px) {
+    .glance-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+
+  /* --- Territories --------------------------------------------------------- */
+  .terr-lede {
+    margin-top: 20px;
+    max-width: 64ch;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-gray);
+  }
+  .regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 14px;
+    margin: clamp(28px, 4vw, 40px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .region {
+    padding: 20px 22px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-card);
+  }
+  .region-name {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .region-markets {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--color-gray);
+  }
+  .terr-note {
+    margin-top: clamp(24px, 3vw, 32px);
+    max-width: 64ch;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-ink);
+  }
+  .terr-cta {
+    margin-top: 22px;
   }
 </style>
 
 <script>
-  import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
-  gsap.registerPlugin(ScrollTrigger);
-
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---- How it works: scroll-scrubbed timeline ---- */
@@ -875,7 +1103,15 @@ const pfInput = "pf-input";
   const progressEl = flowEl?.querySelector<HTMLElement>(".flow-progress");
   const stepEls = flowEl ? Array.from(flowEl.querySelectorAll<HTMLElement>("[data-step]")) : [];
 
-  if (flowEl && progressEl && stepEls.length && !reduce) {
+  if (flowEl && progressEl && stepEls.length && !reduce) void runFlow(flowEl, progressEl);
+
+  // GSAP + ScrollTrigger load only when motion is allowed (shared chunk).
+  async function runFlow(flowEl: HTMLElement, progressEl: HTMLElement) {
+    const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+      import("gsap"),
+      import("gsap/ScrollTrigger"),
+    ]);
+    gsap.registerPlugin(ScrollTrigger);
     flowEl.classList.add("is-scrubbed");
     progressEl.style.setProperty("--draw", "0");
 
@@ -896,49 +1132,6 @@ const pfInput = "pf-input";
       scrub: 0.5,
       onUpdate: (self) => apply(self.progress),
       onRefresh: (self) => apply(self.progress),
-    });
-  }
-
-  /* ---- Partner inquiry form (Web3Forms) ---- */
-  const form = document.getElementById("partner-form") as HTMLFormElement | null;
-  if (form) {
-    const statusEl = form.querySelector<HTMLElement>("[data-form-status]");
-    const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-    const accessKey =
-      form.querySelector<HTMLInputElement>('input[name="access_key"]')?.value ?? "";
-    const set = (text: string, kind: "ok" | "error" | "pending") => {
-      if (!statusEl) return;
-      statusEl.textContent = text;
-      statusEl.style.color =
-        kind === "error" ? "var(--color-red)" : kind === "ok" ? "var(--color-ink)" : "var(--color-gray)";
-    };
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!form.checkValidity()) return form.reportValidity();
-      if (!accessKey || accessKey === "YOUR_WEB3FORMS_KEY") {
-        set(form.dataset.msgUnconfigured ?? "", "error");
-        return;
-      }
-      if (submitBtn) submitBtn.disabled = true;
-      set(form.dataset.msgSending ?? "", "pending");
-      try {
-        const res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: new FormData(form),
-        });
-        const json = await res.json();
-        if (json.success) {
-          form.reset();
-          set(form.dataset.msgSuccess ?? "", "ok");
-        } else {
-          set(form.dataset.msgError ?? "", "error");
-        }
-      } catch {
-        set(form.dataset.msgError ?? "", "error");
-      } finally {
-        if (submitBtn) submitBtn.disabled = false;
-      }
     });
   }
 </script>

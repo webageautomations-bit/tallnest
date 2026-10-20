@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import jingoLogoRed from "../assets/jingo/jingo-logo-red.png";
+import carton from "../assets/jingo/jingo-carton.jpg";
 // Flagship — Tall Nest's first brand, Jingo. One floating card carries it.
 import { type Dict } from "../i18n/utils";
 
@@ -24,13 +27,13 @@ const arrow = "→";
     <article data-reveal class="flagship-card mt-12">
       <div class="grid items-center gap-10 lg:grid-cols-[1.4fr_0.9fr] lg:gap-12">
         <div>
-          <img
-            src="/Jingo-Logo-Red.png"
+          <Image
+            src={jingoLogoRed}
             alt="Jingo logo"
-            width="91"
-            height="48"
+            width={91}
+            densities={[1, 2]}
             class="h-[48px] w-auto"
-            decoding="async"
+            loading="lazy"
           />
           <p class="mt-5 max-w-[42ch] text-lg leading-relaxed text-gray">
             {t.desc}
@@ -69,11 +72,12 @@ const arrow = "→";
         </div>
 
         <div class="fc-art">
-          <img
-            src="/jingo-carton.jpg"
+          <Image
+            src={carton}
             alt="Jingo product cartons"
+            widths={[360, 560, 760]}
+            sizes="(min-width: 1024px) 400px, 90vw"
             loading="lazy"
-            decoding="async"
           />
         </div>
       </div>

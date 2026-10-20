@@ -1,4 +1,6 @@
 ---
+import { Image } from "astro:assets";
+import jingoLogoWhite from "../assets/jingo/jingo-logo-white.png";
 // Homepage hero — a bold, capability-led editorial statement on white.
 // Tall Nest is the company; Jingo is its first brand (one honest callout).
 // Big type carries it; whitespace is deliberate.
@@ -74,13 +76,13 @@ const arrow = "→";
           aria-label="Our first brand: Jingo"
         >
           <span class="meta-caps text-[0.62rem] text-red">{t.jingoLabel}</span>
-          <img
-            src="/jingo-logo.png"
+          <Image
+            src={jingoLogoWhite}
             alt="Jingo"
-            width="51"
-            height="26"
+            width={51}
+            densities={[1, 2]}
             class="h-[26px] w-auto"
-            decoding="async"
+            loading="eager"
           />
           <span
             class="text-red transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none rtl:group-hover:-translate-x-0.5"
@@ -104,8 +106,6 @@ const arrow = "→";
 </section>
 
 <script>
-  import { gsap } from "gsap";
-
   const prefersReducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
@@ -120,6 +120,12 @@ const arrow = "→";
   const cue = q('[data-hero="cue"]');
 
   if (!prefersReducedMotion) {
+    heroIn().catch(() => document.documentElement.classList.remove("reveal-active"));
+  }
+
+  // GSAP is loaded only when motion is allowed (shared chunk with the reveals).
+  async function heroIn() {
+    const { gsap } = await import("gsap");
     gsap.set([eyebrow, subcopy, actions, jingo, cue], {
       autoAlpha: 0,
       y: 16,

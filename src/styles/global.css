@@ -207,6 +207,15 @@ html.reveal-active [data-hero] {
 .reveal-line {
   will-change: transform, filter, opacity;
 }
+/* SplitText line masks clip overflow; with tight line-heights, letter tips
+   (ascenders/descenders) overflow the line box and were clipped mid-reveal,
+   then "popped" in when the split reverted — which also registered as a
+   layout shift. The padding extends the clip area to cover that ink; the
+   equal negative margin cancels it in flow, so layout is unchanged. */
+.reveal-line-mask {
+  padding-block: 0.2em;
+  margin-block: -0.2em;
+}
 /* Safety net: if motion is reduced, nothing is hidden even under .reveal-active. */
 @media (prefers-reduced-motion: reduce) {
   html.reveal-active [data-reveal-heading],

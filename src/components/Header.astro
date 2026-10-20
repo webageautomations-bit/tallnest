@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 // Red Jingo logo — reads on the light corporate header.
 import jingoLogo from "../assets/jingo/jingo-logo-red.png";
+import tallNestLogo from "../assets/tallnest/tallnest-logo.png";
 
 interface Props {
   t: {
@@ -51,13 +52,13 @@ const phones = [
     class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 md:px-10"
   >
     <a href={homeHref} class="inline-flex items-center" aria-label="Tall Nest — home">
-      <img
-        src="/tallnest-logo.png"
-        alt="Tall Nest Food &amp; Beverages"
-        width="122"
-        height="48"
+      <Image
+        src={tallNestLogo}
+        alt="Tall Nest Food & Beverages"
+        width={122}
+        densities={[1, 2]}
         class="h-[42px] w-auto md:h-[48px]"
-        decoding="async"
+        loading="eager"
       />
     </a>
 
@@ -317,8 +318,17 @@ const phones = [
     border-top: 1px solid var(--color-hairline);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 20px;
     font-size: 0.95rem;
+  }
+  /* 44px tap areas for phone / email (20px gap keeps them from overlapping). */
+  .mm-contact a {
+    position: relative;
+  }
+  .mm-contact a::before {
+    content: "";
+    position: absolute;
+    inset: -10px 0;
   }
 
   @media (prefers-reduced-motion: reduce) {

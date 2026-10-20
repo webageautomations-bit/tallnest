@@ -25,7 +25,7 @@ const range = category.name.toLowerCase();
   <div class:list={["art", { "has-photo": img }]} aria-hidden={img ? undefined : "true"}>
     {
       img ? (
-        <Image src={img} alt={`${sku.name} pack`} widths={[240, 360, 480]} sizes="140px" loading="lazy" decoding="async" class="pack" />
+        <Image src={img} alt={`${sku.name} pack`} widths={[240, 360, 480]} sizes="140px" quality={72} loading="lazy" decoding="async" class="pack" />
       ) : (
         <div class="pouch">
           {stripes.map((c) => (

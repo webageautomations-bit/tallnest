@@ -1,25 +1,30 @@
 ---
-// "Become a Jingo Distributor now" — opens WhatsApp (WHATSAPP_DISTRIBUTOR).
+// WhatsApp CTA. intent="distributor" (default) → WHATSAPP_DISTRIBUTOR,
+// "Become a Jingo Distributor now"; intent="general" → WHATSAPP_GENERAL.
 // theme="jingo": candy-pop WhatsApp-green pill (ink text — white on #25D366
 // fails contrast). theme="corporate": restrained white pill, green glyph.
-import { WHATSAPP_DISTRIBUTOR, whatsappGlyph } from "../data/contact";
+// theme="corporate-solid": the corporate primary (deep-red pill, white text).
+import { WHATSAPP_DISTRIBUTOR, WHATSAPP_GENERAL, whatsappGlyph } from "../data/contact";
 
 interface Props {
-  theme: "jingo" | "corporate";
+  theme: "jingo" | "corporate" | "corporate-solid";
+  intent?: "distributor" | "general";
   label?: string;
   class?: string;
 }
-const { theme, label = "Become a Jingo Distributor now", class: cls } = Astro.props;
+const { theme, intent = "distributor", label, class: cls } = Astro.props;
+const href = intent === "general" ? WHATSAPP_GENERAL : WHATSAPP_DISTRIBUTOR;
+const text = label ?? (intent === "general" ? "Message us on WhatsApp" : "Become a Jingo Distributor now");
 ---
 
 <a
-  href={WHATSAPP_DISTRIBUTOR}
+  href={href}
   target="_blank"
   rel="noopener noreferrer"
   class:list={["wa-cta", `wa-cta--${theme}`, cls]}
 >
   <span class="wa-icon" set:html={whatsappGlyph} />
-  <span>{label}</span>
+  <span>{text}</span>
   <span class="sr-only"> (opens WhatsApp in a new tab)</span>
 </a>
 
@@ -98,6 +103,24 @@ const { theme, label = "Become a Jingo Distributor now", class: cls } = Astro.pr
     transform: translateY(-2px);
     border-color: #25d366;
     box-shadow: 0 1px 2px rgba(30, 27, 22, 0.04), 0 16px 30px -16px rgba(30, 27, 22, 0.45);
+  }
+
+  /* Corporate solid — matches the site's primary .btn (deep red) */
+  .wa-cta--corporate-solid {
+    min-height: 50px;
+    background: var(--color-red, #93221e);
+    color: #fff;
+    font-size: 0.95rem;
+    box-shadow: 0 10px 24px -10px rgba(147, 34, 30, 0.6);
+    transition:
+      transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .wa-cta--corporate-solid:hover {
+    transform: translateY(-2px);
+    background: var(--color-red-deep, #7a1c19);
+    box-shadow: 0 16px 30px -12px rgba(147, 34, 30, 0.7);
   }
 
   @media (prefers-reduced-motion: reduce) {

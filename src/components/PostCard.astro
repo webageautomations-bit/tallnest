@@ -4,8 +4,10 @@ import {
   formatDate,
   coverGradient,
   postSlug,
+  coverImage,
   type Post,
 } from "../lib/posts";
+import { Image } from "astro:assets";
 
 interface Props {
   post: Post;
@@ -14,20 +16,20 @@ const { post } = Astro.props;
 const { data } = post;
 const rt = readingTime(post);
 const href = `/the-nest/${postSlug(post)}`;
-const cover = data.cover;
+const cover = coverImage(data.cover);
 ---
 
 <a href={href} class="post-card card" data-reveal-item data-category={data.category}>
   <div class="post-cover" style={`background:${coverGradient(data.category)}`}>
     {
       cover && (
-        <img
+        <Image
           class="post-cover-img"
           src={cover}
           alt={data.title}
+          widths={[400, 640, 900]}
+          sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
           loading="lazy"
-          decoding="async"
-          onerror="this.style.display='none'"
         />
       )
     }
