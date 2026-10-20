@@ -62,6 +62,13 @@ function samePageHash(link: HTMLAnchorElement): string | null {
   return null;
 }
 
+/** Document scroll position that lands `el` per its scroll-margin-top,
+ *  computed from the real scroll offset (window.scrollY). */
+function anchorY(el: HTMLElement): number {
+  const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+  return el.getBoundingClientRect().top + window.scrollY - margin;
+}
+
 /** Smooth-scroll same-page hash links (header clearance via scroll-margin). */
 function wireAnchors(lenis: Lenis | null): void {
   document.addEventListener("click", (e) => {
@@ -75,7 +82,11 @@ function wireAnchors(lenis: Lenis | null): void {
     if (!target) return; // let the browser handle non-existent targets
     e.preventDefault();
     if (lenis) {
-      lenis.scrollTo(target as HTMLElement);
+      // Sync Lenis to the real scroll position first (it can lag behind a
+      // native scroll that hasn't reached it yet), then scroll to an absolute
+      // target — never one computed from Lenis' own remembered position.
+      lenis.scrollTo(window.scrollY, { immediate: true, force: true });
+      lenis.scrollTo(anchorY(target as HTMLElement));
     } else {
       (target as HTMLElement).scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -91,14 +102,11 @@ function honorInitialHash(lenis: Lenis | null): void {
   if (!target) return;
   requestAnimationFrame(() => {
     if (lenis) {
-      // Resolve an absolute position from the real scroll offset. Passing the
-      // element would make Lenis add its own remembered position, which is
+      // Absolute position from the real scroll offset (see anchorY). Passing
+      // the element would make Lenis add its own remembered position, which is
       // stale if the browser's native hash jump landed after Lenis started —
       // the sum then comes out as 0 and the page snaps back to the top.
-      const el = target as HTMLElement;
-      const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
-      const y = el.getBoundingClientRect().top + window.scrollY - margin;
-      lenis.scrollTo(y, { immediate: true, force: true });
+      lenis.scrollTo(anchorY(target as HTMLElement), { immediate: true, force: true });
     } else {
       (target as HTMLElement).scrollIntoView({ block: "start" });
     }
