@@ -8,6 +8,8 @@ import "../styles/global.css";
 import "../styles/jingo.css";
 import JingoHeader from "../components/jingo/JingoHeader.astro";
 import JingoFooter from "../components/jingo/JingoFooter.astro";
+import SocialRail from "../components/SocialRail.astro";
+import { jingoSocials } from "../data/socials";
 
 interface Props {
   title?: string;
@@ -136,6 +138,7 @@ const brandSchema = {
       <slot />
     </main>
     <JingoFooter />
+    <SocialRail links={jingoSocials} theme="jingo" />
 
     <script>
       // Tell the inline-head failsafe the reveal bundle is running.

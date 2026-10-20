@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import SocialRail from "../components/SocialRail.astro";
+import { corporateSocials } from "../data/socials";
 import { t } from "../i18n/utils";
 
 interface Props {
@@ -149,6 +151,7 @@ const organizationSchema = {
       <slot />
     </main>
     <Footer t={t} flush={flushFooter} />
+    <SocialRail links={corporateSocials} theme="corporate" />
 
     <script>
       // Signal the inline-head failsafe that the reveal bundle is running, so it

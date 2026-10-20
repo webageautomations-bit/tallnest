@@ -1,0 +1,165 @@
+---
+// Fixed vertical social rail, pinned to the right edge and vertically
+// centred. One component, two themes:
+//   corporate — restrained: white pill, hairline, grey icons → deep red.
+//   jingo     — candy-pop: cream sticker pill, Jingo-red icon buttons.
+// Shown only from 1344px up: below that both zones' content gutter is 40px,
+// narrower than a 44px tap target, so the rail would sit on content. The
+// footers carry the socials at smaller sizes. Pure CSS — no layout shift.
+import type { SocialLink } from "../data/socials";
+
+interface Props {
+  links: SocialLink[];
+  theme: "corporate" | "jingo";
+}
+const { links, theme } = Astro.props;
+---
+
+<nav class:list={["rail", `rail--${theme}`]} aria-label="Social media">
+  <ul class="rail-list">
+    {
+      links.map((l) => (
+        <li>
+          <a
+            href={l.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={l.network}
+            class="rail-link"
+          >
+            <span class="rail-icon" set:html={l.icon} />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .rail {
+    display: none;
+  }
+  @media (min-width: 1344px) {
+    .rail {
+      display: block;
+      position: fixed;
+      top: 50%;
+      right: 12px;
+      z-index: 45; /* above content, below headers (50) and menus (60) */
+      transform: translateY(-50%);
+    }
+  }
+  @media print {
+    .rail {
+      display: none !important;
+    }
+  }
+
+  .rail-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+  }
+  .rail-link {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rail-icon {
+    display: inline-flex;
+  }
+
+  /* --- Corporate: understated -------------------------------------------- */
+  .rail--corporate .rail-list {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid #e8e5df;
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(30, 27, 22, 0.04), 0 10px 24px -14px rgba(30, 27, 22, 0.28);
+  }
+  /* Hairline "connecting line" above and below the pill. */
+  .rail--corporate::before,
+  .rail--corporate::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 28px;
+    margin-inline: auto;
+    background: linear-gradient(transparent, #d9d4cc);
+  }
+  .rail--corporate::after {
+    background: linear-gradient(#d9d4cc, transparent);
+  }
+  .rail--corporate .rail-link {
+    border-radius: 999px;
+    color: #6b6358;
+    transition:
+      color 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background-color 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .rail--corporate .rail-link:hover {
+    color: #93221e;
+    background: rgba(147, 34, 30, 0.08);
+    transform: translateY(-2px);
+  }
+  .rail--corporate .rail-link:focus-visible {
+    color: #93221e;
+    outline: 2px solid #93221e;
+    outline-offset: 2px;
+  }
+
+  /* --- Jingo: candy-pop --------------------------------------------------- */
+  .rail--jingo .rail-list {
+    gap: 6px;
+    padding: 6px;
+    background: var(--jg-cream, #fff6e9);
+    border: 2.5px solid var(--jg-ink, #24121a);
+    border-radius: 999px;
+    box-shadow: 0 5px 0 var(--jg-ink, #24121a);
+  }
+  .rail--jingo .rail-link {
+    border-radius: 50%;
+    border: 2.5px solid var(--jg-ink, #24121a);
+    background: var(--jg-red, #e0202b);
+    color: #fff;
+    box-shadow: 0 3px 0 var(--jg-ink, #24121a);
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .rail--jingo .rail-link:hover {
+    background: var(--jg-sun, #ffc93c);
+    color: var(--jg-ink, #24121a);
+    transform: translateY(-3px) rotate(-8deg);
+    box-shadow: 0 5px 0 var(--jg-ink, #24121a);
+  }
+  .rail--jingo .rail-link:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink, #24121a);
+  }
+  .rail--jingo .rail-link:focus-visible {
+    outline: 3px solid var(--jg-ink, #24121a);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rail-link {
+      transition: none !important;
+    }
+    .rail--corporate .rail-link:hover,
+    .rail--jingo .rail-link:hover {
+      transform: none;
+    }
+  }
+</style>
