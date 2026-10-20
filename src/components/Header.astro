@@ -4,6 +4,7 @@ interface Props {
     about: string;
     partners: string;
     theNest: string;
+    media: string;
     contact: string;
   };
 }
@@ -20,7 +21,7 @@ type NavLink = {
 const navLinks: NavLink[] = [
   { label: t.about, href: "/about" },
   // Jingo — the flagship brand zone. The label goes to the hub; a dropdown
-  // lists its sections. (Mascots joins once that page is built.)
+  // lists its sections (same order as the Jingo zone's own header).
   {
     label: "Jingo",
     href: "/jingo",
@@ -28,11 +29,13 @@ const navLinks: NavLink[] = [
     children: [
       { label: "Jingo Home", href: "/jingo" },
       { label: "Flavours", href: "/jingo/flavours" },
+      { label: "Mascots", href: "/jingo/mascots" },
       { label: "Our Story", href: "/jingo#story" },
     ],
   },
   { label: t.partners, href: "/partners" },
   { label: t.theNest, href: "/the-nest" },
+  { label: t.media, href: "/media" },
   { label: t.contact, href: "/contact" },
 ];
 

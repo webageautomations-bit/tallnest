@@ -1,40 +1,532 @@
 ---
-// PLACEHOLDER — the mascots page is built in a later pass. This route exists
-// so the Jingo nav never 404s.
+// /jingo/mascots — "Meet the crew": Jingo's flavour mascots. Characters come
+// from src/data/jingo-mascots.ts; their products (chips) resolve against
+// src/data/jingo-products.ts. Renders: src/assets/jingo/mascots/<image>.png.
+//
+// Motion layering (so GSAP reveals never fight CSS transforms):
+//   .stage [data-reveal]  → GSAP entrance (inline transform)
+//     .figure             → hover tilt / bounce, tap squish (CSS)
+//       .bob              → idle float (CSS keyframes)
+// Reduced motion: no float, no tilt — static characters.
+import { Image } from "astro:assets";
 import JingoLayout from "../../layouts/JingoLayout.astro";
+import JingoStockCTA from "../../components/jingo/JingoStockCTA.astro";
+import { mascots } from "../../data/jingo-mascots";
+import {
+  products,
+  categoryById,
+  mascotImage,
+  productById,
+  shelfLabel,
+  textOnColor,
+} from "../../lib/jingo";
+
+const crew = mascots.map((m, i) => {
+  const related = m.relatedProductIds
+    .map((id) => productById(id))
+    .filter((p): p is NonNullable<typeof p> => !!p)
+    .map((p) => {
+      const cat = categoryById(p.categoryId);
+      return { ...p, shelf: cat ? shelfLabel(cat) : "", textColor: textOnColor(p) };
+    });
+  return {
+    ...m,
+    img: mascotImage(m.image),
+    related,
+    // Number badge sits on the mascot's own colour → its contrast-derived textOn.
+    badgeText: m.textOn === "light" ? "var(--jg-white)" : "var(--jg-ink)",
+    num: String(i + 1).padStart(2, "0"),
+    // Desynchronised idle float.
+    bob: `--dur:${(4.6 + (i % 4) * 0.55).toFixed(2)}s;--delay:${(-i * 0.7).toFixed(2)}s;--r:${i % 2 ? 2 : -2}deg`,
+  };
+});
+const total = String(crew.length).padStart(2, "0");
 ---
 
 <JingoLayout
-  title="Mascots — Jingo"
-  description="Meet the Jingo mascots — coming soon."
-  noindex
+  title="Mascots — Meet the Jingo crew"
+  description="Meet the Jingo crew — the flavour characters behind Jingo's candies, lollipops, bubblegums and more."
 >
-  <section class="jg-section">
+  <!-- Hero ---------------------------------------------------------------->
+  <section class="hero" aria-labelledby="crew-h1">
+    <div class="hero-panel">
+      <div class="hero-copy">
+        <p data-reveal class="jg-eyebrow eb-paper">{crew.length} flavour characters</p>
+        <h1 id="crew-h1" data-reveal-heading data-reveal-now class="h1 text-balance">
+          Meet the <span class="hl">crew.</span>
+        </h1>
+        <p data-reveal class="lede">
+          The characters behind the flavours &mdash; one for every big taste in
+          the Jingo range. Say hi, then go find their packs.
+        </p>
+      </div>
+
+      <ul class="lineup" aria-label="Jump to a character">
+        {
+          crew.map((m) => (
+            <li>
+              <a href={`#${m.id}`} class="crew-link" style={`--c:${m.color}`}>
+                <span class="bob" style={m.bob}>
+                  {m.img && (
+                    <Image
+                      src={m.img}
+                      alt=""
+                      widths={[120, 200, 280]}
+                      sizes="(min-width: 960px) 120px, (min-width: 720px) 10vw, 28vw"
+                      loading="eager"
+                      class="crew-img"
+                    />
+                  )}
+                </span>
+                <span class="crew-name">{m.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Showcase ------------------------------------------------------------>
+  <div class="showcase">
+    {
+      crew.map((m, i) => (
+        <section
+          id={m.id}
+          class="mascot jg-anchor"
+          aria-labelledby={`${m.id}-h`}
+          style={`--c:${m.color};--badge-t:${m.badgeText}`}
+        >
+          <div class="jg-wrap">
+            <article class:list={["m-card jg-sticker", { flip: i % 2 === 1 }]}>
+              <div class="stage" data-reveal>
+                <span class="blob" aria-hidden="true" />
+                <div class="figure">
+                  <span class="bob" style={m.bob}>
+                    {m.img && (
+                      <Image
+                        src={m.img}
+                        alt={`${m.label}, the Jingo ${m.label.toLowerCase()} mascot`}
+                        widths={[320, 480, 640, 880]}
+                        sizes="(min-width: 960px) 420px, 76vw"
+                        loading="lazy"
+                        decoding="async"
+                        class="m-img"
+                      />
+                    )}
+                  </span>
+                  <span class="ground" aria-hidden="true" style={m.bob} />
+                </div>
+              </div>
+
+              <div class="copy">
+                <span class="num" aria-hidden="true">
+                  {m.num}<span class="num-of">/{total}</span>
+                </span>
+                <h2 id={`${m.id}-h`} data-reveal-heading class="name text-balance">
+                  {m.label}
+                </h2>
+                <p data-reveal class="stars">
+                  Stars in {m.related.length} Jingo flavour{m.related.length === 1 ? "" : "s"}
+                </p>
+                <ul data-reveal class="chips">
+                  {m.related.map((p) => (
+                    <li>
+                      <a
+                        href={`/jingo/flavours#${p.categoryId}`}
+                        class="chip"
+                        style={`--pc:${p.color};--pt:${p.textColor}`}
+                      >
+                        {p.name}
+                        <span class="chip-shelf">{p.shelf}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <!-- Close -------------------------------------------------------------->
+  <section class="close" aria-labelledby="close-h">
     <div class="jg-wrap">
-      <p class="jg-eyebrow">Coming soon</p>
-      <h1 class="jg-h2 title">The Jingo crew is getting ready.</h1>
-      <p class="jg-lede lede">
-        Our mascots are almost here. In the meantime, go say hi to the flavours.
-      </p>
-      <div class="ctas">
-        <a href="/jingo/flavours" class="jg-btn jg-btn--sun">
-          See the flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+      <div class="close-band jg-sticker">
+        <h2 id="close-h" data-reveal-heading class="close-h text-balance">
+          Every character has a flavour.
+        </h2>
+        <p data-reveal class="close-sub">
+          Taste the whole crew &mdash; all {products.length} Jingo flavours in one place.
+        </p>
+        <a data-reveal href="/jingo/flavours" class="jg-btn jg-btn--sun close-btn">
+          See all {products.length} flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
         </a>
-        <a href="/jingo" class="jg-btn jg-btn--paper">Back to Jingo</a>
       </div>
     </div>
   </section>
+
+  <JingoStockCTA />
 </JingoLayout>
 
 <style>
-  .title,
-  .lede {
-    margin-top: 20px;
+  /* --- Hero ------------------------------------------------------------- */
+  .hero {
+    padding: 10px clamp(8px, 1.6vw, 18px) 0;
   }
-  .ctas {
+  .hero-panel {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(40px, 7vw, 76px) clamp(18px, 5vw, 56px) clamp(24px, 4vw, 40px);
+    background-color: var(--jg-bubble);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.45) 2px, transparent 2.5px);
+    background-size: 26px 26px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius-lg);
+    box-shadow: 0 8px 0 var(--jg-ink);
+  }
+  /* Keep hero content within the standard content width (as .jg-wrap), so
+     the lineup never runs into the right-edge social rail on wide screens. */
+  .hero-copy,
+  .lineup {
+    max-width: 1160px;
+    margin-inline: auto;
+  }
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .eb-paper {
+    background: var(--jg-paper);
+  }
+  .h1 {
+    margin-top: 18px;
+    font-size: clamp(3rem, 11vw, 7rem);
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    color: var(--jg-ink);
+  }
+  .hl {
+    color: var(--jg-red);
+  }
+  .lede {
+    margin-top: 16px;
+    max-width: 46ch;
+    font-size: clamp(1.02rem, 2.2vw, 1.2rem);
+    line-height: 1.5;
+    color: var(--jg-ink);
+  }
+
+  .lineup {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 8px;
+    margin: clamp(26px, 5vw, 44px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 720px) {
+    .lineup {
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 6px;
+    }
+  }
+  .crew-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 6px 2px 8px;
+    border-radius: 18px;
+    color: var(--jg-ink);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.3s var(--jg-ease), background-color 0.2s ease;
+  }
+  .crew-link :global(.crew-img) {
+    display: block;
+    width: 100%;
+    max-width: 120px;
+    height: auto;
+    aspect-ratio: 9 / 11;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 0 rgba(36, 18, 26, 0.18));
+  }
+  .crew-link .bob {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .crew-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.1;
+  }
+  @media (hover: hover) {
+    .crew-link:hover {
+      transform: translateY(-6px) rotate(-4deg);
+      background: color-mix(in srgb, var(--c) 22%, transparent);
+    }
+    .lineup li:nth-child(even) .crew-link:hover {
+      transform: translateY(-6px) rotate(4deg);
+    }
+  }
+  .crew-link:active {
+    transform: scale(0.94);
+  }
+
+  /* --- Idle float (shared) ---------------------------------------------- */
+  .bob {
+    display: block;
+    animation: jg-bob var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+  }
+  @keyframes mascot-ground {
+    0%,
+    100% {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 0.22;
+    }
+    50% {
+      transform: translateX(-50%) scaleX(0.78);
+      opacity: 0.12;
+    }
+  }
+
+  /* --- Showcase --------------------------------------------------------- */
+  .showcase {
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .mascot {
+    padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .m-card {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: clamp(8px, 3vw, 40px);
+    padding: clamp(20px, 4vw, 48px);
+    background: color-mix(in srgb, var(--c) 18%, var(--jg-paper));
+    border-radius: var(--jg-radius-lg);
+  }
+  @media (min-width: 900px) {
+    .m-card {
+      grid-template-columns: 1.05fr 1fr;
+    }
+    .m-card.flip .stage {
+      order: 2;
+    }
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: clamp(260px, 52vw, 460px);
+  }
+  .blob {
+    position: absolute;
+    width: min(86%, 400px);
+    aspect-ratio: 1;
+    border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c) 45%, white), color-mix(in srgb, var(--c) 70%, var(--jg-paper)));
+    border: 2.5px solid var(--jg-ink);
+    box-shadow: 0 6px 0 var(--jg-ink);
+    rotate: -6deg;
+  }
+  .flip .blob {
+    rotate: 8deg;
+  }
+  .figure {
+    position: relative;
+    z-index: 1;
+    width: min(76%, 380px);
+    transition: transform 0.45s var(--jg-ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .figure :global(.m-img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 10px 0 rgba(36, 18, 26, 0.15));
+  }
+  .ground {
+    position: absolute;
+    left: 50%;
+    bottom: -4%;
+    width: 56%;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--jg-ink);
+    opacity: 0.2;
+    transform: translateX(-50%);
+    animation: mascot-ground var(--dur, 5s) ease-in-out var(--delay, 0s) infinite;
+    z-index: -1;
+  }
+  @media (hover: hover) {
+    .m-card:hover .figure {
+      transform: rotate(-7deg) scale(1.06) translateY(-8px);
+    }
+    .m-card.flip:hover .figure {
+      transform: rotate(7deg) scale(1.06) translateY(-8px);
+    }
+  }
+  .figure:active {
+    transform: scale(0.95, 1.04);
+    transition-duration: 0.15s;
+  }
+
+  .copy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .num {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+    padding: 8px 14px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--c);
+    color: var(--badge-t);
+    box-shadow: 0 3px 0 var(--jg-ink);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    rotate: -3deg;
+  }
+  .num-of {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+  .name {
+    margin-top: 16px;
+    font-size: clamp(2.8rem, 9vw, 5.6rem);
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    color: var(--jg-ink);
+  }
+  .stars {
+    margin-top: 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--jg-ink-soft);
+  }
+  .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 36px;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 18px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--pc);
+    color: var(--pt);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.25s var(--jg-ease),
+      box-shadow 0.2s ease;
+  }
+  .chip-shelf {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--jg-paper);
+    color: var(--jg-ink);
+  }
+  @media (hover: hover) {
+    .chip:hover {
+      transform: translateY(-3px) rotate(-2deg);
+      box-shadow: 0 7px 0 var(--jg-ink);
+    }
+  }
+  .chip:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+
+  /* --- Close ------------------------------------------------------------ */
+  .close {
+    padding-block: clamp(1rem, 3vw, 2rem) clamp(2.5rem, 6vw, 4rem);
+  }
+  .close-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: clamp(28px, 6vw, 64px) clamp(20px, 5vw, 56px);
+    background: var(--jg-sky);
+    border-radius: var(--jg-radius-lg);
+    box-shadow: 0 8px 0 var(--jg-ink);
+  }
+  .close-h {
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: var(--jg-ink);
+  }
+  .close-sub {
+    margin-top: 12px;
+    max-width: 44ch;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+    line-height: 1.5;
+    color: var(--jg-ink);
+  }
+  .close-btn {
+    margin-top: 22px;
+  }
+
+  /* --- Reduced motion: static crew -------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    .bob,
+    .ground {
+      animation: none !important;
+    }
+    .bob {
+      transform: none;
+    }
+    .figure,
+    .crew-link,
+    .chip {
+      transition: none;
+    }
+    .m-card:hover .figure,
+    .m-card.flip:hover .figure,
+    .crew-link:hover,
+    .lineup li:nth-child(even) .crew-link:hover {
+      transform: none;
+    }
   }
 </style>

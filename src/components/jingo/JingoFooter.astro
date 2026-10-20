@@ -3,6 +3,7 @@
 // link (fallback for the mobile popover) and ties back to Tall Nest.
 import { Image } from "astro:assets";
 import logoWhite from "../../assets/jingo/jingo-logo-white.png";
+import { jingoSocials } from "../../data/socials";
 
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const storyHref = path === "/jingo" ? "#story" : "/jingo#story";
@@ -36,6 +37,22 @@ const year = new Date().getFullYear();
         <Image src={logoWhite} alt="Jingo" width={360} class="jf-logo-img" loading="lazy" />
       </a>
       <p class="jf-tag">Big flavour, small price, pure fun.</p>
+      <ul class="jf-social">
+        {
+          jingoSocials.map((s) => (
+            <li>
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.network}
+                class="jf-social-link"
+                set:html={s.icon}
+              />
+            </li>
+          ))
+        }
+      </ul>
     </div>
 
     {
@@ -105,6 +122,47 @@ const year = new Date().getFullYear();
     font-size: clamp(1.15rem, 2.4vw, 1.35rem);
     font-weight: 700;
     letter-spacing: -0.02em;
+  }
+  /* Socials — same accounts + icons as the rail; candy sticker buttons. */
+  .jf-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .jf-social-link {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 50%;
+    background: var(--jg-cream);
+    color: var(--jg-ink);
+    box-shadow: 0 3px 0 var(--jg-ink);
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.25s var(--jg-ease),
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  @media (hover: hover) {
+    .jf-social-link:hover {
+      background: var(--jg-sun);
+      transform: translateY(-3px) rotate(-8deg);
+      box-shadow: 0 5px 0 var(--jg-ink);
+    }
+  }
+  .jf-social-link:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jf-social-link {
+      transition: none;
+    }
   }
   .jf-h {
     font-size: 0.75rem;
