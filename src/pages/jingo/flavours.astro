@@ -1,97 +1,244 @@
 ---
-// PLACEHOLDER — the full flavour showcase is built in a later pass. For now
-// this route resolves (no 404) and carries an anchor per category so the hub's
-// /jingo/flavours#<category-id> links land in the right place.
+// /jingo/flavours — the full flavour wall: every product in products[],
+// grouped by categories[] in catalogue order, plus packaging SKUs from
+// specialSkus[]. Each section keeps its #<category-id> anchor (the hub's
+// category cards link to them). Cards are photo-ready: see packImage() in
+// src/lib/jingo.ts and src/assets/jingo/products/README.md.
 import JingoLayout from "../../layouts/JingoLayout.astro";
-import { categories, productsIn, textOnColor, flavourLabel } from "../../lib/jingo";
+import JingoCategoryBar from "../../components/jingo/JingoCategoryBar.astro";
+import JingoProductCard from "../../components/jingo/JingoProductCard.astro";
+import JingoPackSku from "../../components/jingo/JingoPackSku.astro";
+import JingoStockCTA from "../../components/jingo/JingoStockCTA.astro";
+import {
+  categories,
+  products,
+  productsIn,
+  skusIn,
+  categoryTheme,
+  flavourLabel,
+  priceRange,
+} from "../../lib/jingo";
+
+const { min } = priceRange();
+const sections = categories.map((c, i) => ({
+  ...c,
+  theme: categoryTheme(c.id, i),
+  items: productsIn(c.id),
+  skus: skusIn(c.id),
+}));
 ---
 
 <JingoLayout
   title="Flavours — Jingo"
   description="Every Jingo flavour — candies, toffees, Squizo liquid chocolates, Twist lollipops, Bublo bubblegums, Choco Chums and Mehfil nimkos."
-  noindex
 >
-  <section class="jg-section">
-    <div class="jg-wrap">
-      <p class="jg-eyebrow">Coming soon</p>
-      <h1 class="jg-h2 title">The full flavour wall is on its way.</h1>
-      <p class="jg-lede lede">
-        Here&rsquo;s a quick look at every range while we finish it.
-      </p>
-
-      <div class="cats">
-        {
-          categories.map((c) => (
-            <section id={c.id} class="cat jg-anchor">
-              <h2 class="cat-name">
-                {c.name}
-                {c.subBrand && <span class="cat-sub"> · {c.subBrand}</span>}
-              </h2>
-              <p class="cat-meta">
-                {flavourLabel(c.flavourCount)} · {c.price}
-              </p>
-              <ul class="chips">
-                {productsIn(c.id).map((p) => (
-                  <li class="chip" style={`background:${p.color};color:${textOnColor(p)}`}>
-                    {p.name}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
-        }
+  <div class="wall">
+    <!-- Intro ("All" in the jump bar) -->
+    <section id="all" class="intro jg-anchor" aria-labelledby="flv-h1">
+      <div class="jg-wrap">
+        <p data-reveal class="jg-eyebrow">The flavour wall</p>
+        <h1 id="flv-h1" data-reveal-heading data-reveal-now class="h1 text-balance">
+          All {products.length} flavours. Pick a favourite.
+        </h1>
+        <p data-reveal class="jg-lede lede">
+          Every Jingo treat in one place &mdash; {categories.length} categories,
+          {" "}{products.length} flavours, all at pocket-money prices from
+          Rs.&nbsp;{min}.
+        </p>
+        <ul class="palette" aria-hidden="true">
+          {products.map((p) => <li style={`background:${p.color}`} />)}
+        </ul>
       </div>
+    </section>
 
-      <a href="/jingo" class="jg-btn back">
-        <span aria-hidden="true">&larr;</span> Back to Jingo
-      </a>
-    </div>
-  </section>
+    <JingoCategoryBar />
+
+    {
+      sections.map((c) => (
+        <section
+          id={c.id}
+          class="cat jg-anchor"
+          aria-labelledby={`${c.id}-h`}
+          style={`--cat-bg:${c.theme.bg};--cat-fg:${c.theme.fg};--badge-bg:${c.theme.badgeBg};--badge-fg:${c.theme.badgeFg}`}
+        >
+          <div class="jg-wrap">
+            <header class="cat-head jg-sticker">
+              <div class="cat-top">
+                {c.subBrand && <span class="badge">{c.subBrand}</span>}
+                <span class="chip">{flavourLabel(c.flavourCount)}</span>
+                <span class="chip">{c.price}</span>
+              </div>
+              <h2 id={`${c.id}-h`} data-reveal-heading class="cat-name">
+                {c.name}
+              </h2>
+              <p class="cat-blurb">{c.blurb}</p>
+              <p class="cat-pack">{c.packing}</p>
+            </header>
+
+            <ul data-reveal-group class="grid">
+              {c.items.map((p) => (
+                <li data-reveal-item class="cell">
+                  <JingoProductCard product={p} line={c.subBrand ?? c.name} />
+                </li>
+              ))}
+            </ul>
+
+            {c.skus.length > 0 && (
+              <div data-reveal class="skus">
+                {c.skus.map((s) => (
+                  <JingoPackSku sku={s} category={c} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <div class="cta">
+    <JingoStockCTA />
+  </div>
 </JingoLayout>
 
 <style>
-  .title,
-  .lede {
+  .wall {
+    --jg-cbar-h: 66px;
+    /* A category's top lands flush under the pinned header + bar; its own
+       16px top padding is the breathing room. (Landing 16px lower would leave
+       the bar unpinned when jumping to the first category, right after it.) */
+    --jg-anchor-offset: calc(var(--jg-header-h) + var(--jg-cbar-h));
+  }
+
+  .intro {
+    padding-block: clamp(2.5rem, 7vw, 4.5rem) clamp(2rem, 5vw, 3rem);
+  }
+  .h1 {
     margin-top: 20px;
-  }
-  .cats {
-    display: grid;
-    gap: 40px;
-    margin-top: 48px;
-  }
-  .cat-name {
-    font-size: 1.6rem;
+    max-width: 16ch;
+    font-size: clamp(2.5rem, 8vw, 5rem);
     font-weight: 700;
-    letter-spacing: -0.025em;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
   }
-  .cat-sub {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--jg-ink-soft);
+  .lede {
+    margin-top: 18px;
   }
-  .cat-meta {
-    margin-top: 4px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--jg-ink-soft);
-  }
-  .chips {
+  .palette {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin: 16px 0 0;
+    gap: 6px;
+    margin: 26px 0 0;
     padding: 0;
     list-style: none;
   }
+  .palette li {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--jg-ink);
+  }
+
+  .cat {
+    padding-block: 16px clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .cat-head {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(20px, 4vw, 34px);
+    background: var(--cat-bg);
+    color: var(--cat-fg);
+  }
+  .cat-head::after {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -40px;
+    width: 200px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.3), transparent);
+    pointer-events: none;
+  }
+  .cat-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .badge,
   .chip {
-    padding: 8px 16px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 7px 11px;
     border: 2px solid var(--jg-ink);
     border-radius: 999px;
-    font-weight: 700;
   }
-  .back {
-    margin-top: 56px;
+  .badge {
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    letter-spacing: 0.14em;
+  }
+  .chip {
+    background: var(--jg-paper);
+    color: var(--jg-ink);
+  }
+  .cat-name {
+    margin-top: 16px;
+    font-size: clamp(2.1rem, 6.5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+  .cat-blurb {
+    margin-top: 10px;
+    max-width: 48ch;
+    font-size: clamp(1rem, 2.2vw, 1.15rem);
+    font-weight: 500;
+    line-height: 1.45;
+  }
+  .cat-pack {
+    margin-top: 12px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: clamp(18px, 3vw, 26px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 720px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+  }
+  @media (min-width: 1080px) {
+    .grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 22px;
+    }
+  }
+  .cell {
+    display: flex;
+  }
+
+  .skus {
+    display: grid;
+    gap: 14px;
+    margin-top: clamp(18px, 3vw, 26px);
+  }
+
+  .cta {
+    margin-top: clamp(1rem, 3vw, 2rem);
   }
 </style>

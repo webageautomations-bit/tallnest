@@ -2,18 +2,57 @@
 // Nothing here hardcodes product names or product colours; it only reads the
 // data file. The category accent map below is Jingo *theme* (the data file has
 // no category colour) and falls back gracefully for any future category id.
+import type { ImageMetadata } from "astro";
 import {
   categories,
   products,
+  specialSkus,
   type JingoCategory,
   type JingoProduct,
 } from "../data/jingo-products";
 
-export { categories, products };
+export { categories, products, specialSkus };
 export type { JingoCategory, JingoProduct };
+export type JingoSku = (typeof specialSkus)[number];
 
 export const productsIn = (categoryId: string): JingoProduct[] =>
   products.filter((p) => p.categoryId === categoryId);
+
+export const skusIn = (categoryId: string): JingoSku[] =>
+  specialSkus.filter((s) => s.categoryId === categoryId);
+
+/** Short shelf label: the sub-brand where there is one ("Squizo"), else the
+ *  category name ("Candies"). */
+export const shelfLabel = (c: JingoCategory): string =>
+  c.subBrand
+    ? c.subBrand.charAt(0) + c.subBrand.slice(1).toLowerCase()
+    : c.name;
+
+// ---------------------------------------------------------------------------
+// Pack photos — PHOTO-READY convention.
+// Drop a pack shot at src/assets/jingo/products/<id>.{webp,png,jpg,jpeg}
+// (id = product or special-SKU id, e.g. cola-candy.webp) and it is picked up
+// automatically at build time and optimised to WebP by astro:assets. No file →
+// the card falls back to its colour treatment. No code change either way.
+// ---------------------------------------------------------------------------
+const packFiles = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/jingo/products/*.{webp,png,jpg,jpeg}",
+  { eager: true },
+);
+const EXT_RANK = ["webp", "png", "jpg", "jpeg"];
+const packById = new Map<string, { img: ImageMetadata; rank: number }>();
+for (const [path, mod] of Object.entries(packFiles)) {
+  const file = path.split("/").pop() ?? "";
+  const dot = file.lastIndexOf(".");
+  const id = file.slice(0, dot);
+  const rank = EXT_RANK.indexOf(file.slice(dot + 1).toLowerCase());
+  const prev = packById.get(id);
+  if (!prev || rank < prev.rank) packById.set(id, { img: mod.default, rank });
+}
+
+/** Pack image for a product / SKU id, if one has been dropped in. */
+export const packImage = (id: string): ImageMetadata | undefined =>
+  packById.get(id)?.img;
 
 export const categoryById = (id: string): JingoCategory | undefined =>
   categories.find((c) => c.id === id);

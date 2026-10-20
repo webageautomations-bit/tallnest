@@ -1,0 +1,72 @@
+---
+// Decorative category silhouette for colour-block cards (no pack photo yet):
+// a wrapped candy, toffee, squeeze pouch, lollipop, bubble, bunties or a nimko
+// bowl. Inherits currentColor so it tints with the card's textOn colour.
+interface Props {
+  categoryId: string;
+  class?: string;
+}
+const { categoryId, class: cls } = Astro.props;
+---
+
+<svg class={cls} viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  {
+    categoryId === "candies" ? (
+      <g>
+        <path d="M38 60 8 36q-6 24 0 48z" />
+        <path d="M82 60l30-24q6 24 0 48z" />
+        <ellipse cx="60" cy="60" rx="30" ry="24" />
+      </g>
+    ) : categoryId === "toffees" ? (
+      <g>
+        <path d="M34 60 10 42q-5 18 0 36z" />
+        <path d="M86 60l24-18q5 18 0 36z" />
+        <rect x="30" y="40" width="60" height="40" rx="10" />
+      </g>
+    ) : categoryId === "squizo" ? (
+      <g>
+        <rect x="52" y="8" width="16" height="16" rx="4" />
+        <path d="M46 22h28l10 14v62a14 14 0 0 1-14 14H50a14 14 0 0 1-14-14V36z" />
+      </g>
+    ) : categoryId === "lollipops" ? (
+      <g>
+        <rect x="55" y="62" width="10" height="54" rx="5" />
+        <circle cx="60" cy="42" r="34" />
+      </g>
+    ) : categoryId === "bubblegums" ? (
+      <g>
+        <circle cx="54" cy="58" r="40" />
+        <circle cx="98" cy="22" r="14" />
+      </g>
+    ) : categoryId === "bunties" ? (
+      <g>
+        <circle cx="36" cy="40" r="17" />
+        <circle cx="78" cy="34" r="17" />
+        <circle cx="58" cy="72" r="17" />
+        <circle cx="96" cy="76" r="15" />
+        <circle cx="24" cy="86" r="15" />
+      </g>
+    ) : categoryId === "nimkos" ? (
+      <g>
+        <circle cx="40" cy="44" r="9" />
+        <circle cx="60" cy="36" r="10" />
+        <circle cx="80" cy="46" r="8" />
+        <circle cx="52" cy="52" r="7" />
+        <circle cx="70" cy="54" r="7" />
+        <path d="M12 58h96a48 48 0 0 1-96 0z" />
+      </g>
+    ) : (
+      <g>
+        <path d="M38 60 8 36q-6 24 0 48z" />
+        <path d="M82 60l30-24q6 24 0 48z" />
+        <ellipse cx="60" cy="60" rx="30" ry="24" />
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  svg {
+    fill: currentColor;
+  }
+</style>

@@ -1,0 +1,218 @@
+---
+// One flavour on the /jingo/flavours wall.
+//  · Pack render present (src/assets/jingo/products/<id>.*): the pack is the
+//    hero on a surface softly tinted with the product's colour; name, flavour
+//    and price sit on a paper label (ink), and the tag chip pairs `color` with
+//    `textOn`.
+//  · Render missing: the colour block — product `color` with the name in
+//    `textOn`, plus a category silhouette — so nothing ever breaks.
+import { Image } from "astro:assets";
+import JingoCandyShape from "./JingoCandyShape.astro";
+import { packImage, textOnColor, type JingoProduct } from "../../lib/jingo";
+
+interface Props {
+  product: JingoProduct;
+  line?: string; // sub-brand / category line shown above the name
+}
+const { product: p, line } = Astro.props;
+const img = packImage(p.id);
+---
+
+<article
+  class:list={["card jg-sticker", img ? "has-photo" : "no-photo"]}
+  style={`--c:${p.color};--t:${textOnColor(p)}`}
+>
+  <div class="media">
+    {
+      img ? (
+        <>
+          {line && <span class="tag">{line}</span>}
+          <Image
+            src={img}
+            alt={`${p.name} pack`}
+            widths={[240, 360, 480, 640]}
+            sizes="(min-width: 1080px) 270px, (min-width: 720px) 30vw, 46vw"
+            loading="lazy"
+            decoding="async"
+            class="pack"
+          />
+        </>
+      ) : (
+        <>
+          <JingoCandyShape categoryId={p.categoryId} class="shape" />
+          <span class="shine" aria-hidden="true" />
+          {line && <span class="line">{line}</span>}
+          <h3 class="name text-balance">{p.name}</h3>
+        </>
+      )
+    }
+  </div>
+  <div class="label">
+    {img && <h3 class="name name--label text-balance">{p.name}</h3>}
+    <span class="flavour">{p.flavour}</span>
+    <span class="price">{p.price}</span>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    background: var(--jg-paper);
+    transition:
+      transform 0.3s var(--jg-ease),
+      box-shadow 0.3s var(--jg-ease);
+  }
+  @media (hover: hover) {
+    .card:hover {
+      transform: translateY(-6px) rotate(-1.5deg);
+      box-shadow: var(--jg-shadow-lift);
+    }
+    :global(li:nth-child(even)) > .card:hover {
+      transform: translateY(-6px) rotate(1.5deg);
+    }
+  }
+
+  .media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    border-bottom: 2.5px solid var(--jg-ink);
+  }
+
+  /* --- Colour-block fallback ------------------------------------------- */
+  .no-photo .media {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 14px;
+    background: var(--c);
+    color: var(--t);
+  }
+  /* The svg is rendered by JingoCandyShape (its own style scope), so reach it
+     via :global under this card's scoped .media. */
+  .media :global(.shape) {
+    position: absolute;
+    top: -8%;
+    right: -14%;
+    width: 78%;
+    opacity: 0.2;
+    rotate: -14deg;
+    transition: rotate 0.4s var(--jg-ease);
+  }
+  @media (hover: hover) {
+    .card:hover .media :global(.shape) {
+      rotate: -4deg;
+    }
+  }
+  .shine {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 30px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    rotate: -28deg;
+  }
+  .line {
+    position: relative;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+  .name {
+    position: relative;
+    font-size: clamp(1.25rem, 3.6vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  /* --- Pack photo -------------------------------------------------------- */
+  /* The pack is the hero; its colour only frames it — a soft tint with a
+     light pool behind the box, never full saturation behind text. */
+  .has-photo .media {
+    background:
+      radial-gradient(60% 55% at 50% 52%, rgba(255, 255, 255, 0.75), transparent 72%),
+      color-mix(in srgb, var(--c) 32%, var(--jg-paper));
+  }
+  /* The one piece of text on colour: full product colour + its textOn. */
+  .tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 6px 9px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--c);
+    color: var(--t);
+  }
+  /* Fixed inset box (clear of the tag) so portrait boxes, landscape boxes and
+     pouches all fit whole — object-fit needs a definite height to contain. */
+  .has-photo .media :global(.pack) {
+    position: absolute;
+    top: max(17%, 42px); /* tag is ~36px from the top edge */
+    left: 9%;
+    width: 82%;
+    height: calc(92% - max(17%, 42px));
+    object-fit: contain;
+    filter: drop-shadow(0 10px 12px rgba(36, 18, 26, 0.25));
+    transition: transform 0.35s var(--jg-ease);
+  }
+  @media (hover: hover) {
+    .has-photo:hover .media :global(.pack) {
+      transform: scale(1.05) rotate(-2deg);
+    }
+  }
+  .name--label {
+    width: 100%;
+    font-size: clamp(1.05rem, 2.6vw, 1.25rem);
+    color: var(--jg-ink);
+  }
+
+  /* --- Label --------------------------------------------------------------- */
+  .label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+    padding: 12px 14px 14px;
+    color: var(--jg-ink);
+  }
+  .flavour {
+    font-size: 0.86rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--jg-ink-soft);
+  }
+  .price {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-sun);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    .media :global(.shape),
+    .has-photo .media :global(.pack) {
+      transition: none;
+    }
+  }
+</style>

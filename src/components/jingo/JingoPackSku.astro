@@ -1,0 +1,185 @@
+---
+// A packaging SKU (from specialSkus[]) — e.g. the Mix Toffees Pouch. Styled as
+// a wide "bulk pack" strip, deliberately unlike a flavour card, so it reads as
+// a pack format of the range rather than an extra flavour. Photo-ready via the
+// same <id>.* convention; otherwise a pouch made of the range's own colours.
+import { Image } from "astro:assets";
+import {
+  packImage,
+  productsIn,
+  type JingoCategory,
+  type JingoSku,
+} from "../../lib/jingo";
+
+interface Props {
+  sku: JingoSku;
+  category: JingoCategory;
+}
+const { sku, category } = Astro.props;
+const img = packImage(sku.id);
+const stripes = productsIn(category.id).map((p) => p.color);
+const range = category.name.toLowerCase();
+---
+
+<aside class="sku" aria-label={`${sku.name} — bulk pack`}>
+  <div class:list={["art", { "has-photo": img }]} aria-hidden={img ? undefined : "true"}>
+    {
+      img ? (
+        <Image src={img} alt={`${sku.name} pack`} widths={[240, 360, 480]} sizes="140px" loading="lazy" decoding="async" class="pack" />
+      ) : (
+        <div class="pouch">
+          {stripes.map((c) => (
+            <span style={`background:${c}`} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+
+  <div class="copy">
+    <span class="badge">Bulk pack</span>
+    <h3 class="name">{sku.name}</h3>
+    <p class="desc">
+      Assorted {range} in one pouch &mdash; a bulk pack format of the
+      {" "}{range} range, not a separate flavour.
+    </p>
+    <p class="packing">{sku.packing}</p>
+  </div>
+
+  <div class="price">
+    <span class="price-k">Per pouch</span>
+    <span class="price-v">{sku.price}</span>
+  </div>
+</aside>
+
+<style>
+  .sku {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: clamp(18px, 3vw, 26px);
+    background: var(--jg-paper);
+    border: 2.5px dashed var(--jg-ink);
+    border-radius: var(--jg-radius);
+  }
+  @media (min-width: 640px) {
+    .sku {
+      grid-template-columns: auto 1fr auto;
+      gap: 26px;
+    }
+  }
+
+  .art {
+    display: grid;
+    place-items: center;
+    width: 112px;
+    height: 112px;
+  }
+  .art.has-photo {
+    width: 140px;
+    height: 176px;
+  }
+  .art :global(.pack) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    rotate: -4deg;
+    filter: drop-shadow(0 10px 12px rgba(36, 18, 26, 0.25));
+  }
+  /* Pouch silhouette striped with the range's real flavour colours. */
+  .pouch {
+    display: flex;
+    width: 84px;
+    height: 104px;
+    overflow: hidden;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 14px 14px 22px 22px;
+    box-shadow: 0 5px 0 var(--jg-ink);
+    rotate: -6deg;
+    position: relative;
+  }
+  .pouch::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 14px;
+    background: var(--jg-paper);
+    border-bottom: 2.5px solid var(--jg-ink);
+    z-index: 1;
+  }
+  .pouch span {
+    flex: 1;
+  }
+
+  .copy {
+    min-width: 0;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    padding: 7px 11px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-ink);
+    color: var(--jg-sun);
+  }
+  .name {
+    margin-top: 10px;
+    font-size: clamp(1.4rem, 3.6vw, 1.9rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .desc {
+    margin-top: 8px;
+    max-width: 52ch;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--jg-ink-soft);
+  }
+  .packing {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--jg-ink);
+  }
+
+  .price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  @media (min-width: 640px) {
+    .price {
+      align-items: flex-end;
+      text-align: end;
+    }
+  }
+  .price-k {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--jg-ink-soft);
+  }
+  .price-v {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    padding: 8px 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-sun);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    white-space: nowrap;
+  }
+</style>

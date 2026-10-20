@@ -1,0 +1,181 @@
+---
+// Category jump bar for /jingo/flavours — pinned under the Jingo header.
+// Plain #anchor links (work with JS off; smooth-scroll + .jg-anchor handle the
+// landing). With JS, a scroll-spy marks the category in view and keeps its
+// pill visible inside the horizontally scrolling bar on phones.
+import { categories, categoryTheme, shelfLabel } from "../../lib/jingo";
+
+const items = [
+  { id: "all", label: "All", dot: "var(--jg-red)" },
+  ...categories.map((c, i) => ({ id: c.id, label: shelfLabel(c), dot: categoryTheme(c.id, i).bg })),
+];
+---
+
+<nav class="cbar" aria-label="Jump to a category" data-cbar>
+  <div class="jg-wrap cbar-wrap">
+    <ul class="cbar-list">
+      {
+        items.map((it) => (
+          <li>
+            <a href={`#${it.id}`} class="pill" data-cbar-link={it.id}>
+              <span class="dot" style={`background:${it.dot}`} aria-hidden="true" />
+              {it.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .cbar {
+    position: sticky;
+    top: var(--jg-header-h);
+    z-index: 40;
+    height: var(--jg-cbar-h);
+    display: flex;
+    align-items: center;
+    background: color-mix(in srgb, var(--jg-cream) 92%, transparent);
+    backdrop-filter: saturate(1.4) blur(12px);
+    -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    border-block: 2.5px solid var(--jg-ink);
+  }
+  .cbar-wrap {
+    /* Edge padding comes from the scroller so pills can scroll flush. */
+    padding-inline: 0;
+  }
+  .cbar-list {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 4px clamp(16px, 5vw, 40px) 6px;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cbar-list::-webkit-scrollbar {
+    display: none;
+  }
+  .cbar-list li {
+    flex: none;
+    scroll-snap-align: start;
+    scroll-margin-inline: clamp(16px, 5vw, 40px);
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    box-shadow: 0 3px 0 var(--jg-ink);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--jg-ink);
+    text-decoration: none;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.2s var(--jg-ease),
+      background-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--jg-ink);
+  }
+  @media (hover: hover) {
+    .pill:hover {
+      transform: translateY(-2px);
+      background: var(--jg-bubble);
+    }
+  }
+  .pill:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  .pill.is-active {
+    background: var(--jg-sun);
+  }
+  @media (min-width: 1080px) {
+    .cbar-list {
+      justify-content: center;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pill {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Scroll-spy: highlight the category in view (progressive enhancement).
+  const bar = document.querySelector<HTMLElement>("[data-cbar]");
+  const list = bar?.querySelector<HTMLElement>(".cbar-list");
+  const links = Array.from(
+    bar?.querySelectorAll<HTMLAnchorElement>("[data-cbar-link]") ?? [],
+  );
+  const sections = links
+    .map((a) => document.getElementById(a.dataset.cbarLink ?? ""))
+    .filter((s): s is HTMLElement => !!s);
+
+  if (bar && list && sections.length) {
+    let current = "";
+    const setActive = (id: string) => {
+      if (id === current) return;
+      current = id;
+      for (const a of links) {
+        const on = a.dataset.cbarLink === id;
+        a.classList.toggle("is-active", on);
+        if (on) {
+          a.setAttribute("aria-current", "true");
+          // Keep the active pill in view inside the bar only (never scroll the
+          // page itself).
+          const li = a.parentElement as HTMLElement;
+          const left = li.offsetLeft - list.clientWidth / 2 + li.offsetWidth / 2;
+          list.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+        } else {
+          a.removeAttribute("aria-current");
+        }
+      }
+    };
+
+    // The section whose top has passed a line just under the *pinned* bar
+    // (its pinned `top` offset + height). Measuring from its live position would
+    // mark the first category active before the bar has even pinned.
+    const update = () => {
+      const pinnedTop = parseFloat(getComputedStyle(bar).top) || 0;
+      const line = pinnedTop + bar.offsetHeight + 24;
+      let id = sections[0].id;
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top <= line) id = s.id;
+      }
+      setActive(id);
+    };
+
+    let ticking = false;
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          update();
+        });
+      },
+      { passive: true },
+    );
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  }
+</script>
