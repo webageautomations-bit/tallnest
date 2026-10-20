@@ -1,0 +1,386 @@
+---
+// /jingo/arcade/quiz — "Which Jingo Candy Are You?"
+// Content: src/data/jingo-quiz.ts (questions, results, rarityOrder).
+// Result product details come from jingo-products.ts and the character from
+// jingo-mascots.ts — nothing about a candy is hardcoded here.
+// Flow: intro → 7 questions (one at a time, Back allowed) → result.
+import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../components/arcade/ShareResult.astro";
+import { questions, results, rarityOrder } from "../../../data/jingo-quiz";
+import { mascots } from "../../../data/jingo-mascots";
+import { productById } from "../../../lib/jingo";
+import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+
+// Build-time integrity: every scored id and every result must resolve.
+const resultIds = new Set(results.map((r) => r.productId));
+for (const q of questions) {
+  for (const o of q.options) {
+    for (const id of o.scores) {
+      if (!resultIds.has(id)) throw new Error(`jingo-quiz: ${q.id}${o.id} scores "${id}", which has no result`);
+    }
+  }
+}
+
+const resolved = await Promise.all(
+  results.map(async (r) => {
+    const p = productById(r.productId);
+    if (!p) throw new Error(`jingo-quiz: unknown productId "${r.productId}"`);
+    const m = mascots.find((x) => x.id === r.mascotId);
+    if (!m) throw new Error(`jingo-quiz: unknown mascotId "${r.mascotId}"`);
+    return {
+      id: p.id,
+      name: p.name,
+      flavour: p.flavour,
+      price: p.price,
+      color: p.color,
+      tint: p.tint,
+      textOn: p.textOn,
+      title: r.title,
+      blurb: r.blurb,
+      mascot: { label: m.label, color: m.color, img: await mascotSrc(m.image, 640) },
+      pack: await packSrc(p.id, 320),
+    };
+  }),
+);
+
+const url = gameUrl(Astro.site, "quiz");
+const data = {
+  questions: questions.map((q) => ({
+    id: q.id,
+    prompt: q.prompt,
+    options: q.options.map((o) => ({ id: o.id, text: o.text, scores: o.scores })),
+  })),
+  results: resolved,
+  rarityOrder,
+  url,
+};
+---
+
+<ArcadeGameLayout
+  slug="quiz"
+  title="Which Jingo Candy Are You? — Jingo Arcade Quiz"
+  description="Seven questions, one very specific verdict: find out which of the nine Jingo candies you are — then share your flavour."
+>
+  <div class="qz" data-quiz>
+    <!-- Intro -->
+    <section class="ag-screen ag-panel ag-panel--accent qz-intro" data-screen="intro" aria-labelledby="qz-intro-h">
+      <p class="qz-kicker">{questions.length} questions &middot; {results.length} candies</p>
+      <h2 id="qz-intro-h" class="ag-display">Which Jingo candy are you?</h2>
+      <p class="ag-sub">
+        No right answers, no timer. Just pick what you&rsquo;d actually do &mdash; we&rsquo;ll
+        tell you which candy you are.
+      </p>
+      <div class="ag-actions">
+        <button type="button" class="jg-btn jg-btn--paper qz-start" data-start>
+          Start the quiz <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Question -->
+    <section class="ag-screen qz-q" data-screen="question" hidden aria-labelledby="qz-prompt">
+      <div class="qz-progress">
+        <p class="qz-count" data-count>Question 1 of {questions.length}</p>
+        <div
+          class="qz-bar"
+          role="progressbar"
+          aria-label="Quiz progress"
+          aria-valuemin="0"
+          aria-valuemax={questions.length}
+          aria-valuenow="1"
+          data-bar
+        >
+          <span class="qz-bar-fill" data-bar-fill></span>
+        </div>
+      </div>
+      <h2 id="qz-prompt" class="qz-prompt" tabindex="-1" data-prompt></h2>
+      <ol class="qz-options" role="list" data-options></ol>
+      <button type="button" class="qz-back" data-back>
+        <span aria-hidden="true">&larr;</span> Previous question
+      </button>
+    </section>
+
+    <!-- Result -->
+    <section class="ag-screen qz-result" data-screen="result" hidden aria-labelledby="qz-result-h">
+      <div class="qz-card" data-result-card>
+        <div class="qz-figure">
+          <img class="qz-mascot" data-r-mascot alt="" width="640" height="784" decoding="async" />
+        </div>
+        <div class="qz-copy">
+          <p class="qz-kicker">Your Jingo flavour</p>
+          <h2 id="qz-result-h" class="qz-result-h" tabindex="-1" data-r-heading></h2>
+          <p class="qz-blurb" data-r-blurb></p>
+
+          <div class="qz-pack">
+            <img class="qz-pack-img" data-r-pack alt="" width="320" height="424" decoding="async" />
+            <div>
+              <p class="qz-pack-name" data-r-name></p>
+              <p class="qz-pack-meta"><span data-r-flavour></span> &middot; <span data-r-price></span></p>
+            </div>
+          </div>
+
+          <div class="ag-actions">
+            <a href="/jingo/flavours#candies" class="jg-btn jg-btn--sun">
+              See it in the range <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+            <button type="button" class="jg-btn jg-btn--paper" data-restart>Play again</button>
+          </div>
+
+          <ShareResult message="Which Jingo candy are you? Seven questions, one very specific verdict." url={url} />
+        </div>
+      </div>
+    </section>
+
+    <p class="ag-sr" aria-live="polite" data-live></p>
+  </div>
+
+  <script is:inline type="application/json" id="quiz-data" set:html={jsonForScript(data)} />
+</ArcadeGameLayout>
+
+<script>
+  import { initQuiz } from "../../../scripts/arcade/quiz";
+  initQuiz();
+</script>
+
+<style>
+  .qz {
+    max-width: 760px;
+    margin-inline: auto;
+    scroll-margin-top: calc(var(--jg-header-h) + 12px);
+  }
+  .qz-kicker {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .qz-intro .ag-display {
+    font-size: clamp(2.2rem, 9vw, 4rem);
+  }
+
+  /* Question */
+  .qz-progress {
+    display: grid;
+    gap: 8px;
+  }
+  .qz-count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--jg-ink-soft);
+  }
+  .qz-bar {
+    height: 14px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-paper);
+    overflow: hidden;
+  }
+  .qz-bar-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--ag-accent);
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.35s var(--jg-ease);
+  }
+  .qz-prompt {
+    margin-top: 22px;
+    font-size: clamp(1.6rem, 5.6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    outline: none;
+  }
+  .qz-options {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .qz-options :global(.qz-opt) {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 12px 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 20px;
+    background: var(--jg-paper);
+    box-shadow: 0 4px 0 var(--jg-ink);
+    color: var(--jg-ink);
+    font: inherit;
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.2s var(--jg-ease),
+      box-shadow 0.2s var(--jg-ease),
+      background-color 0.15s ease;
+  }
+  .qz-options :global(.qz-letter) {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--jg-sun);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  @media (hover: hover) {
+    .qz-options :global(.qz-opt:hover) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--jg-ink);
+    }
+  }
+  .qz-options :global(.qz-opt:active),
+  .qz-options :global(.qz-opt.is-picked) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--jg-ink);
+  }
+  .qz-options :global(.qz-opt.is-picked),
+  .qz-options :global(.qz-opt[aria-pressed="true"]) {
+    background: var(--ag-accent);
+  }
+  .qz-options :global(.qz-opt:focus-visible) {
+    border-radius: 20px;
+  }
+  .qz-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-top: 18px;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--jg-ink);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  /* Result — tinted with the candy's own pack colours (set in JS). */
+  .qz-card {
+    display: grid;
+    gap: 8px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius-lg);
+    background: var(--r-tint, var(--jg-paper));
+    box-shadow: 0 8px 0 var(--jg-ink);
+    overflow: hidden;
+  }
+  .qz-figure {
+    display: grid;
+    place-items: center;
+    padding: 22px 16px 0;
+    background:
+      radial-gradient(circle closest-side at 50% 55%, color-mix(in srgb, var(--r-color, var(--ag-accent)) 55%, transparent) 0 80%, transparent 81%);
+  }
+  .qz-mascot {
+    width: min(78%, 340px);
+    height: auto;
+    filter: drop-shadow(0 8px 0 rgba(36, 18, 26, 0.22));
+    animation: qz-pop 0.6s var(--jg-ease) both;
+  }
+  @keyframes qz-pop {
+    from {
+      transform: scale(0.6) rotate(-8deg);
+      opacity: 0;
+    }
+  }
+  .qz-copy {
+    padding: 8px clamp(18px, 5vw, 36px) clamp(22px, 5vw, 36px);
+    color: var(--jg-ink);
+  }
+  .qz-result-h {
+    font-size: clamp(1.9rem, 7vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+    outline: none;
+  }
+  .qz-blurb {
+    margin-top: 14px;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .qz-pack {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 22px;
+    background: var(--jg-paper);
+  }
+  .qz-pack-img {
+    flex: none;
+    width: 84px;
+    height: auto;
+  }
+  .qz-pack-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .qz-pack-meta {
+    margin-top: 2px;
+    color: var(--jg-ink-soft);
+  }
+  .qz-pack-name::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--r-color);
+    vertical-align: 0;
+  }
+
+  @media (min-width: 760px) {
+    .qz-card {
+      grid-template-columns: 0.9fr 1.1fr;
+      align-items: center;
+    }
+    .qz-figure {
+      align-self: stretch;
+      padding: 28px;
+    }
+    .qz-mascot {
+      width: min(100%, 320px);
+    }
+    .qz-copy {
+      padding: clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px) 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .qz-bar-fill,
+    .qz-options :global(.qz-opt) {
+      transition: none;
+    }
+    .qz-mascot {
+      animation: none;
+    }
+  }
+</style>
