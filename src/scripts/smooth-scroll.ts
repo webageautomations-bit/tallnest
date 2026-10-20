@@ -91,7 +91,14 @@ function honorInitialHash(lenis: Lenis | null): void {
   if (!target) return;
   requestAnimationFrame(() => {
     if (lenis) {
-      lenis.scrollTo(target as HTMLElement, { immediate: true });
+      // Resolve an absolute position from the real scroll offset. Passing the
+      // element would make Lenis add its own remembered position, which is
+      // stale if the browser's native hash jump landed after Lenis started —
+      // the sum then comes out as 0 and the page snaps back to the top.
+      const el = target as HTMLElement;
+      const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+      const y = el.getBoundingClientRect().top + window.scrollY - margin;
+      lenis.scrollTo(y, { immediate: true, force: true });
     } else {
       (target as HTMLElement).scrollIntoView({ block: "start" });
     }
