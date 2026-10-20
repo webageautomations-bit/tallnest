@@ -10,12 +10,27 @@ interface Props {
 
 const { t } = Astro.props;
 
-const navLinks: { label: string; href: string; brand?: boolean }[] = [
+type NavLink = {
+  label: string;
+  href: string;
+  brand?: boolean;
+  children?: { label: string; href: string }[];
+};
+
+const navLinks: NavLink[] = [
   { label: t.about, href: "/about" },
-  // Jingo — the flagship brand. Points to the homepage "Meet Jingo" section for
-  // now so it's never a dead link from any page. TODO: change to "/jingo" once
-  // the dedicated Jingo site/zone is deployed.
-  { label: "Jingo", href: "/#jingo", brand: true },
+  // Jingo — the flagship brand zone. The label goes to the hub; a dropdown
+  // lists its sections. (Mascots joins once that page is built.)
+  {
+    label: "Jingo",
+    href: "/jingo",
+    brand: true,
+    children: [
+      { label: "Jingo Home", href: "/jingo" },
+      { label: "Flavours", href: "/jingo/flavours" },
+      { label: "Our Story", href: "/jingo#story" },
+    ],
+  },
   { label: t.partners, href: "/partners" },
   { label: t.theNest, href: "/the-nest" },
   { label: t.contact, href: "/contact" },
@@ -54,18 +69,53 @@ const phones = [
     <nav aria-label="Primary" class="hidden md:block">
       <ul class="flex items-center gap-9">
         {
-          navLinks.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                class:list={["navlink", { "is-current": isActive(link.href), "is-brand": link.brand }]}
-                aria-current={isActive(link.href) ? "page" : undefined}
-              >
-                {link.label}
-                {link.brand && <span class="brand-dot" aria-hidden="true" />}
-              </a>
-            </li>
-          ))
+          navLinks.map((link) =>
+            link.children ? (
+              <li class="dd" data-dd>
+                <a
+                  href={link.href}
+                  class:list={["navlink", { "is-current": isActive(link.href), "is-brand": link.brand }]}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                >
+                  {link.label}
+                  {link.brand && <span class="brand-dot" aria-hidden="true" />}
+                </a>
+                <button
+                  type="button"
+                  class="dd-toggle"
+                  aria-expanded="false"
+                  aria-controls={`dd-${link.label.toLowerCase()}`}
+                  aria-label={`${link.label} menu`}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <div class="dd-panel" id={`dd-${link.label.toLowerCase()}`}>
+                  <ul class="dd-list">
+                    {link.children.map((c) => (
+                      <li>
+                        <a href={c.href} class="dd-link">
+                          {c.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ) : (
+              <li>
+                <a
+                  href={link.href}
+                  class:list={["navlink", { "is-current": isActive(link.href), "is-brand": link.brand }]}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                >
+                  {link.label}
+                  {link.brand && <span class="brand-dot" aria-hidden="true" />}
+                </a>
+              </li>
+            ),
+          )
         }
       </ul>
     </nav>
@@ -119,6 +169,17 @@ const phones = [
                 {link.label}
                 {link.brand && <span class="mm-flag">Flagship</span>}
               </a>
+              {link.children && (
+                <ul class="mm-sub" aria-label={`${link.label} pages`}>
+                  {link.children.map((c) => (
+                    <li>
+                      <a href={c.href} class="mm-sublink" data-close>
+                        {c.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))
         }
@@ -207,6 +268,134 @@ const phones = [
     border-radius: var(--radius-pill);
   }
 
+  /* Jingo dropdown (desktop). Opens on hover or keyboard focus with pure CSS,
+     so it works without JS; the chevron button + script add click/tap toggle,
+     Esc-to-close and aria-expanded. */
+  .dd {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .dd-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-inline-end: -8px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-ink);
+    opacity: 0.7;
+    cursor: pointer;
+    transition:
+      opacity 0.2s var(--ease-brand),
+      background-color 0.2s var(--ease-brand),
+      transform 0.25s var(--ease-brand);
+  }
+  .dd-toggle:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--color-red) 8%, transparent);
+  }
+  .dd-toggle svg {
+    transition: transform 0.25s var(--ease-brand);
+  }
+  .dd-panel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    z-index: 5;
+    padding-top: 14px; /* hover bridge between label and panel */
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 6px);
+    transition:
+      opacity 0.18s var(--ease-brand),
+      transform 0.18s var(--ease-brand),
+      visibility 0s linear 0.18s;
+  }
+  .dd:hover .dd-panel,
+  .dd:focus-within .dd-panel,
+  .dd.is-open .dd-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+    transition:
+      opacity 0.18s var(--ease-brand),
+      transform 0.18s var(--ease-brand),
+      visibility 0s;
+  }
+  /* Esc closes it even while focus/hover remain inside (cleared on leave). */
+  .dd.is-closed .dd-panel {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .dd:hover .dd-toggle svg,
+  .dd:focus-within .dd-toggle svg,
+  .dd.is-open .dd-toggle svg {
+    transform: rotate(180deg);
+  }
+  .dd.is-closed .dd-toggle svg {
+    transform: none;
+  }
+  .dd-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid var(--color-hairline);
+    border-top: 2px solid var(--color-red);
+    border-radius: 14px;
+    box-shadow: var(--shadow-e2);
+  }
+  .dd-link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.2s var(--ease-brand),
+      color 0.2s var(--ease-brand);
+  }
+  .dd-link:hover,
+  .dd-link:focus-visible {
+    background: color-mix(in srgb, var(--color-red) 7%, transparent);
+    color: var(--color-red);
+  }
+
+  /* Mobile: Jingo's pages as an indented group under the Jingo link. */
+  .mm-nav .mm-sub {
+    gap: 0;
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0 0 0 16px;
+    border-inline-start: 2px solid color-mix(in srgb, var(--color-red) 30%, transparent);
+    display: flex;
+    flex-direction: column;
+  }
+  .mm-sublink {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-brand);
+  }
+  .mm-sublink:hover {
+    color: var(--color-red);
+  }
+
   #site-header.is-scrolled {
     border-color: var(--color-hairline);
     box-shadow: 0 6px 24px -18px rgba(0, 0, 0, 0.3);
@@ -291,7 +480,12 @@ const phones = [
   @media (prefers-reduced-motion: reduce) {
     .navlink::after,
     .mm-backdrop,
-    .mm-panel {
+    .mm-panel,
+    .dd-toggle,
+    .dd-toggle svg,
+    .dd-panel,
+    .dd-link,
+    .mm-sublink {
       transition: none;
     }
   }
@@ -304,6 +498,47 @@ const phones = [
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
   }
+
+  // Desktop dropdowns: click/tap toggle, Esc to close, aria-expanded in sync.
+  // (Hover and keyboard focus already open them via CSS.)
+  document.querySelectorAll<HTMLElement>("[data-dd]").forEach((dd) => {
+    const btn = dd.querySelector<HTMLButtonElement>(".dd-toggle");
+    const top = dd.querySelector<HTMLAnchorElement>("a");
+    if (!btn || !top) return;
+    const expanded = (on: boolean) => btn.setAttribute("aria-expanded", String(on));
+    const reset = () => {
+      dd.classList.remove("is-open", "is-closed");
+      expanded(false);
+    };
+    btn.addEventListener("click", () => {
+      const open = !dd.classList.contains("is-open") || dd.classList.contains("is-closed");
+      dd.classList.toggle("is-open", open);
+      dd.classList.toggle("is-closed", !open);
+      expanded(open);
+    });
+    dd.addEventListener("mouseenter", () => {
+      if (!dd.classList.contains("is-closed")) expanded(true);
+    });
+    dd.addEventListener("mouseleave", () => {
+      if (!dd.contains(document.activeElement)) reset();
+    });
+    dd.addEventListener("focusin", () => {
+      if (!dd.classList.contains("is-closed")) expanded(true);
+    });
+    dd.addEventListener("focusout", (e) => {
+      if (!dd.contains(e.relatedTarget as Node | null)) reset();
+    });
+    dd.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      dd.classList.remove("is-open");
+      dd.classList.add("is-closed");
+      expanded(false);
+      top.focus();
+    });
+    document.addEventListener("click", (e) => {
+      if (!dd.contains(e.target as Node)) reset();
+    });
+  });
 
   const menu = document.getElementById("mobile-menu");
   const openBtn = document.getElementById("menu-open");
