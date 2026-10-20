@@ -38,7 +38,7 @@ const {
   jsonLd,
 } = Astro.props;
 
-const site = Astro.site ?? new URL("https://tallnest.com");
+const site = Astro.site ?? new URL("https://www.tallnest.com");
 // Canonical matches the built URL shape (directory format → trailing slash),
 // which is also what the sitemap lists.
 const withSlash = (p: string) =>

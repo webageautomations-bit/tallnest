@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import WhatsAppCTA from "../components/WhatsAppCTA.astro";
 import { categories, products, priceRange } from "../lib/jingo";
 import { WHATSAPP_DISTRIBUTOR, PHONE_DISPLAY, PHONE_TEL, EMAIL } from "../data/contact";
+import { SITE } from "../lib/schema";
 
 // Facts used across the page (and the FAQPage schema) — derived from the
 // product data so counts / prices can't drift from the catalogue.
@@ -101,7 +102,7 @@ const faqs = [
 // FAQPage structured data — question/answer text is the visible copy above.
 const faqSchema = {
   "@type": "FAQPage",
-  "@id": "https://tallnest.com/partners/#faq",
+  "@id": `${SITE}/partners/#faq`,
   mainEntity: faqs.map((f) => ({
     "@type": "Question",
     name: f.q,

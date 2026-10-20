@@ -5,7 +5,7 @@
 import { corporateSocials } from "../data/socials";
 import { WHATSAPP_DISTRIBUTOR } from "../data/contact";
 
-export const SITE = "https://tallnest.com";
+export const SITE = "https://www.tallnest.com";
 export const ORG_ID = `${SITE}/#organization`;
 export const WEBSITE_ID = `${SITE}/#website`;
 export const JINGO_ID = `${SITE}/jingo/#brand`;
@@ -21,6 +21,12 @@ export const organizationNode = {
     url: `${SITE}/tallnest-logo.png`,
     width: 820,
     height: 322,
+  },
+  image: {
+    "@type": "ImageObject",
+    url: `${SITE}/og/tallnest-og.jpg`,
+    width: 1200,
+    height: 630,
   },
   description:
     "Tall Nest Group is a Pakistani FMCG company building consumer brands. Its first brand, Jingo, is a confectionery range — candies, toffees, liquid chocolates, lollipops, bubblegums, bunties and nimkos — priced from Rs. 5 to Rs. 50.",

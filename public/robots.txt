@@ -1,4 +1,4 @@
-# Tall Nest Group — tallnest.com
+# Tall Nest Group — www.tallnest.com
 # We welcome search engines and AI assistants to read and cite this site.
 
 User-agent: *
@@ -32,4 +32,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://tallnest.com/sitemap-index.xml
+Sitemap: https://www.tallnest.com/sitemap-index.xml

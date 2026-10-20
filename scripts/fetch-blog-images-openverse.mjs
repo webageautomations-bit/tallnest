@@ -29,7 +29,7 @@ const QUERY_BY_CATEGORY = {
 };
 const FALLBACK_QUERY = "confectionery candy";
 
-const UA = "TallNestBlogImageFetch/1.0 (+https://tallnest.com)";
+const UA = "TallNestBlogImageFetch/1.0 (+https://www.tallnest.com)";
 
 function readPost(file) {
   const raw = readFileSync(join(POSTS_DIR, file), "utf8");

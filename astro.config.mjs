@@ -6,7 +6,7 @@ import motionPreload from './integrations/motion-preload.mjs';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://tallnest.com',
+  site: 'https://www.tallnest.com',
   // Keyword-matched URL for distributor recruitment. Astro serves a 301 in dev
   // and emits a redirect page in the static build; vercel.json issues a true
   // edge 301 in production.
