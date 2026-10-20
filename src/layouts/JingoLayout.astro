@@ -9,41 +9,44 @@ import "../styles/jingo.css";
 import JingoHeader from "../components/jingo/JingoHeader.astro";
 import JingoFooter from "../components/jingo/JingoFooter.astro";
 import SocialRail from "../components/SocialRail.astro";
+import FloatingWhatsApp from "../components/FloatingWhatsApp.astro";
 import { jingoSocials } from "../data/socials";
+import SEOHead from "../components/SEOHead.astro";
+import { organizationNode, websiteNode, jingoBrandNode } from "../lib/schema";
 
 interface Props {
   title?: string;
   description?: string;
+  /** OG/Twitter image (root-relative), 1200×630. */
   image?: string;
-  /** Placeholder pages opt out of indexing until they're built. */
+  imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  type?: "website" | "article";
+  /** Extra page-level JSON-LD node(s), merged into the graph. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Opt a page out of indexing (none currently do). */
   noindex?: boolean;
 }
 
 const {
-  title = "Jingo — Big flavour, small price, pure fun.",
+  title = "Jingo — Candies, Toffees & Lollipops from Rs. 5 | Pakistan",
   description =
-    "Jingo is Pakistan's poppiest candy — candies, toffees, lollipops, liquid chocolates, bubblegums, bunties & nimkos at pocket-money prices. A Tall Nest brand.",
-  image = "/jingo-carton.jpg",
+    "Jingo is a Pakistani confectionery brand from Tall Nest Group: 35+ candies, toffees, lollipops, liquid chocolates, bubblegums, bunties and nimkos at Rs. 5–50.",
+  image,
+  imageAlt = "Jingo — the candy brand from Tall Nest Group, with its nine candy mascots",
+  type = "website",
+  imageWidth,
+  imageHeight,
+  jsonLd,
   noindex = false,
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImageURL = new URL(image, Astro.site);
-
-const brandSchema = {
-  "@context": "https://schema.org",
-  "@type": "Brand",
-  name: "Jingo",
-  slogan: "Big flavour, small price, pure fun.",
-  url: canonicalURL.toString(),
-  logo: new URL("/Jingo-Logo-Red.png", Astro.site).toString(),
-  description,
-  parentOrganization: {
-    "@type": "Organization",
-    name: "Tall Nest Food & Beverages",
-    url: Astro.site?.toString(),
-  },
-};
+// Jingo Brand + its parent Organization (Organization.brand → Jingo) + WebSite,
+// plus any page-level nodes.
+const DEFAULT_OG = "/og/jingo-og.jpg"; // 1200×630
+const pageNodes = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
 ---
 
 <!doctype html>
@@ -52,8 +55,6 @@ const brandSchema = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#E0202B" />
-    {noindex && <meta name="robots" content="noindex" />}
 
     <!-- FOUC guard — identical to BaseLayout: reveal targets are only
          pre-hidden when JS runs and motion is allowed, with a failsafe that
@@ -102,31 +103,18 @@ const brandSchema = {
       href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap"
     />
 
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
-
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
-
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Jingo by Tall Nest" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content={ogImageURL} />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImageURL} />
-
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(brandSchema)}
+    <SEOHead
+      title={title}
+      description={description}
+      ogImage={image ?? DEFAULT_OG}
+      ogImageWidth={image ? imageWidth : 1200}
+      ogImageHeight={image ? imageHeight : 630}
+      ogImageAlt={imageAlt}
+      type={type}
+      siteName="Jingo by Tall Nest Group"
+      themeColor="#E0202B"
+      robots={noindex ? "noindex,follow" : undefined}
+      jsonLd={graph}
     />
 
     <slot name="head" />
@@ -139,6 +127,7 @@ const brandSchema = {
     </main>
     <JingoFooter />
     <SocialRail links={jingoSocials} theme="jingo" />
+    <FloatingWhatsApp />
 
     <script>
       // Tell the inline-head failsafe the reveal bundle is running.

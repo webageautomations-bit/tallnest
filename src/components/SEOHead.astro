@@ -1,0 +1,91 @@
+---
+// Reusable SEO head — used by BaseLayout (Tall Nest) and JingoLayout (Jingo).
+// Renders: <title>, description, canonical, robots, Open Graph, Twitter card,
+// theme-color, favicons, geo hint, and JSON-LD (one @graph — layouts pass the
+// sitewide nodes, pages can add their own via `jsonLd`, e.g. FAQPage).
+interface Props {
+  title: string;
+  description: string;
+  /** Absolute or root-relative; defaults to the current page URL. */
+  canonical?: string;
+  /** Root-relative or absolute image URL (1200×630 recommended).
+   *  Width/height are emitted only when known. */
+  ogImage: string;
+  ogImageAlt: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  type?: "website" | "article";
+  siteName: string;
+  themeColor: string;
+  /** Defaults to "index,follow". */
+  robots?: string;
+  /** JSON-LD node(s); merged into one @graph. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  ogImageAlt,
+  ogImageWidth,
+  ogImageHeight,
+  type = "website",
+  siteName,
+  themeColor,
+  robots = "index,follow,max-image-preview:large",
+  jsonLd,
+} = Astro.props;
+
+const site = Astro.site ?? new URL("https://tallnest.com");
+// Canonical matches the built URL shape (directory format → trailing slash),
+// which is also what the sitemap lists.
+const withSlash = (p: string) =>
+  p === "/" || p.endsWith("/") || /\.[a-z0-9]+$/i.test(p) ? p : `${p}/`;
+const canonicalURL = canonical
+  ? new URL(canonical, site).toString()
+  : new URL(withSlash(Astro.url.pathname), site).toString();
+const imageURL = new URL(ogImage, site).toString();
+
+const nodes = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const graph = nodes.length
+  ? JSON.stringify({ "@context": "https://schema.org", "@graph": nodes })
+  : null;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+<meta name="robots" content={robots} />
+<meta name="theme-color" content={themeColor} />
+
+<!-- Icons -->
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:locale" content="en_US" />
+<meta property="og:image" content={imageURL} />
+{ogImageWidth && <meta property="og:image:width" content={String(ogImageWidth)} />}
+{ogImageHeight && <meta property="og:image:height" content={String(ogImageHeight)} />}
+<meta property="og:image:alt" content={ogImageAlt} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
+<meta name="twitter:image:alt" content={ogImageAlt} />
+
+<!-- Geo (Pakistan — Lahore, Punjab) -->
+<meta name="geo.region" content="PK-PB" />
+<meta name="geo.placename" content="Lahore" />
+
+{graph && <script is:inline type="application/ld+json" set:html={graph} />}

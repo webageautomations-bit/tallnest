@@ -3,52 +3,43 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import SocialRail from "../components/SocialRail.astro";
+import FloatingWhatsApp from "../components/FloatingWhatsApp.astro";
 import { corporateSocials } from "../data/socials";
 import { t } from "../i18n/utils";
+import SEOHead from "../components/SEOHead.astro";
+import { organizationNode, websiteNode } from "../lib/schema";
 
 interface Props {
   title?: string;
   description?: string;
+  /** OG/Twitter image (root-relative), 1200×630. */
   image?: string;
+  imageAlt?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  type?: "website" | "article";
+  /** Extra page-level JSON-LD node(s), e.g. FAQPage — merged into the graph. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   flushFooter?: boolean;
 }
 
 const {
-  title = "Tall Nest — A Pakistani Food & Beverage Company",
+  title = "Tall Nest Group — Pakistani FMCG & Confectionery Brands",
   description =
-    "Tall Nest builds, markets, and distributes food & beverage brands for Pakistan. Our first brand is Jingo, with more in development.",
-  image = "/og-default.jpg",
+    "Tall Nest Group is a Pakistani FMCG company building consumer brands. Its first, Jingo, offers 35+ confectionery products from Rs. 5 — distributors wanted.",
+  image,
+  imageAlt = "Tall Nest Group — Food & Beverages",
+  type = "website",
+  imageWidth,
+  imageHeight,
+  jsonLd,
   flushFooter = false,
 } = Astro.props;
 
-// Canonical + absolute asset URLs (Astro.site is set in astro.config.mjs).
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImageURL = new URL(image, Astro.site);
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Tall Nest Food & Beverages",
-  url: Astro.site?.toString(),
-  logo: new URL("/tallnest-logo.png", Astro.site).toString(),
-  description,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "DHA Phase 6",
-    addressLocality: "Lahore",
-    addressCountry: "PK",
-  },
-  telephone: "+92 317 827 6277",
-  sameAs: [
-    "https://www.facebook.com/tallnestgroup",
-    "https://www.instagram.com/tallnestgroup",
-    "https://www.linkedin.com/company/tallnestgroup",
-  ],
-  brand: {
-    "@type": "Brand",
-    name: "Jingo",
-  },
-};
+// Sitewide structured data (Organization + WebSite) + any page-level nodes.
+const DEFAULT_OG = "/og/tallnest-og.jpg"; // 1200×630
+const pageNodes = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+const graph = [organizationNode, websiteNode, ...pageNodes];
 ---
 
 <!doctype html>
@@ -106,37 +97,17 @@ const organizationSchema = {
       href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,1&f[]=general-sans@400,500,600,700&display=swap"
     />
 
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
-
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Tall Nest" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:image" content={ogImageURL} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImageURL} />
-
-    <!-- Structured data -->
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(organizationSchema)}
+    <SEOHead
+      title={title}
+      description={description}
+      ogImage={image ?? DEFAULT_OG}
+      ogImageWidth={image ? imageWidth : 1200}
+      ogImageHeight={image ? imageHeight : 630}
+      ogImageAlt={imageAlt}
+      type={type}
+      siteName="Tall Nest Group"
+      themeColor="#93221E"
+      jsonLd={graph}
     />
 
     <slot name="head" />
@@ -152,6 +123,7 @@ const organizationSchema = {
     </main>
     <Footer t={t} flush={flushFooter} />
     <SocialRail links={corporateSocials} theme="corporate" />
+    <FloatingWhatsApp />
 
     <script>
       // Signal the inline-head failsafe that the reveal bundle is running, so it
