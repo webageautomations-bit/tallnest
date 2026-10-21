@@ -5,6 +5,9 @@
 // `color` is the character's OWN colour (drives its section tint + badge).
 // The product chip keeps its own pack colour from jingo-products.ts.
 // `textOn` is derived from `color` for contrast — don't set it by hand.
+// `faces` is the way the RENDER naturally faces (all nine are drawn in a
+// three-quarter view turned to the right). Games mirror a sprite when it
+// needs to face the other way — e.g. Mascot Cup's right-hand player.
 import { products } from "./jingo-products";
 import { textOnFor } from "../lib/color";
 
@@ -14,20 +17,21 @@ export interface JingoMascot {
   image: string;
   color: string;
   textOn: "light" | "dark";
+  faces: "left" | "right";
   relatedProductIds: string[]; // exactly one candy id
 }
 
 // ── Edit labels / colours here (catalogue order of the candies) ─────────────
 const crew: Omit<JingoMascot, "textOn">[] = [
-  { id: "cola",          label: "Cola",          image: "cola",          color: "#E01E24", relatedProductIds: ["cola-candy"] },
-  { id: "raw-mango",     label: "Raw Mango",     image: "raw-mango",     color: "#86B52E", relatedProductIds: ["kachi-keri"] },
-  { id: "orange",        label: "Orange",        image: "orange",        color: "#F58220", relatedProductIds: ["tangy-candy"] },
-  { id: "chilli",        label: "Chilli",        image: "chilli",        color: "#E62217", relatedProductIds: ["chilli-chaska"] },
-  { id: "masala",        label: "Masala",        image: "masala",        color: "#C25418", relatedProductIds: ["chatkhari"] },
-  { id: "mint",          label: "Mint",          image: "mint",          color: "#5FAEE8", relatedProductIds: ["frosty"] },
-  { id: "khatti-meethi", label: "Khatti Meethi", image: "khatti-meethi", color: "#EE5E96", relatedProductIds: ["chulbuli"] },
-  { id: "imli",          label: "Imli",          image: "imli",          color: "#8C3A22", relatedProductIds: ["imli-blast"] },
-  { id: "falsa",         label: "Falsa",         image: "falsa",         color: "#6E2E86", relatedProductIds: ["falsa-frenzy"] },
+  { id: "cola",          label: "Cola",          image: "cola",          color: "#E01E24", faces: "right", relatedProductIds: ["cola-candy"] },
+  { id: "raw-mango",     label: "Raw Mango",     image: "raw-mango",     color: "#86B52E", faces: "right", relatedProductIds: ["kachi-keri"] },
+  { id: "orange",        label: "Orange",        image: "orange",        color: "#F58220", faces: "right", relatedProductIds: ["tangy-candy"] },
+  { id: "chilli",        label: "Chilli",        image: "chilli",        color: "#E62217", faces: "right", relatedProductIds: ["chilli-chaska"] },
+  { id: "masala",        label: "Masala",        image: "masala",        color: "#C25418", faces: "right", relatedProductIds: ["chatkhari"] },
+  { id: "mint",          label: "Mint",          image: "mint",          color: "#5FAEE8", faces: "right", relatedProductIds: ["frosty"] },
+  { id: "khatti-meethi", label: "Khatti Meethi", image: "khatti-meethi", color: "#EE5E96", faces: "right", relatedProductIds: ["chulbuli"] },
+  { id: "imli",          label: "Imli",          image: "imli",          color: "#8C3A22", faces: "right", relatedProductIds: ["imli-blast"] },
+  { id: "falsa",         label: "Falsa",         image: "falsa",         color: "#6E2E86", faces: "right", relatedProductIds: ["falsa-frenzy"] },
 ];
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -431,7 +431,14 @@ export function initRunner(): void {
     for (const p of w.pickups) {
       if (p.taken) continue;
       const img = packImgs[p.img];
-      if (img) ctx.drawImage(img, p.x, p.y + Math.sin(p.t * 4) * 3, PACK.w, PACK.h);
+      if (img) {
+        // Fit inside the pickup box at the pack's own ratio (packs vary: boxes,
+        // pouches, wide cartons); the pickup hitbox stays PACK.w × PACK.h.
+        const r = img.naturalWidth / img.naturalHeight;
+        const dw = r > PACK.w / PACK.h ? PACK.w : PACK.h * r;
+        const dh = r > PACK.w / PACK.h ? PACK.w / r : PACK.h;
+        ctx.drawImage(img, p.x + (PACK.w - dw) / 2, p.y + (PACK.h - dh) + Math.sin(p.t * 4) * 3, dw, dh);
+      }
     }
 
     // Player — single render, animated by bob/tilt transforms; stretch on fast-fall.
@@ -449,7 +456,10 @@ export function initRunner(): void {
       ctx.translate(PLAYER.x + PLAYER.w / 2, w.y + PLAYER.h / 2 + bob);
       ctx.rotate(tilt);
       if (w.fastFall) ctx.scale(0.86, 1.14);
-      ctx.drawImage(mascotImg, -PLAYER.w / 2, -PLAYER.h / 2, PLAYER.w, PLAYER.h);
+      // Fixed height, width from the render's own ratio (no stretching); the
+      // hitbox (HB in runner-world.ts) is the same for every character.
+      const mw = PLAYER.h * (mascotImg.naturalWidth / mascotImg.naturalHeight);
+      ctx.drawImage(mascotImg, -mw / 2, -PLAYER.h / 2, mw, PLAYER.h);
       ctx.restore();
       if (w.fastFall) {
         ctx.strokeStyle = "rgba(36,18,26,0.35)";

@@ -68,7 +68,7 @@ const data = { url };
         <div class="cc-flames" aria-hidden="true">
           <span class="cc-flame"></span><span class="cc-flame"></span><span class="cc-flame"></span>
         </div>
-        <div class="cc-mascot-wrap">
+        <div class="cc-mascot-wrap" style={`aspect-ratio:${img.w} / ${img.h}`}>
           <img class="cc-mascot" src={img.src} width={img.w} height={img.h} alt={`The Jingo ${mascot.label} character`} decoding="async" />
         </div>
         <p class="cc-verdict" data-verdict aria-hidden="true"></p>
@@ -249,8 +249,7 @@ const data = { url };
     left: 50%;
     bottom: 5%;
     height: 80%;
-    aspect-ratio: 898 / 1100;
-    translate: -50% 0;
+    translate: -50% 0; /* aspect-ratio set inline from the render's real size */
   }
   .cc-mascot {
     width: 100%;

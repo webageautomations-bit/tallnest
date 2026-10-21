@@ -26,6 +26,8 @@ export const games: ArcadeGame[] = [
   { slug: "counter", name: "Counter Rush",               blurb: "Serve the queue. Grab the right pack. Don't panic.",     status: "live", accentColor: "#FFC93C", mascotId: "orange" },
   { slug: "chilli",  name: "Chilli Chaska Challenge",    blurb: "Stop the needle in the sweet spot. It only gets hotter.", status: "live", accentColor: "#E0202B", mascotId: "chilli" },
   { slug: "runner",  name: "Mascot Runner",              blurb: "Pick your character and run.",                           status: "live", accentColor: "#A6E04A", mascotId: "raw-mango" },
+  { slug: "cup",     name: "Mascot Cup",                 blurb: "Pick your character. Head the ball. Win the cup.",       status: "live", accentColor: "#7B3FF2", mascotId: "cola" },
+  { slug: "delivery", name: "Delivery Dash",             blurb: "Get the Jingo stock across the road to the shop. Don't get flattened.", status: "live", accentColor: "#FF8A1F", mascotId: "masala" },
 ];
 
 export const gameBySlug = (slug: string): ArcadeGame | undefined =>

@@ -58,7 +58,7 @@ h1{margin-top:22px;font-size:var(--fs,84px);line-height:.95;letter-spacing:-.045
 """
 
 CARDS = {
-"arcade": dict(accent="#ff4f9a", fs="92px", title="Jingo Arcade", pill="5 free games", hook="Quiz, match, rush, chilli &amp; run — made for your phone",
+"arcade": dict(accent="#ff4f9a", fs="92px", title="Jingo Arcade", pill="7 free games", hook="Quiz, match, rush, chilli, run, cup &amp; dash — made for your phone",
   art=f"""<img class="m" src="{M('chilli')}" style="left:0px;top:70px;height:250px;transform:rotate(-10deg)">
   <img class="m" src="{M('raw-mango')}" style="left:350px;top:60px;height:250px;transform:rotate(10deg)">
   <img class="m" src="{M('mint')}" style="left:10px;top:300px;height:270px;transform:rotate(-6deg)">
@@ -92,6 +92,20 @@ CARDS = {
   <div style="position:absolute;left:50px;top:300px;width:100px;height:10px;background:rgba(36,18,26,.35);border-radius:5px"></div>
   <img class="m" src="{M('raw-mango')}" style="left:130px;top:60px;height:400px;transform:rotate(-8deg)">
   <img class="pk" src="{P('aam-twist')}" style="left:340px;top:80px;height:120px;transform:rotate(12deg)">"""),
+"cup": dict(accent="#7b3ff2", fs="92px", title="Mascot Cup", pill="Head-soccer duel", hook="Pick your player. Head the ball. Win the cup.",
+  art=f"""<div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:#7fcf5a;border-top:6px solid #24121a"></div>
+  <div style="position:absolute;right:0;bottom:110px;width:70px;height:170px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.7) 0 3px,transparent 3px 12px),repeating-linear-gradient(0deg,rgba(255,255,255,.7) 0 3px,transparent 3px 12px);border:6px solid #24121a;border-right:0"></div>
+  <img class="m" src="{M('cola')}" style="left:0px;top:150px;height:330px">
+  <img class="m" src="{M('mint')}" style="left:300px;top:160px;height:320px;transform:scaleX(-1)">
+  <div style="position:absolute;left:228px;top:70px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 55%,#ffd3e3 56%);border:6px solid #24121a"></div>"""),
+"delivery": dict(accent="#ff8a1f", fs="88px", title="Delivery Dash", pill="Road-crossing game", hook="Get the stock to the shop. Don't get flattened.",
+  art=f"""<div style="position:absolute;left:0;right:0;top:170px;height:300px;background:#3b3740;border-block:6px solid #24121a"></div>
+  <div style="position:absolute;left:0;right:0;top:318px;height:0;border-top:5px dashed rgba(255,255,255,.8)"></div>
+  <div style="position:absolute;left:40px;top:200px;width:200px;height:90px;border-radius:26px;border:6px solid #24121a;background:linear-gradient(180deg,#ffd23c 0 50%,#2fae55 50%)"></div>
+  <div style="position:absolute;left:62px;top:276px;width:34px;height:34px;border-radius:50%;background:#24121a"></div>
+  <div style="position:absolute;left:188px;top:276px;width:34px;height:34px;border-radius:50%;background:#24121a"></div>
+  <img class="m" src="{M('masala')}" style="left:300px;top:250px;height:250px">
+  <div style="position:absolute;left:338px;top:400px;width:110px;height:74px;background:#c98b4f;border:6px solid #24121a;border-radius:8px;box-shadow:inset 0 22px 0 -8px #e0202b"></div>"""),
 }
 
 def page(c):
