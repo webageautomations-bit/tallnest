@@ -16,12 +16,15 @@ import "../styles/arcade.css";
 
 interface Props {
   slug: string;
-  /** <title> override; defaults to "<game name> — Jingo Arcade". */
+  /** <title> override; defaults to "<game name> | Jingo by Tall Nest". */
   title?: string;
   description?: string;
+  /** Share preview (1200×630); defaults to /og/arcade-<slug>.jpg. */
+  image?: string;
+  imageAlt?: string;
 }
 
-const { slug, title, description } = Astro.props;
+const { slug, title, description, image, imageAlt } = Astro.props;
 const game = gameBySlug(slug);
 if (!game) throw new Error(`ArcadeGameLayout: no game "${slug}" in jingo-arcade.ts`);
 
@@ -29,8 +32,12 @@ const onAccent = textOnFor(game.accentColor) === "light" ? "var(--jg-white)" : "
 ---
 
 <JingoLayout
-  title={title ?? `${game.name} — Jingo Arcade`}
+  title={title ?? `${game.name} | Jingo by Tall Nest`}
   description={description ?? `${game.name}: ${game.blurb} A free game in the Jingo Arcade.`}
+  image={image ?? `/og/arcade-${game.slug}.jpg`}
+  imageWidth={1200}
+  imageHeight={630}
+  imageAlt={imageAlt ?? `${game.name} — a free game in the Jingo Arcade`}
   motion={false}
   floatingWhatsApp={false}
 >
