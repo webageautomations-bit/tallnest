@@ -1,43 +1,36 @@
-// "Counter Rush" — client loop. Rules come from counter-logic.ts; products
-// and customers arrive as JSON built from jingo-products.ts / jingo-mascots.ts.
+// "Counter Rush" — client loop. Pure visual matching: the browser only knows
+// product ids, tints and pack images (no names). Rules come from
+// counter-logic.ts; lookalike sets arrive precomputed from the page.
 import {
   LIVES,
   SHIFT,
   WRONG_PENALTY,
   buildRound,
-  levelFor,
-  lookalikeMap,
   multiplier,
+  paramsFor,
   pointsFor,
-  type CounterProduct,
   type Round,
 } from "./counter-logic";
 import { getBest, higherIsBetter, recordBest } from "./storage";
 import { setShare } from "./share";
 
 interface Img { src: string; w: number; h: number }
-interface Product extends CounterProduct { tint: string; img: Img }
-interface Customer { id: string; label: string; color: string; img: Img }
-interface CounterData { products: Product[]; customers: Customer[]; url: string }
+interface Pack { id: string; tint: string; img: Img }
+interface Customer { id: string; color: string; img: Img }
+interface CounterData { products: Pack[]; looks: Record<string, string[]>; customers: Customer[]; url: string }
 
 const SERVE_BEAT = 550; // ms the "thanks" moment lasts before the next customer
 const WALKOUT_BEAT = 800;
-
-const ASKS = [
-  (n: string) => `One ${n}, please!`,
-  (n: string) => `Got any ${n}?`,
-  (n: string) => `${n} — quick!`,
-  (n: string) => `I'll take one ${n}.`,
-  (n: string) => `Do you have ${n}?`,
-];
+const ASKS = ["This one, please!", "Got one of these?", "One of these — quick!", "I need this one!", "Do you have this?"];
 
 export function initCounter(): void {
   const root = document.querySelector<HTMLElement>("[data-counter]");
   const raw = document.getElementById("counter-data")?.textContent;
   if (!root || !raw) return;
-  const { products, customers, url } = JSON.parse(raw) as CounterData;
+  const { products, looks: lookObj, customers, url } = JSON.parse(raw) as CounterData;
   const byId = new Map(products.map((p) => [p.id, p]));
-  const looks = lookalikeMap(products);
+  const ids = products.map((p) => p.id);
+  const looks = new Map(Object.entries(lookObj));
 
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
   const screens = { intro: $("[data-screen=intro]"), play: $("[data-screen=play]"), end: $("[data-screen=end]") };
@@ -51,13 +44,14 @@ export function initCounter(): void {
   };
   const customerEl = $("[data-customer]");
   const avatar = $<HTMLImageElement>("[data-avatar]");
-  const request = $("[data-request]");
+  const want = $<HTMLImageElement>("[data-want]");
+  const wantBox = want.parentElement!;
+  const say = $("[data-say]");
   const patienceEl = $("[data-patience]");
-  const levelEl = $("[data-level]");
+  const meta = $("[data-meta]");
   const shelfEl = $("[data-shelf]");
   const live = $("[data-live]");
 
-  // Game state
   let score = 0;
   let served = 0;
   let lives = LIVES;
@@ -65,6 +59,7 @@ export function initCounter(): void {
   let bestStreak = 0;
   let patience = 1; // 0..1
   let patienceMs = 9000;
+  let customerNo = 0;
   let round: Round | null = null;
   let lastCustomer = "";
   let running = false;
@@ -100,9 +95,10 @@ export function initCounter(): void {
   };
 
   const nextCustomer = () => {
-    const params = levelFor(served);
+    const params = paramsFor(served);
     patienceMs = params.patienceMs;
-    round = buildRound(products, looks, params, Math.random, round?.target);
+    customerNo++;
+    round = buildRound(ids, looks, params, Math.random, round?.target);
     const pool = customers.filter((c) => c.id !== lastCustomer);
     const who = pool[Math.floor(Math.random() * pool.length)];
     lastCustomer = who.id;
@@ -111,24 +107,28 @@ export function initCounter(): void {
     avatar.width = who.img.w;
     avatar.height = who.img.h;
     customerEl.style.setProperty("--c-color", who.color);
-    const name = byId.get(round.target)!.name;
-    request.textContent = ASKS[Math.floor(Math.random() * ASKS.length)](name);
-    levelEl.textContent = `Level ${params.level}`;
+
+    const target = byId.get(round.target)!;
+    want.src = target.img.src;
+    want.width = target.img.w;
+    want.height = target.img.h;
+    wantBox.style.setProperty("--want-tint", target.tint);
+    say.textContent = ASKS[Math.floor(Math.random() * ASKS.length)];
+    meta.textContent = `Customer ${customerNo} · ${(patienceMs / 1000).toFixed(1)}s`;
     root.dataset.tricky = String(round.tricky);
+    root.dataset.patienceMs = String(patienceMs);
 
     shelfEl.dataset.size = String(round.shelf.length);
     shelfEl.replaceChildren(
-      ...round.shelf.map((id) => {
+      ...round.shelf.map((id, i) => {
         const p = byId.get(id)!;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "ct-pack";
         btn.dataset.id = p.id;
+        btn.setAttribute("aria-label", `Pack ${i + 1}`);
         btn.style.setProperty("--tint", p.tint);
-        btn.innerHTML =
-          `<img src="${p.img.src}" alt="" width="${p.img.w}" height="${p.img.h}" decoding="async">` +
-          `<span class="ct-pack-name"></span>`;
-        btn.querySelector(".ct-pack-name")!.textContent = p.name;
+        btn.innerHTML = `<img src="${p.img.src}" alt="" width="${p.img.w}" height="${p.img.h}" decoding="async">`;
         return btn;
       }),
     );
@@ -137,6 +137,7 @@ export function initCounter(): void {
     locked = false;
     shelfEl.classList.remove("is-locked");
     pulse("is-new");
+    live.textContent = `Customer ${customerNo} wants a pack.`;
   };
 
   const end = (completed: boolean) => {
@@ -195,8 +196,8 @@ export function initCounter(): void {
       locked = true;
       shelfEl.classList.add("is-locked");
       pulse("is-happy");
-      request.textContent = "Thanks!";
-      live.textContent = `Right! +${pts}.`;
+      say.textContent = "Thanks!";
+      live.textContent = `Right pack! +${pts}.`;
       paintHud();
       window.setTimeout(() => (served >= SHIFT ? end(true) : nextCustomer()), SERVE_BEAT);
     } else {
@@ -209,7 +210,7 @@ export function initCounter(): void {
       pulse("is-cross");
       paintHud();
       paintPatience();
-      live.textContent = `Not ${byId.get(btn.dataset.id ?? "")?.name ?? "that one"}!`;
+      live.textContent = "Wrong pack!";
       if (patience <= 0) {
         patience = 0;
         loseLife("Wrong pack — they've had enough. You lost a life.");
@@ -223,11 +224,12 @@ export function initCounter(): void {
     lives = LIVES;
     streak = 0;
     bestStreak = 0;
+    customerNo = 0;
     round = null;
     paused = document.hidden;
     paintHud();
     show("play");
-    root.scrollIntoView({ block: "start" });
+    root.scrollIntoView({ block: "start", behavior: "instant" });
     // Warm the cache so packs appear instantly when they first hit the shelf.
     for (const p of products) new Image().src = p.img.src;
     nextCustomer();

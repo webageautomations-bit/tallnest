@@ -1,9 +1,9 @@
 ---
 // /jingo/arcade/runner — "Mascot Runner": a light, vanilla-Canvas endless
 // runner. Pick one of the crew (jingo-mascots.ts); the run is themed with
-// that mascot's colour. Collect Jingo packs (jingo-products.ts renders) and
-// jump the crates. Controls: tap / click / Space / ↑ to jump, again in
-// mid-air to DOUBLE-JUMP.
+// that mascot's colour. Collect Jingo packs (jingo-products.ts renders), jump
+// crates and low birds, stay under high birds. Controls: tap / click / Space /
+// ↑ to jump (again in mid-air to DOUBLE-JUMP); swipe down / ↓ to FAST-FALL.
 // Reduced motion: a clear notice and a static "not suitable" state first;
 // the visitor can still opt in.
 import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
@@ -67,8 +67,9 @@ const data = { crew, packs, url };
     <section class="ag-screen ag-panel ag-panel--accent rn-select" data-screen="select" hidden aria-labelledby="rn-select-h">
       <h2 id="rn-select-h" class="ag-display">Pick your runner.</h2>
       <p class="ag-sub">
-        Tap, click or press <kbd>Space</kbd> to jump &mdash; tap again in mid-air
-        to <b>double-jump</b>. Grab packs, dodge crates.
+        Tap, click or press <kbd>Space</kbd> to jump (again in mid-air to
+        <b>double-jump</b>). <b>Swipe down</b> or press <kbd>&darr;</kbd> to drop
+        fast. Jump the crates and low birds; stay down for the high ones.
       </p>
       <div class="rn-crew" role="radiogroup" aria-label="Characters">
         {
@@ -98,7 +99,7 @@ const data = { crew, packs, url };
 
     <!-- Play -->
     <section class="ag-screen rn-play" data-screen="play" hidden aria-label="Mascot Runner">
-      <div class="rn-stage" data-stage tabindex="0" aria-label="Game area. Tap, click or press Space to jump.">
+      <div class="rn-stage" data-stage tabindex="0" aria-label="Game area. Tap, click or press Space to jump; swipe down or press the down arrow to drop fast.">
         <canvas class="rn-canvas" data-canvas width="600" height="400"></canvas>
 
         <button type="button" class="rn-pause" data-pause aria-label="Pause">
@@ -123,7 +124,7 @@ const data = { crew, packs, url };
           <ShareResult message="I'm running in Mascot Runner in the Jingo Arcade. Beat it." url={url} />
         </div>
       </div>
-      <p class="rn-help">Tap anywhere on the game, click, or press <kbd>Space</kbd> / <kbd>&uarr;</kbd> to jump. Tap again in mid-air to double-jump.</p>
+      <p class="rn-help">Tap / <kbd>Space</kbd> / <kbd>&uarr;</kbd> to jump (again for double) &middot; swipe down / <kbd>&darr;</kbd> to drop fast. Low birds: jump. High birds: stay down.</p>
     </section>
 
     <p class="ag-sr" aria-live="polite" data-live></p>

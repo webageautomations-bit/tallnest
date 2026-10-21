@@ -24,7 +24,7 @@ export const games: ArcadeGame[] = [
   { slug: "quiz",    name: "Which Jingo Candy Are You?", blurb: "Seven questions. One very specific verdict.",            status: "live", accentColor: "#FF4F9A", mascotId: "khatti-meethi" },
   { slug: "match",   name: "Flavour Match",              blurb: "Pair the packs before your memory gives out.",           status: "live", accentColor: "#38C6F4", mascotId: "mint" },
   { slug: "counter", name: "Counter Rush",               blurb: "Serve the queue. Grab the right pack. Don't panic.",     status: "live", accentColor: "#FFC93C", mascotId: "orange" },
-  { slug: "chilli",  name: "Chilli Chaska Challenge",    blurb: "Hold your nerve. Bank your score before you burn.",      status: "live", accentColor: "#E0202B", mascotId: "chilli" },
+  { slug: "chilli",  name: "Chilli Chaska Challenge",    blurb: "Stop the needle in the sweet spot. It only gets hotter.", status: "live", accentColor: "#E0202B", mascotId: "chilli" },
   { slug: "runner",  name: "Mascot Runner",              blurb: "Pick your character and run.",                           status: "live", accentColor: "#A6E04A", mascotId: "raw-mango" },
 ];
 

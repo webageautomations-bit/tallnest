@@ -3,15 +3,19 @@
 // Content: src/data/jingo-quiz.ts (questions, results, rarityOrder).
 // Result product details come from jingo-products.ts and the character from
 // jingo-mascots.ts — nothing about a candy is hardcoded here.
-// Flow: intro → 7 questions (one at a time, Back allowed) → result.
+// Flow: intro → QUESTION_COUNT questions drawn at random IN THE BROWSER from
+// the full pool on every load / replay (one at a time, Back allowed) → result.
 import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
 import ShareResult from "../../../components/arcade/ShareResult.astro";
-import { questions, results, rarityOrder } from "../../../data/jingo-quiz";
+import { questions, results, rarityOrder, QUESTION_COUNT } from "../../../data/jingo-quiz";
 import { mascots } from "../../../data/jingo-mascots";
 import { productById } from "../../../lib/jingo";
 import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
 
 // Build-time integrity: every scored id and every result must resolve.
+if (QUESTION_COUNT < 1 || QUESTION_COUNT > questions.length) {
+  throw new Error(`jingo-quiz: QUESTION_COUNT (${QUESTION_COUNT}) must be 1–${questions.length}`);
+}
 const resultIds = new Set(results.map((r) => r.productId));
 for (const q of questions) {
   for (const o of q.options) {
@@ -50,6 +54,7 @@ const data = {
     prompt: q.prompt,
     options: q.options.map((o) => ({ id: o.id, text: o.text, scores: o.scores })),
   })),
+  count: QUESTION_COUNT,
   results: resolved,
   rarityOrder,
   url,
@@ -64,7 +69,7 @@ const data = {
   <div class="qz" data-quiz>
     <!-- Intro -->
     <section class="ag-screen ag-panel ag-panel--accent qz-intro" data-screen="intro" aria-labelledby="qz-intro-h">
-      <p class="qz-kicker">{questions.length} questions &middot; {results.length} candies</p>
+      <p class="qz-kicker">{QUESTION_COUNT} questions &middot; {results.length} candies</p>
       <h2 id="qz-intro-h" class="ag-display">Which Jingo candy are you?</h2>
       <p class="ag-sub">
         No right answers, no timer. Just pick what you&rsquo;d actually do &mdash; we&rsquo;ll
@@ -80,14 +85,15 @@ const data = {
     <!-- Question -->
     <section class="ag-screen qz-q" data-screen="question" hidden aria-labelledby="qz-prompt">
       <div class="qz-progress">
-        <p class="qz-count" data-count>Question 1 of {questions.length}</p>
+        <p class="qz-count" data-count aria-hidden="true">1 / {QUESTION_COUNT}</p>
         <div
           class="qz-bar"
           role="progressbar"
           aria-label="Quiz progress"
           aria-valuemin="0"
-          aria-valuemax={questions.length}
+          aria-valuemax={QUESTION_COUNT}
           aria-valuenow="1"
+          aria-valuetext={`Question 1 of ${QUESTION_COUNT}`}
           data-bar
         >
           <span class="qz-bar-fill" data-bar-fill></span>
@@ -165,10 +171,10 @@ const data = {
     gap: 8px;
   }
   .qz-count {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
     color: var(--jg-ink-soft);
   }
   .qz-bar {

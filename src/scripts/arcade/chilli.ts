@@ -1,220 +1,202 @@
-// "Chilli Chaska Challenge" — one-button push-your-luck.
-// Hold (touch, mouse, or Space) → heat rises linearly, round score rises with
-// heat² (accelerating). Release → bank. Heat reaching this round's hidden,
-// random burst point → round score lost. Pointer-cancel, losing capture, tab
-// switch or window blur all count as a RELEASE (bank), never a burst.
+// "Chilli Chaska Challenge" — keep the heat in the sweet spot.
+// Needle sweeps the gauge; tap / click / Space stops it. Inside the green zone
+// = points by accuracy ("Perfect!" dead-centre) and the next, harder round.
+// Outside = lose a life (3 lives). Reduced motion: slower sweep, no shake or
+// flames — still fully playable.
+import { LIVES, judge, sweep, sweepSpeed, zoneCentre, zoneWidth } from "./chilli-logic";
 import { getBest, higherIsBetter, recordBest } from "./storage";
 import { setShare } from "./share";
 
-interface ChilliData { rounds: number; url: string; candy: string }
+interface ChilliData { url: string }
 
-export const FILL_MS = 3600; // full heat in 3.6 s of holding
-const BURST_MIN = 0.32;
-const BURST_MAX = 0.97;
-const LOCKOUT_MS = 700; // pause after a round so a held-over press can't start the next
-const MAX_POINTS = 1000;
-
-export const pointsAt = (heat: number): number => Math.round(MAX_POINTS * heat * heat);
-export const randomBurst = (): number => BURST_MIN + Math.random() * (BURST_MAX - BURST_MIN);
-
-type Phase = "ready" | "holding" | "lockout" | "done";
+const RESULT_BEAT = 800; // ms the stopped needle + verdict stay up
+const BEST_KEY = "chilli-timing"; // the old hold-to-burst bests were a different scale
 
 export function initChilli(): void {
   const root = document.querySelector<HTMLElement>("[data-chilli]");
   const raw = document.getElementById("chilli-data")?.textContent;
   if (!root || !raw) return;
-  const { rounds, url } = JSON.parse(raw) as ChilliData;
+  const { url } = JSON.parse(raw) as ChilliData;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
   const screens = { intro: $("[data-screen=intro]"), play: $("[data-screen=play]"), end: $("[data-screen=end]") };
   const stage = $("[data-stage]");
-  const meter = $("[data-meter]");
-  const meterFill = $("[data-meter-fill]");
-  const heatNum = $("[data-heat-num]");
-  const pointsEl = $("[data-points]");
-  const burstEl = $("[data-burst]");
+  const track = $("[data-track]");
+  const zone = $("[data-sweet]");
+  const needle = $("[data-needle]");
+  const verdict = $("[data-verdict]");
   const msg = $("[data-msg]");
-  const hold = $<HTMLButtonElement>("[data-hold]");
-  const holdLabel = $("[data-hold-label]");
-  const roundsEl = $("[data-rounds]");
+  const stopBtn = $<HTMLButtonElement>("[data-stop]");
   const live = $("[data-live]");
 
-  let phase: Phase = "done";
-  let round = 0; // 0-based index of the current round
-  let results: (number | null)[] = []; // banked points, null = burnt
-  let heat = 0;
-  let burstAt = randomBurst();
+  let round = 1;
+  let lives = LIVES;
+  let score = 0;
+  let hits = 0;
+  let perfects = 0;
+  let p = 0; // needle 0..1
+  let dir: 1 | -1 = 1;
+  let zc = 0.5;
+  let zw = zoneWidth(1);
+  let speed = sweepSpeed(1, reduced);
+  let sweeping = false;
   let raf = 0;
   let last = 0;
+  let trackW = track.clientWidth;
+  new ResizeObserver(() => {
+    trackW = track.clientWidth;
+    paintNeedle();
+  }).observe(track);
 
   const show = (name: keyof typeof screens) => {
     for (const [k, el] of Object.entries(screens)) el.hidden = k !== name;
   };
-  const total = () => results.reduce<number>((s, r) => s + (r ?? 0), 0);
-
-  const paintHeat = () => {
-    stage.style.setProperty("--heat", heat.toFixed(3));
-    meterFill.style.transform = `scaleX(${heat})`;
-    const pct = Math.min(100, Math.round(heat * 100));
-    heatNum.textContent = `${pct}%`;
-    meter.setAttribute("aria-valuenow", String(pct));
-    pointsEl.textContent = String(pointsAt(heat));
-    stage.classList.toggle("is-shaking", phase === "holding" && heat > 0.2 && !reduced);
-    stage.classList.toggle("is-sweating", phase === "holding" && heat > 0.45);
-  };
-
-  const paintRounds = (list: HTMLElement) => {
-    list.replaceChildren(
-      ...results.map((r, i) => {
-        const li = document.createElement("li");
-        li.className = r === null ? "is-burnt" : "is-banked";
-        li.textContent = r === null ? `R${i + 1}: burnt` : `R${i + 1}: +${r}`;
-        return li;
-      }),
-    );
-  };
 
   const paintHud = () => {
-    $("[data-hud-round]").textContent = `${Math.min(round + 1, rounds)}/${rounds}`;
-    $("[data-hud-total]").textContent = String(total());
-    paintRounds(roundsEl);
+    $("[data-hud-round]").textContent = String(round);
+    $("[data-hud-score]").textContent = String(score);
+    $("[data-hud-lives]").innerHTML = Array.from({ length: LIVES }, (_, i) => `<span class="${i < lives ? "" : "off"}">♥</span>`).join("");
+    $("[data-hud-lives-chip]").setAttribute("aria-label", `Lives: ${lives} of ${LIVES}`);
   };
 
-  const readyRound = () => {
-    phase = "ready";
-    heat = 0;
-    burstAt = randomBurst();
-    stage.classList.remove("is-burnt");
-    burstEl.hidden = true;
-    hold.disabled = false;
-    holdLabel.textContent = round === 0 ? "Hold to heat up" : `Hold for round ${round + 1}`;
-    paintHeat();
-    paintHud();
+  const inZone = () => Math.abs(p - zc) <= zw / 2;
+  const paintNeedle = () => {
+    needle.style.transform = `translateX(${(p * trackW).toFixed(1)}px)`;
+    stage.classList.toggle("is-calm", sweeping && inZone());
   };
 
-  const finishRound = (banked: number | null) => {
-    cancelAnimationFrame(raf);
-    hold.classList.remove("is-held");
-    results.push(banked);
-    phase = "lockout";
-    hold.disabled = true;
-    paintHeat();
-    holdLabel.textContent = banked === null ? "Burnt!" : `Banked +${banked}`;
-    if (banked === null) {
-      stage.classList.add("is-burnt");
-      burstEl.hidden = false;
-      msg.textContent = `Burnt at ${Math.round(heat * 100)}% heat — round ${round + 1} score lost.`;
-    } else {
-      msg.textContent = `Banked +${banked} at ${Math.round(heat * 100)}% heat.`;
-    }
-    live.textContent = msg.textContent;
-    round++;
-    paintHud();
-    window.setTimeout(() => {
-      if (round >= rounds) endRun();
-      else {
-        readyRound();
-        msg.textContent += ` Hold for round ${round + 1}.`;
-      }
-    }, LOCKOUT_MS + (banked === null ? 300 : 0));
+  const placeZone = () => {
+    zw = zoneWidth(round);
+    zc = zoneCentre(zw);
+    speed = sweepSpeed(round, reduced);
+    zone.style.left = `${((zc - zw / 2) * 100).toFixed(2)}%`;
+    zone.style.width = `${(zw * 100).toFixed(2)}%`;
+    root.dataset.zoneWidth = zw.toFixed(4);
+    root.dataset.speed = speed.toFixed(3);
   };
 
   const frame = (now: number) => {
-    if (phase !== "holding") return;
-    const dt = Math.min(64, now - last);
+    if (!sweeping) return;
+    const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    heat = Math.min(1, heat + dt / FILL_MS);
-    if (heat >= burstAt) {
-      heat = burstAt;
-      finishRound(null);
-      return;
-    }
-    paintHeat();
+    ({ p, dir } = sweep(p, dir, speed, dt));
+    paintNeedle();
     raf = requestAnimationFrame(frame);
   };
 
-  const press = () => {
-    if (phase !== "ready") return;
-    phase = "holding";
-    hold.classList.add("is-held");
-    holdLabel.textContent = "Let go to bank!";
-    msg.textContent = "Heating up…";
+  const startSweep = () => {
+    sweeping = true;
+    stopBtn.disabled = false;
+    stage.classList.remove("is-burn", "is-happy", "is-perfect");
+    verdict.textContent = "";
     last = performance.now();
     raf = requestAnimationFrame(frame);
   };
 
-  const release = () => {
-    if (phase !== "holding") return;
-    finishRound(pointsAt(heat));
-  };
-
   const endRun = () => {
-    phase = "done";
-    const t = total();
-    const burnt = results.filter((r) => r === null).length;
-    const { best, isNew } = recordBest<number>("chilli", t, higherIsBetter);
-    $("[data-end-title]").textContent = `You banked ${t}.`;
-    $("[data-end-total]").textContent = String(t);
-    $("[data-end-burnt]").textContent = `${burnt}/${rounds}`;
+    const { best, isNew } = recordBest<number>(BEST_KEY, score, higherIsBetter);
+    $("[data-end-title]").textContent = `You survived ${hits} round${hits === 1 ? "" : "s"}.`;
+    $("[data-end-rounds]").textContent = String(hits);
+    $("[data-end-score]").textContent = String(score);
+    $("[data-end-perfects]").textContent = String(perfects);
     $("[data-end-best]").textContent = String(best);
     $("[data-end-new]").hidden = !isNew;
-    paintRounds($("[data-end-rounds]"));
-    setShare(`I banked ${t} on the Chilli Chaska Challenge without burning. Your turn.`, url);
+    setShare(`I survived ${hits} round${hits === 1 ? "" : "s"} of the Chilli Chaska Challenge (score ${score}). Your turn.`, url);
     show("end");
-    live.textContent = `Run complete. You banked ${t}.${isNew ? " New best run!" : ""}`;
+    live.textContent = `Run over. ${hits} rounds survived, score ${score}.${isNew ? " New best!" : ""}`;
     $("[data-end-title]").focus({ preventScroll: true });
   };
 
-  const start = () => {
-    round = 0;
-    results = [];
-    msg.textContent = `Press and hold to start round 1.`;
-    show("play");
-    root.scrollIntoView({ block: "start" });
-    readyRound();
-    hold.focus({ preventScroll: true });
+  const stop = () => {
+    if (!sweeping) return;
+    sweeping = false;
+    cancelAnimationFrame(raf);
+    stopBtn.disabled = true;
+    const r = judge(p, zc, zw, round);
+    root.dataset.lastStop = p.toFixed(4);
+    stage.classList.remove("is-calm");
+    if (r.hit) {
+      score += r.points;
+      hits++;
+      if (r.perfect) perfects++;
+      stage.classList.add(r.perfect ? "is-perfect" : "is-happy");
+      verdict.textContent = `${r.grade} +${r.points}`;
+      verdict.dataset.kind = r.perfect ? "perfect" : "hit";
+      round++;
+      msg.textContent = `Round ${round} — faster, and a smaller sweet spot.`;
+    } else {
+      lives--;
+      stage.classList.add("is-burn");
+      verdict.textContent = `${r.grade} −1 life`;
+      verdict.dataset.kind = "miss";
+      msg.textContent = lives > 0 ? `Missed the sweet spot. ${lives} li${lives === 1 ? "fe" : "ves"} left — same round, new spot.` : "Burnt out!";
+    }
+    live.textContent = verdict.textContent;
+    paintHud();
+    window.setTimeout(() => {
+      if (lives <= 0) {
+        endRun();
+        return;
+      }
+      placeZone();
+      startSweep();
+    }, RESULT_BEAT + (r.hit ? 0 : 250));
   };
 
-  // --- Input: pointer (touch + mouse) ------------------------------------
-  hold.addEventListener("pointerdown", (e) => {
+  const start = () => {
+    round = 1;
+    lives = LIVES;
+    score = 0;
+    hits = 0;
+    perfects = 0;
+    p = 0;
+    dir = 1;
+    show("play");
+    root.scrollIntoView({ block: "start", behavior: "instant" });
+    trackW = track.clientWidth;
+    placeZone();
+    paintHud();
+    msg.textContent = "Stop the needle inside the green sweet spot.";
+    paintNeedle();
+    startSweep();
+    stopBtn.focus({ preventScroll: true });
+  };
+
+  // --- Input: touch + mouse (pointerdown = instant), keyboard Space --------
+  const onPointer = (e: PointerEvent) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     e.preventDefault();
-    try {
-      hold.setPointerCapture(e.pointerId);
-    } catch {
-      /* capture unsupported — window listeners below still release */
-    }
-    press();
+    stop();
+  };
+  stopBtn.addEventListener("pointerdown", onPointer);
+  stage.addEventListener("pointerdown", onPointer);
+  track.parentElement!.addEventListener("pointerdown", onPointer);
+  stopBtn.addEventListener("click", (e) => {
+    // Keyboard Enter on the focused button (pointer clicks were handled on pointerdown).
+    if ((e as MouseEvent).detail === 0) stop();
   });
-  hold.addEventListener("pointerup", release);
-  hold.addEventListener("pointercancel", release); // e.g. the browser took over the gesture
-  hold.addEventListener("lostpointercapture", release);
-  hold.addEventListener("contextmenu", (e) => e.preventDefault()); // long-press menu
-  window.addEventListener("pointerup", release);
-
-  // --- Input: keyboard (hold Space) -------------------------------------
-  const playing = () => !screens.play.hidden;
   document.addEventListener("keydown", (e) => {
-    if (e.code !== "Space" || !playing()) return;
-    e.preventDefault(); // no page scroll, no button click
-    if (!e.repeat) press();
+    if (e.code !== "Space" || screens.play.hidden) return;
+    e.preventDefault();
+    if (!e.repeat) stop();
   });
   document.addEventListener("keyup", (e) => {
-    if (e.code !== "Space" || !playing()) return;
-    e.preventDefault();
-    release();
+    if (e.code === "Space" && !screens.play.hidden) e.preventDefault(); // no button click
   });
-
-  // Leaving mid-hold banks — it's never a burst.
-  window.addEventListener("blur", release);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) release();
+    // Pause the sweep while hidden; resume where it was.
+    if (document.hidden && sweeping) {
+      cancelAnimationFrame(raf);
+    } else if (!document.hidden && sweeping) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
   });
 
   $("[data-start]").addEventListener("click", start);
   $("[data-again]").addEventListener("click", start);
 
-  const best = getBest<number>("chilli");
-  if (best) $("[data-intro-best]").textContent = `Your best run: ${best}`;
+  const best = getBest<number>(BEST_KEY);
+  if (best) $("[data-intro-best]").textContent = `Your best: ${best}`;
 }

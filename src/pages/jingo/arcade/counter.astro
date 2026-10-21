@@ -1,53 +1,48 @@
 ---
-// /jingo/arcade/counter — "Counter Rush". Customers ask for a Jingo product by
-// name; tap the right pack on the shelf before their patience runs out.
-// Products (names, tints, pack renders) come from jingo-products.ts and the
-// customers are the crew from jingo-mascots.ts. Rules / ramp / lookalikes live
-// in src/scripts/arcade/counter-logic.ts.
+// /jingo/arcade/counter — "Counter Rush". Pure visual matching: each customer
+// shows the PACK they want; tap the identical pack on the shelf before their
+// patience runs out. No product names anywhere in play — lookalike sets are
+// worked out here at build time (from jingo-products.ts names/flavours) and
+// the browser only receives ids, tints and pack renders. Customers are the
+// crew from jingo-mascots.ts. Rules / ramp live in counter-logic.ts.
 import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
 import ShareResult from "../../../components/arcade/ShareResult.astro";
 import { products, packImage } from "../../../lib/jingo";
 import { mascots } from "../../../data/jingo-mascots";
 import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
-import { SHIFT, LIVES } from "../../../scripts/arcade/counter-logic";
+import { SHIFT, LIVES, lookalikeMap } from "../../../scripts/arcade/counter-logic";
 
+const stocked = products.filter((p) => packImage(p.id));
 const shelfProducts = await Promise.all(
-  products
-    .filter((p) => packImage(p.id))
-    .map(async (p) => ({
-      id: p.id,
-      name: p.name,
-      flavour: p.flavour,
-      categoryId: p.categoryId,
-      tint: p.tint,
-      img: await packSrc(p.id, 200, 70),
-    })),
+  stocked.map(async (p) => ({ id: p.id, tint: p.tint, img: await packSrc(p.id, 200, 70) })),
 );
+const looks = Object.fromEntries(lookalikeMap(stocked));
 const customers = await Promise.all(
-  mascots.map(async (m) => ({ id: m.id, label: m.label, color: m.color, img: await mascotSrc(m.image, 180, 72) })),
+  mascots.map(async (m) => ({ id: m.id, color: m.color, img: await mascotSrc(m.image, 180, 72) })),
 );
 const url = gameUrl(Astro.site, "counter");
-const data = { products: shelfProducts, customers, url };
+const data = { products: shelfProducts, looks, customers, url };
 ---
 
 <ArcadeGameLayout
   slug="counter"
   title="Counter Rush — Jingo Arcade Speed Game"
-  description="Serve the queue at the Jingo counter: customers ask for flavours by name, you grab the right pack before they lose patience. Watch out for lookalikes."
+  description="Serve the queue at the Jingo counter: each customer shows you the pack they want — find the match on the shelf before they lose patience. Watch out for lookalikes."
 >
   <div class="ct" data-counter>
     <!-- Intro -->
     <section class="ag-screen ag-panel ag-panel--accent" data-screen="intro" aria-labelledby="ct-intro-h">
       <h2 id="ct-intro-h" class="ag-display">You&rsquo;re on the counter.</h2>
       <p class="ag-sub">
-        Customers ask for a Jingo flavour by name. Tap the right pack before
-        their patience runs out. Serve {SHIFT} to finish your shift &mdash; you
-        have {LIVES} lives.
+        Each customer holds up the pack they want. Find the matching pack on the
+        shelf and tap it before their patience runs out. Serve {SHIFT} to finish
+        your shift &mdash; you have {LIVES} lives.
       </p>
       <ul class="ct-rules" role="list">
         <li><b>Right pack:</b> points, and a combo for every streak.</li>
         <li><b>Wrong pack:</b> their patience drops fast.</li>
         <li><b>Too slow:</b> they walk out and you lose a life.</li>
+        <li><b>Every customer</b> is a little less patient than the last &mdash; and some packs look <i>very</i> alike.</li>
       </ul>
       <p class="ct-best" data-intro-best></p>
       <div class="ag-actions">
@@ -72,11 +67,14 @@ const data = { products: shelfProducts, customers, url };
       <div class="ct-customer" data-customer>
         <img class="ct-avatar" data-avatar alt="" width="180" height="220" decoding="async" />
         <div class="ct-bubble">
-          <p class="ct-request" data-request aria-live="assertive"></p>
+          <div class="ct-want">
+            <img class="ct-want-img" data-want alt="The pack this customer wants" width="200" height="265" decoding="async" />
+            <p class="ct-say" data-say>This one, please!</p>
+          </div>
           <div class="ct-patience" aria-hidden="true">
             <span class="ct-patience-fill" data-patience></span>
           </div>
-          <p class="ct-level" data-level>Level 1</p>
+          <p class="ct-meta" data-meta>Customer 1</p>
         </div>
       </div>
 
@@ -170,25 +168,25 @@ const data = { products: shelfProducts, customers, url };
     color: color-mix(in srgb, var(--jg-ink) 22%, transparent);
   }
 
-  /* Customer */
+  /* Customer + the pack they're holding up */
   .ct-customer {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin-top: 12px;
     padding: 10px 12px;
     border: 2.5px solid var(--jg-ink);
     border-radius: 22px;
-    background: var(--c-color, var(--jg-paper));
     background: color-mix(in srgb, var(--c-color, var(--jg-sun)) 30%, var(--jg-paper));
     box-shadow: 0 4px 0 var(--jg-ink);
   }
   .ct-avatar {
     flex: none;
-    width: clamp(56px, 10svh, 80px);
+    width: clamp(52px, 9svh, 76px);
     height: auto;
   }
-  .ct-customer.is-new .ct-avatar {
+  .ct-customer.is-new .ct-avatar,
+  .ct-customer.is-new .ct-want-img {
     animation: ct-arrive 0.35s var(--jg-ease) both;
   }
   .ct-customer.is-happy .ct-avatar {
@@ -199,7 +197,7 @@ const data = { products: shelfProducts, customers, url };
   }
   @keyframes ct-arrive {
     from {
-      transform: translateX(-30px) rotate(-10deg);
+      transform: translateX(-24px) rotate(-10deg);
       opacity: 0;
     }
   }
@@ -222,14 +220,40 @@ const data = { products: shelfProducts, customers, url };
     flex: 1;
     min-width: 0;
   }
-  .ct-request {
-    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    min-height: 2.3em;
+  /* Speech bubble holding the wanted pack. */
+  .ct-want {
+    position: relative;
     display: flex;
     align-items: center;
+    gap: 10px;
+    padding: 6px 12px 6px 6px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 18px;
+    background: var(--want-tint, var(--jg-paper));
+  }
+  .ct-want::before {
+    content: "";
+    position: absolute;
+    left: -9px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border-left: 2.5px solid var(--jg-ink);
+    border-bottom: 2.5px solid var(--jg-ink);
+    background: var(--want-tint, var(--jg-paper));
+    transform: rotate(45deg);
+  }
+  .ct-want-img {
+    flex: none;
+    width: auto;
+    height: clamp(52px, 9svh, 88px);
+    filter: drop-shadow(0 3px 0 rgba(36, 18, 26, 0.25));
+  }
+  .ct-say {
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    font-weight: 700;
+    line-height: 1.15;
   }
   .ct-patience {
     height: 14px;
@@ -253,16 +277,17 @@ const data = { products: shelfProducts, customers, url };
   .ct-patience-fill.is-mid {
     background: var(--jg-sun);
   }
-  .ct-level {
+  .ct-meta {
     margin-top: 6px;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--jg-ink-soft);
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Shelf — thumb zone, 2–3 columns, generous tiles. */
+  /* Shelf — images only, thumb zone, 2–3 columns. */
   .ct-shelf {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -285,19 +310,14 @@ const data = { products: shelfProducts, customers, url };
     }
   }
   .ct-shelf :global(.ct-pack) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
+    display: grid;
+    place-items: center;
     min-height: 44px;
-    padding: 8px 6px 6px;
+    padding: 8px 6px;
     border: 2.5px solid var(--jg-ink);
     border-radius: 16px;
     background: var(--tint, var(--jg-paper));
     box-shadow: 0 3px 0 var(--jg-ink);
-    color: var(--jg-ink);
-    font: inherit;
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -313,26 +333,14 @@ const data = { products: shelfProducts, customers, url };
     border-radius: 16px;
   }
   .ct-shelf :global(.ct-pack img) {
-    width: 100%;
-    max-width: 92px;
-    aspect-ratio: 3 / 4;
-    height: auto;
+    width: auto;
+    max-width: 100%;
+    height: clamp(84px, 15svh, 128px);
     object-fit: contain;
     pointer-events: none;
   }
-  .ct-shelf[data-size="4"] :global(.ct-pack img) {
-    max-width: 110px;
-  }
-  /* Full 3×3 shelf: smaller art so all three rows fit a phone screen. */
   .ct-shelf[data-size="9"] :global(.ct-pack img) {
-    width: auto;
-    height: clamp(56px, 10.5svh, 96px);
-  }
-  .ct-shelf :global(.ct-pack-name) {
-    font-size: 0.78rem;
-    font-weight: 700;
-    line-height: 1.15;
-    text-align: center;
+    height: clamp(58px, 11.3svh, 104px);
   }
   .ct-shelf :global(.ct-pack.is-right) {
     background: #8fe3a8;
@@ -348,6 +356,7 @@ const data = { products: shelfProducts, customers, url };
 
   @media (prefers-reduced-motion: reduce) {
     .ct-customer.is-new .ct-avatar,
+    .ct-customer.is-new .ct-want-img,
     .ct-customer.is-happy .ct-avatar,
     .ct-customer.is-cross .ct-avatar,
     .ct-shelf :global(.ct-pack.is-wrong) {

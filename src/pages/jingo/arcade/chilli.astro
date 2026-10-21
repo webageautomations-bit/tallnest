@@ -1,47 +1,49 @@
 ---
-// /jingo/arcade/chilli — "Chilli Chaska Challenge": one-button push-your-luck.
-// Hold to heat up (score climbs, accelerating); release to bank. Hold past the
-// hidden, per-round random burst point and the round's score is lost.
-// 5 rounds per run. The star is the mascot of the Chilli Chaska candy, looked
-// up from jingo-mascots.ts / jingo-products.ts (not hardcoded).
+// /jingo/arcade/chilli — "Chilli Chaska Challenge": keep the heat in the
+// sweet spot. A needle sweeps a heat gauge; stop it inside the green zone.
+// Each round the sweep speeds up and the zone narrows (its position is random
+// every round). Points by accuracy, "Perfect!" dead-centre; a miss costs one
+// of 3 lives. The star is the mascot of the Chilli Chaska candy, looked up
+// from jingo-mascots.ts / jingo-products.ts (not hardcoded).
 import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
 import ShareResult from "../../../components/arcade/ShareResult.astro";
 import { mascots } from "../../../data/jingo-mascots";
 import { productById } from "../../../lib/jingo";
 import { mascotSrc, packSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+import { LIVES } from "../../../scripts/arcade/chilli-logic";
 
 const CANDY_ID = "chilli-chaska"; // the candy this game is named after
 const candy = productById(CANDY_ID);
 const mascot = mascots.find((m) => m.relatedProductIds.includes(CANDY_ID));
 if (!candy || !mascot) throw new Error(`Chilli Chaska Challenge: "${CANDY_ID}" product/mascot missing`);
 
-const ROUNDS = 5;
 const img = await mascotSrc(mascot.image, 480);
 const pack = await packSrc(candy.id, 160, 72);
 const url = gameUrl(Astro.site, "chilli");
-const data = { rounds: ROUNDS, url, candy: candy.name };
+const data = { url };
 ---
 
 <ArcadeGameLayout
   slug="chilli"
-  title="Chilli Chaska Challenge — Jingo Arcade Nerve Game"
-  description="Hold your nerve: press and hold to heat up the Chilli Chaska mascot, release to bank your score — but hold too long and it bursts. Five rounds."
+  title="Chilli Chaska Challenge — Jingo Arcade Timing Game"
+  description="Keep the heat in the sweet spot: stop the sweeping needle inside the green zone. Every round it's faster and the zone is smaller. Three lives — how far can you get?"
 >
   <div class="cc" data-chilli>
     <!-- Intro -->
     <section class="ag-screen ag-panel ag-panel--accent cc-intro" data-screen="intro" aria-labelledby="cc-intro-h">
       <div class="cc-intro-row">
         <div>
-          <h2 id="cc-intro-h" class="ag-display">How hot can you go?</h2>
+          <h2 id="cc-intro-h" class="ag-display">Find the sweet spot.</h2>
           <p class="ag-sub">
-            Press and <b>hold</b> the button. The heat rises and your score climbs
-            faster and faster. Let go to bank it &mdash; but hold past the burst
-            point and you lose that round. The burst point changes every round.
+            The needle sweeps across the heat gauge. <b>Stop it inside the green
+            zone.</b> The closer to the centre, the more you score &mdash; dead
+            centre is a <b>Perfect!</b> Every round it&rsquo;s faster and the zone
+            is smaller. Miss and you lose a life.
           </p>
         </div>
         <img class="cc-intro-pack" src={pack.src} width={pack.w} height={pack.h} alt={`${candy.name} pack`} decoding="async" />
       </div>
-      <p class="cc-controls">{ROUNDS} rounds &middot; Hold the button, or hold <kbd>Space</kbd></p>
+      <p class="cc-controls">{LIVES} lives &middot; Tap, click or press <kbd>Space</kbd> to stop</p>
       <p class="cc-best" data-intro-best></p>
       <div class="ag-actions">
         <button type="button" class="jg-btn jg-btn--paper" data-start>
@@ -53,58 +55,49 @@ const data = { rounds: ROUNDS, url, candy: candy.name };
     <!-- Play -->
     <section class="ag-screen cc-play" data-screen="play" hidden aria-label="Chilli Chaska Challenge">
       <div class="cc-hud">
-        <span class="ag-chip"><span class="ag-chip-label">Round</span> <b data-hud-round>1/{ROUNDS}</b></span>
-        <span class="ag-chip"><span class="ag-chip-label">Banked</span> <b data-hud-total>0</b></span>
+        <span class="ag-chip"><span class="ag-chip-label">Round</span> <b data-hud-round>1</b></span>
+        <span class="ag-chip"><span class="ag-chip-label">Score</span> <b data-hud-score>0</b></span>
+        <span class="ag-chip cc-lives" role="img" aria-label={`Lives: ${LIVES}`} data-hud-lives-chip>
+          <span class="ag-chip-label">Lives</span>
+          <span class="cc-hearts" data-hud-lives aria-hidden="true"></span>
+        </span>
       </div>
-      <ol class="cc-rounds" role="list" aria-label="Round results" data-rounds></ol>
 
-      <div class="cc-stage" data-stage style="--heat:0">
+      <div class="cc-stage" data-stage>
         <div class="cc-glow" aria-hidden="true"></div>
         <div class="cc-flames" aria-hidden="true">
           <span class="cc-flame"></span><span class="cc-flame"></span><span class="cc-flame"></span>
         </div>
         <div class="cc-mascot-wrap">
           <img class="cc-mascot" src={img.src} width={img.w} height={img.h} alt={`The Jingo ${mascot.label} character`} decoding="async" />
-          <span class="cc-sweat cc-sweat--1" aria-hidden="true"></span>
-          <span class="cc-sweat cc-sweat--2" aria-hidden="true"></span>
         </div>
-        <p class="cc-burst" data-burst hidden>BURNT!</p>
-        <p class="cc-points" data-points aria-hidden="true">0</p>
+        <p class="cc-verdict" data-verdict aria-hidden="true"></p>
       </div>
 
-      <div class="cc-meter-row">
-        <span class="cc-meter-label">Heat</span>
-        <div
-          class="cc-meter"
-          role="meter"
-          aria-label="Heat"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="0"
-          data-meter
-        >
-          <span class="cc-meter-fill" data-meter-fill></span>
+      <!-- Heat gauge: cool → hot, green sweet spot, sweeping needle -->
+      <div class="cc-gauge" aria-hidden="true">
+        <div class="cc-scale"><span>Mild</span><span>Hot</span></div>
+        <div class="cc-track" data-track>
+          <span class="cc-zone" data-sweet><span class="cc-zone-mid"></span></span>
+          <span class="cc-needle" data-needle></span>
         </div>
-        <b class="cc-meter-num" data-heat-num>0%</b>
       </div>
 
-      <p class="cc-msg" data-msg>Press and hold to start round 1.</p>
+      <p class="cc-msg" data-msg>Stop the needle inside the green sweet spot.</p>
 
-      <button type="button" class="cc-hold" data-hold>
-        <span data-hold-label>Hold to heat up</span>
-      </button>
+      <button type="button" class="cc-stop" data-stop>Stop!</button>
     </section>
 
     <!-- End -->
     <section class="ag-screen ag-panel cc-end" data-screen="end" hidden aria-labelledby="cc-end-h">
-      <p class="cc-kicker">Run complete</p>
-      <h2 id="cc-end-h" class="ag-display" tabindex="-1" data-end-title>You banked 0.</h2>
-      <p class="ag-new" data-end-new hidden>New best run!</p>
-      <ol class="cc-rounds cc-rounds--end" role="list" aria-label="Round results" data-end-rounds></ol>
+      <p class="cc-kicker">Burnt out</p>
+      <h2 id="cc-end-h" class="ag-display" tabindex="-1" data-end-title>You survived 0 rounds.</h2>
+      <p class="ag-new" data-end-new hidden>New best!</p>
       <dl class="ag-stats">
-        <div class="ag-stat"><dt>Total banked</dt><dd data-end-total>0</dd></div>
-        <div class="ag-stat"><dt>Rounds burnt</dt><dd data-end-burnt>0</dd></div>
-        <div class="ag-stat"><dt>Best run</dt><dd data-end-best>0</dd></div>
+        <div class="ag-stat"><dt>Rounds</dt><dd data-end-rounds>0</dd></div>
+        <div class="ag-stat"><dt>Score</dt><dd data-end-score>0</dd></div>
+        <div class="ag-stat"><dt>Perfects</dt><dd data-end-perfects>0</dd></div>
+        <div class="ag-stat"><dt>Best score</dt><dd data-end-best>0</dd></div>
       </dl>
       <div class="ag-actions">
         <button type="button" class="jg-btn" data-again>Play again</button>
@@ -163,81 +156,82 @@ const data = { rounds: ROUNDS, url, candy: candy.name };
   /* HUD */
   .cc-hud {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
-  .cc-rounds {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 10px 0 0;
-    padding: 0;
-    list-style: none;
-    min-height: 34px;
+  .cc-hearts {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--jg-red);
   }
-  .cc-rounds :global(li) {
-    display: inline-flex;
-    align-items: center;
-    min-height: 32px;
-    padding: 4px 10px;
-    border: 2px solid var(--jg-ink);
-    border-radius: 999px;
-    background: var(--jg-paper);
-    font-size: 0.85rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-  .cc-rounds :global(li.is-burnt) {
-    background: #ffb3b3;
-    text-decoration: line-through;
-    text-decoration-thickness: 2px;
-  }
-  .cc-rounds :global(li.is-banked) {
-    background: #b9efc9;
+  .cc-hearts :global(.off) {
+    color: color-mix(in srgb, var(--jg-ink) 22%, transparent);
   }
 
-  /* Stage — heat (0..1) drives every tension cue. */
+  /* Stage — mascot reacts: calm (needle in the zone), happy/perfect on a hit,
+     burning up on a miss. */
   .cc-stage {
     position: relative;
-    display: grid;
-    place-items: center;
-    height: clamp(230px, 38svh, 340px);
+    height: clamp(190px, 30svh, 300px);
     margin-top: 10px;
     border: 2.5px solid var(--jg-ink);
     border-radius: var(--jg-radius);
     overflow: hidden;
-    background: color-mix(in srgb, #ff3b1f calc(var(--heat) * 55%), var(--jg-paper));
+    background: var(--jg-paper);
     box-shadow: 0 5px 0 var(--jg-ink);
     user-select: none;
     -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background-color 0.25s ease;
+  }
+  .cc-stage.is-calm {
+    background: #dff6e6;
+  }
+  .cc-stage.is-burn {
+    background: #ffc7b8;
+  }
+  .cc-stage.is-perfect {
+    background: #fff1b8;
   }
   .cc-glow {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 75%, rgba(255, 201, 60, 0.9), transparent 60%);
-    opacity: var(--heat);
+    background: radial-gradient(circle at 50% 80%, rgba(255, 138, 31, 0.85), transparent 62%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .cc-stage.is-burn .cc-glow {
+    opacity: 1;
   }
   .cc-flames {
     position: absolute;
-    bottom: -10px;
+    bottom: -12px;
     left: 50%;
     display: flex;
     align-items: flex-end;
     gap: 4px;
     translate: -50% 0;
     transform-origin: 50% 100%;
-    transform: scaleY(var(--heat));
-    opacity: min(1, calc(var(--heat) * 2));
+    transform: scaleY(0);
+    opacity: 0;
+    transition:
+      transform 0.25s var(--jg-ease),
+      opacity 0.2s ease;
+  }
+  .cc-stage.is-burn .cc-flames {
+    transform: scaleY(1);
+    opacity: 1;
   }
   .cc-flame {
-    width: 70px;
-    height: 150px;
+    width: 64px;
+    height: 130px;
     border-radius: 50% 50% 40% 40% / 70% 70% 30% 30%;
     background: linear-gradient(180deg, transparent, #ffc93c 30%, #ff8a1f 60%, #e0202b);
-    animation: cc-flicker 0.32s ease-in-out infinite alternate;
+    animation: cc-flicker 0.3s ease-in-out infinite alternate;
   }
   .cc-flame:nth-child(2) {
-    height: 190px;
-    width: 86px;
+    width: 80px;
+    height: 170px;
     animation-delay: -0.15s;
   }
   .cc-flame:nth-child(3) {
@@ -248,13 +242,13 @@ const data = { rounds: ROUNDS, url, candy: candy.name };
       transform: scaleY(0.82) skewX(4deg);
     }
   }
-  /* Absolutely placed so its height resolves against the fixed-height stage.
-     Centred with `translate` so the shake/pop `transform` animations compose. */
+  /* Absolutely placed so its height resolves against the fixed-height stage;
+     centred with `translate` so transform animations compose. */
   .cc-mascot-wrap {
     position: absolute;
     left: 50%;
     bottom: 5%;
-    height: 78%;
+    height: 80%;
     aspect-ratio: 898 / 1100;
     translate: -50% 0;
   }
@@ -263,200 +257,166 @@ const data = { rounds: ROUNDS, url, candy: candy.name };
     height: 100%;
     object-fit: contain;
     pointer-events: none;
-    transform: scale(calc(1 + var(--heat) * 0.14));
-    filter: saturate(calc(1 + var(--heat) * 1.3)) drop-shadow(0 0 calc(var(--heat) * 18px) rgba(224, 32, 43, 0.9));
+    transition: filter 0.25s ease;
   }
-  .cc-stage.is-shaking .cc-mascot-wrap {
-    animation: cc-shake 0.1s linear infinite;
+  .cc-stage.is-calm .cc-mascot {
+    filter: drop-shadow(0 0 14px rgba(63, 191, 106, 0.9));
+  }
+  .cc-stage.is-burn .cc-mascot {
+    filter: saturate(2) brightness(0.9) drop-shadow(0 0 18px rgba(224, 32, 43, 0.95));
+  }
+  .cc-stage.is-burn .cc-mascot-wrap {
+    animation: cc-shake 0.09s linear 6;
+  }
+  .cc-stage.is-happy .cc-mascot-wrap,
+  .cc-stage.is-perfect .cc-mascot-wrap {
+    animation: cc-hop 0.45s var(--jg-ease);
   }
   @keyframes cc-shake {
-    0% {
-      transform: translate(calc(var(--heat) * -7px), 0) rotate(calc(var(--heat) * -3deg));
+    0%,
+    100% {
+      transform: translateX(-6px) rotate(-3deg);
     }
     50% {
-      transform: translate(calc(var(--heat) * 7px), calc(var(--heat) * 2px)) rotate(calc(var(--heat) * 3deg));
-    }
-    100% {
-      transform: translate(calc(var(--heat) * -7px), 0) rotate(calc(var(--heat) * -3deg));
+      transform: translateX(6px) rotate(3deg);
     }
   }
-  .cc-sweat {
-    position: absolute;
-    width: 14px;
-    height: 20px;
-    border: 2px solid var(--jg-ink);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    background: #9fe0ff;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-  .cc-sweat--1 {
-    top: 18%;
-    left: 4%;
-  }
-  .cc-sweat--2 {
-    top: 26%;
-    right: 2%;
-  }
-  .cc-stage.is-sweating .cc-sweat {
-    opacity: 1;
-    animation: cc-drip 0.9s ease-in infinite;
-  }
-  .cc-stage.is-sweating .cc-sweat--2 {
-    animation-delay: -0.45s;
-  }
-  @keyframes cc-drip {
-    to {
-      transform: translateY(26px);
-      opacity: 0;
+  @keyframes cc-hop {
+    40% {
+      transform: translateY(-14px) rotate(-5deg) scale(1.04);
     }
   }
-  .cc-points {
+  .cc-verdict {
     position: absolute;
     top: 10px;
-    right: 14px;
-    padding: 4px 12px;
-    border: 2.5px solid var(--jg-ink);
-    border-radius: 999px;
-    background: var(--jg-paper);
-    font-size: clamp(1.4rem, 6vw, 2rem);
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
     font-weight: 700;
-    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--jg-ink);
+    -webkit-text-stroke: 0;
+    text-shadow: 0 3px 0 var(--jg-paper);
   }
-  .cc-burst {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: clamp(2.6rem, 12vw, 4.4rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--jg-white);
-    -webkit-text-stroke: 3px var(--jg-ink);
-    paint-order: stroke fill;
-    text-shadow: 0 6px 0 var(--jg-ink);
-    background: radial-gradient(circle, rgba(255, 201, 60, 0.95) 0 30%, rgba(224, 32, 43, 0.85) 31% 55%, transparent 56%);
-    animation: cc-boom 0.45s var(--jg-ease) both;
+  .cc-verdict[data-kind="perfect"] {
+    color: var(--jg-red);
   }
-  @keyframes cc-boom {
-    from {
-      transform: scale(0.3);
-      opacity: 0;
-    }
-  }
-  .cc-stage.is-burnt .cc-mascot-wrap {
-    animation: cc-pop 0.45s ease-out forwards;
-  }
-  @keyframes cc-pop {
-    60% {
-      transform: scale(1.35);
-      opacity: 0.8;
-    }
-    to {
-      transform: scale(1.5);
-      opacity: 0;
-    }
+  .cc-verdict[data-kind="miss"] {
+    color: var(--jg-red-deep);
   }
 
-  /* Heat meter */
-  .cc-meter-row {
-    display: grid;
-    grid-template-columns: auto 1fr 3.4em;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
+  /* Gauge */
+  .cc-gauge {
+    margin-top: 14px;
+    touch-action: manipulation;
   }
-  .cc-meter-label {
+  .cc-scale {
+    display: flex;
+    justify-content: space-between;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    color: var(--jg-ink-soft);
   }
-  .cc-meter {
-    height: 18px;
-    border: 2.5px solid var(--jg-ink);
-    border-radius: 999px;
-    background: var(--jg-paper);
+  .cc-track {
+    position: relative;
+    height: 46px;
+    margin-top: 6px;
+    border: 3px solid var(--jg-ink);
+    border-radius: 14px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgba(36, 18, 26, 0.18) calc(10% - 2px) 10%),
+      linear-gradient(90deg, #ffe8a3, #ffb347 45%, #ff6a3d 75%, #e0202b);
+    box-shadow: 0 4px 0 var(--jg-ink);
     overflow: hidden;
   }
-  .cc-meter-fill {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #ffc93c, #ff8a1f 50%, #e0202b);
-    transform-origin: left center;
-    transform: scaleX(0);
+  .cc-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(63, 191, 106, 0.88);
+    border-inline: 3px solid #1f7a3c;
   }
-  .cc-meter-num {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+  .cc-zone-mid {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 3px;
+    margin-left: -1.5px;
+    background: rgba(255, 255, 255, 0.95);
+  }
+  .cc-needle {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    left: -3px;
+    width: 6px;
+    border-radius: 3px;
+    background: var(--jg-ink);
+    box-shadow: 0 0 0 2px var(--jg-paper);
+    will-change: transform;
   }
   .cc-msg {
     min-height: 1.5em;
-    margin-top: 10px;
+    margin-top: 12px;
     font-weight: 600;
     text-align: center;
   }
 
-  /* The one big button — thumb-sized, no text selection / callout on hold. */
-  .cc-hold {
+  /* The one big button. */
+  .cc-stop {
     display: grid;
     place-items: center;
     width: 100%;
-    min-height: 96px;
-    margin-top: 12px;
+    min-height: 88px;
+    margin-top: 10px;
     border: 3px solid var(--jg-ink);
     border-radius: 28px;
     background: var(--jg-red);
     box-shadow: 0 7px 0 var(--jg-ink);
     color: var(--jg-white);
     font: inherit;
-    font-size: clamp(1.25rem, 5vw, 1.6rem);
+    font-size: clamp(1.4rem, 6vw, 1.8rem);
     font-weight: 700;
     cursor: pointer;
-    touch-action: none;
+    touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
-    transition:
-      transform 0.12s ease,
-      box-shadow 0.12s ease,
-      background-color 0.15s ease;
   }
-  .cc-hold.is-held {
+  .cc-stop:active {
     transform: translateY(5px);
     box-shadow: 0 2px 0 var(--jg-ink);
-    background: var(--jg-red-deep);
   }
-  .cc-hold:disabled {
-    cursor: default;
+  .cc-stop:disabled {
     opacity: 0.6;
+    cursor: default;
   }
-  .cc-hold:focus-visible {
+  .cc-stop:focus-visible {
     border-radius: 28px;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    /* Playable, just static: no shake, no flames/sweat, no pops. The heat
-       meter, percentage and stage colour still show the tension. */
-    .cc-flames,
-    .cc-sweat {
+    /* Slower sweep is set in JS; here: no shake, flames or hops. */
+    .cc-flames {
       display: none;
     }
-    .cc-stage.is-shaking .cc-mascot-wrap,
-    .cc-stage.is-burnt .cc-mascot-wrap,
-    .cc-burst {
+    .cc-stage.is-burn .cc-mascot-wrap,
+    .cc-stage.is-happy .cc-mascot-wrap,
+    .cc-stage.is-perfect .cc-mascot-wrap {
       animation: none;
     }
-    .cc-stage.is-burnt .cc-mascot-wrap {
-      opacity: 0.35;
-    }
+    .cc-stage,
+    .cc-glow,
     .cc-mascot {
-      transform: none;
-    }
-    .cc-hold {
       transition: none;
+    }
+    .cc-stop:active {
+      transform: none;
     }
   }
 </style>

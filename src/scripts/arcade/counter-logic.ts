@@ -1,5 +1,7 @@
 // "Counter Rush" — pure game rules (no DOM): difficulty ramp, lookalikes,
 // shelf building, scoring. Kept separate so it can be tested headless.
+// The game is purely visual: lookalikes are computed at BUILD time (from names
+// and flavours) and the browser only ever receives ids + pack images.
 //
 // LOOKALIKES are derived from the product data, not hardcoded: two products
 // are lookalikes when their name or flavour shares a meaningful word once
@@ -15,10 +17,9 @@ export interface CounterProduct {
   categoryId: string;
 }
 
-export interface LevelParams {
-  level: number;
+export interface RoundParams {
   shelf: number; // packs on the shelf
-  patienceMs: number; // full patience bar
+  patienceMs: number; // this customer's full patience bar
   lookalikeChance: number; // chance the target's lookalikes share the shelf
 }
 
@@ -27,6 +28,11 @@ export const SHIFT = 30;
 export const LIVES = 3;
 /** Fraction of the full patience bar a wrong pack costs. */
 export const WRONG_PENALTY = 0.35;
+
+/** Patience: starts generous, each customer ~4% shorter, never below the floor. */
+export const PATIENCE_START = 9000;
+export const PATIENCE_DECAY = 0.96;
+export const PATIENCE_FLOOR = 3000;
 
 const STOP = new Set([
   "candy", "candies", "flavoured", "flavour", "twist", "bublo", "toffee", "toffees",
@@ -57,23 +63,16 @@ export function lookalikeMap(products: CounterProduct[]): Map<string, string[]> 
   return map;
 }
 
-/** Ramp: level rises every 4 customers served. */
-export function levelFor(served: number): LevelParams {
-  const level = 1 + Math.floor(served / 4);
-  const table: Omit<LevelParams, "level">[] = [
-    { shelf: 4, patienceMs: 9000, lookalikeChance: 0 },
-    { shelf: 6, patienceMs: 8000, lookalikeChance: 0 },
-    { shelf: 6, patienceMs: 7000, lookalikeChance: 0.5 },
-    { shelf: 9, patienceMs: 6200, lookalikeChance: 0.7 },
-    { shelf: 9, patienceMs: 5400, lookalikeChance: 0.85 },
-  ];
-  const base = table[Math.min(level, table.length) - 1];
-  const extra = Math.max(0, level - table.length);
+/**
+ * Continuous ramp for the customer after `served` serves: patience shrinks
+ * every single customer (geometric, floored); lookalike chance climbs
+ * smoothly from customer 7 to certainty by 20; the shelf grows 4 → 6 → 9.
+ */
+export function paramsFor(served: number): RoundParams {
   return {
-    level,
-    shelf: base.shelf,
-    patienceMs: Math.max(3200, base.patienceMs - extra * 450),
-    lookalikeChance: extra > 0 ? 1 : base.lookalikeChance,
+    shelf: served < 4 ? 4 : served < 10 ? 6 : 9,
+    patienceMs: Math.max(PATIENCE_FLOOR, Math.round(PATIENCE_START * PATIENCE_DECAY ** served)),
+    lookalikeChance: Math.min(1, Math.max(0, (served - 6) / 14)),
   };
 }
 
@@ -102,13 +101,13 @@ export interface Round {
  * lookalikes and they're placed beside it; the rest is random fill.
  */
 export function buildRound(
-  products: CounterProduct[],
+  allIds: string[],
   looks: Map<string, string[]>,
-  params: LevelParams,
+  params: RoundParams,
   rng: Rng = Math.random,
   avoid?: string,
 ): Round {
-  const ids = products.map((p) => p.id).filter((id) => id !== avoid);
+  const ids = allIds.filter((id) => id !== avoid);
   const tricky = rng() < params.lookalikeChance;
 
   if (tricky) {

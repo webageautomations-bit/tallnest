@@ -52,7 +52,7 @@ export function initMatch(): void {
 
   const show = (name: keyof typeof screens) => {
     for (const [k, el] of Object.entries(screens)) el.hidden = k !== name;
-    if (root.getBoundingClientRect().top < 80) root.scrollIntoView({ block: "start" });
+    if (root.getBoundingClientRect().top < 80) root.scrollIntoView({ block: "start", behavior: "instant" });
   };
 
   const paintBests = () => {

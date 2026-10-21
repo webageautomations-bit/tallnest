@@ -1,6 +1,6 @@
 // "Which Jingo Candy Are You?" — client logic. Data arrives as JSON from the
 // page (built from jingo-quiz.ts + jingo-products.ts + jingo-mascots.ts).
-import { pickResult } from "./quiz-score";
+import { drawQuestions, pickResult } from "./quiz-score";
 import { setShare } from "./share";
 
 interface Option { id: string; text: string; scores: string[] }
@@ -13,7 +13,7 @@ interface Result {
   mascot: { label: string; color: string; img: Img };
   pack: Img;
 }
-interface QuizData { questions: Question[]; results: Result[]; rarityOrder: string[]; url: string }
+interface QuizData { questions: Question[]; count: number; results: Result[]; rarityOrder: string[]; url: string }
 
 const PICK_BEAT = 180; // ms the picked option stays lit before advancing
 
@@ -22,7 +22,10 @@ export function initQuiz(): void {
   const raw = document.getElementById("quiz-data")?.textContent;
   if (!root || !raw) return;
   const data = JSON.parse(raw) as QuizData;
-  const { questions, results, rarityOrder, url } = data;
+  const { questions: pool, count, results, rarityOrder, url } = data;
+  // This play's questions — drawn client-side on mount and again on every
+  // replay, so visitors (and replays) get different sets.
+  let questions = drawQuestions(pool, count);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
@@ -31,7 +34,7 @@ export function initQuiz(): void {
     question: $("[data-screen=question]"),
     result: $("[data-screen=result]"),
   };
-  const count = $("[data-count]");
+  const countEl = $("[data-count]");
   const bar = $("[data-bar]");
   const fill = $("[data-bar-fill]");
   const prompt = $("[data-prompt]");
@@ -56,8 +59,10 @@ export function initQuiz(): void {
 
   const renderQuestion = () => {
     const q = questions[index];
-    count.textContent = `Question ${index + 1} of ${questions.length}`;
+    countEl.textContent = `${index + 1} / ${questions.length}`;
+    bar.setAttribute("aria-valuemax", String(questions.length));
     bar.setAttribute("aria-valuenow", String(index + 1));
+    bar.setAttribute("aria-valuetext", `Question ${index + 1} of ${questions.length}`);
     fill.style.transform = `scaleX(${(index + 1) / questions.length})`;
     prompt.textContent = q.prompt;
     list.replaceChildren(
@@ -157,6 +162,7 @@ export function initQuiz(): void {
 
   $("[data-start]").addEventListener("click", start);
   $("[data-restart]").addEventListener("click", () => {
+    questions = drawQuestions(pool, count, questions.map((q) => q.id));
     show("intro");
     $<HTMLButtonElement>("[data-start]").focus({ preventScroll: true });
     toTop();

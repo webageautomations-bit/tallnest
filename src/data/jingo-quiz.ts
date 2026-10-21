@@ -22,6 +22,10 @@ export interface QuizResult {
   blurb: string;      // result-screen copy
 }
 
+// Questions shown per play — a random QUESTION_COUNT are drawn from
+// `questions` in the browser on every load / replay.
+export const QUESTION_COUNT = 7;
+
 export const questions: QuizQuestion[] = [
   {
     id: 'q1',
