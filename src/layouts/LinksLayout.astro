@@ -1,0 +1,109 @@
+---
+// Link-in-bio layout for /links (Tall Nest) and /jingo/links (Jingo).
+// These pages open almost only inside Instagram / TikTok / Facebook in-app
+// browsers on mobile data, so they deliberately DON'T use the full
+// BaseLayout / JingoLayout chrome (header, footer, social rail, floating
+// WhatsApp, GSAP motion + its modulepreloads). They share the same SEO head,
+// the same Fontshare family and each zone's brand tokens — and ship ZERO
+// JavaScript and only their own small CSS.
+//
+// SEO: noindex, follow (navigation shims, not content) — still with full
+// OG/Twitter tags so a pasted link previews well. Excluded from the sitemap in
+// astro.config.mjs.
+import SEOHead from "../components/SEOHead.astro";
+
+interface Props {
+  zone: "corporate" | "jingo";
+  title: string;
+  description: string;
+}
+
+const { zone, title, description } = Astro.props;
+const corp = zone === "corporate";
+// General Sans faces used on these pages (two each), preloaded so they're in
+// place for first paint; a system fallback stack covers a slow/blocked font.
+const FONT_500 = "https://cdn.fontshare.com/wf/3RZHWSNONLLWJK3RLPEKUZOMM56GO4LJ/BPDRY7AHVI3MCDXXVXTQQ76H3UXA63S3/SB2OEB6IKZPRR6JT4GFJ2TFT6HBB6AZN.woff2";
+const FONT_600 = "https://cdn.fontshare.com/wf/K46YRH762FH3QJ25IQM3VAXAKCHEXXW4/ISLWQPUZHZF33LRIOTBMFOJL57GBGQ4B/3ZLMEXZEQPLTEPMHTQDAUXP5ZZXCZAEN.woff2";
+const FONT_700 = "https://cdn.fontshare.com/wf/KWXO5X3YW4X7OLUMPO4X24HQJGJU7E2Q/VOWUQZS3YLP66ZHPTXAFSH6YACY4WJHT/NIQ54PVBBIWVK3PFSOIOUJSXIJ5WTNDP.woff2";
+const preloads = corp ? [FONT_500, FONT_600] : [FONT_600, FONT_700];
+const weights = corp ? "500,600" : "600,700";
+---
+
+<!doctype html>
+<html lang="en" dir="ltr" data-zone={corp ? undefined : "jingo"} data-motion="off">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    {preloads.map((href) => <link rel="preload" as="font" type="font/woff2" crossorigin href={href} />)}
+    <link rel="stylesheet" href={`https://api.fontshare.com/v2/css?f[]=general-sans@${weights}&display=swap`} />
+    <SEOHead
+      title={title}
+      description={description}
+      ogImage={corp ? "/og/tallnest-og.jpg" : "/og/jingo-og.jpg"}
+      ogImageWidth={1200}
+      ogImageHeight={630}
+      ogImageAlt={corp ? "Tall Nest Group — Food & Beverages" : "Jingo — the candy brand from Tall Nest Group"}
+      siteName={corp ? "Tall Nest Group" : "Jingo by Tall Nest Group"}
+      themeColor={corp ? "#93221E" : "#E0202B"}
+      robots="noindex,follow"
+    />
+  </head>
+  <body class:list={["lk", corp ? "lk--corp" : "lk--jingo"]}>
+    <main class="lk-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  /* Tiny reset — these pages don't load the site-wide Tailwind bundle. */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100svh;
+    /* Fallback stack sized close to General Sans, so a slow font doesn't shift layout. */
+    font-family: "General Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+  h1,
+  p {
+    margin: 0;
+  }
+  .lk-main {
+    width: 100%;
+    max-width: 480px;
+    margin-inline: auto;
+    padding: max(28px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom));
+  }
+  .lk-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  :focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+</style>

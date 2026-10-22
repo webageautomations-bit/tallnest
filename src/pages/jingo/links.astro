@@ -1,0 +1,203 @@
+---
+// /jingo/links — Jingo link-in-bio (Instagram / TikTok / Facebook — mostly
+// consumers): the fun leads, and the distributor enquiry sits LAST, set apart
+// under a divider for shopkeepers and retailers. Every button carries a stable
+// data-link-id for analytics. No JavaScript.
+import { Image } from "astro:assets";
+import LinksLayout from "../../layouts/LinksLayout.astro";
+import { WHATSAPP_DISTRIBUTOR, whatsappGlyph } from "../../data/contact";
+import logoRed from "../../assets/jingo/jingo-logo-red.png";
+
+const icon = (body: string) =>
+  `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
+const home = icon(`<path d="M3 11 12 3l9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>`);
+const star = icon(`<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>`);
+const pad = icon(`<rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="15.5" cy="11.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="13.5" r=".8" fill="currentColor"/>`);
+const download = icon(`<path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 20h14"/>`);
+const nest = icon(`<path d="M4 13c0 4 3.6 7 8 7s8-3 8-7"/><path d="M3 13h18"/><path d="M8 13c0-2.5 1.8-4 4-4s4 1.5 4 4"/>`);
+
+interface LinkItem { id: string; label: string; href: string; icon: string; tone: string }
+// All internal (same site) — they stay in-tab. The catalogue is a PDF on this
+// site, opened in-tab (in-app browsers handle that better than `download`).
+const links: LinkItem[] = [
+  { id: "jingo-home", label: "Jingo Home", href: "/jingo", icon: home, tone: "sun" },
+  { id: "jingo-mascots", label: "Our Mascots", href: "/jingo/mascots", icon: star, tone: "pink" },
+  { id: "jingo-arcade", label: "Games Arcade", href: "/jingo/arcade", icon: pad, tone: "sky" },
+  { id: "jingo-catalogue", label: "Download Catalogue", href: "/jingo-catalogue-2026.pdf", icon: download, tone: "paper" },
+  { id: "jingo-visit-tallnest", label: "Visit Tall Nest", href: "/", icon: nest, tone: "paper" },
+];
+---
+
+<LinksLayout
+  zone="jingo"
+  title="Jingo — Links"
+  description="Jingo: candies, toffees and the whole candy crew. Explore the range, meet the mascots, play the arcade — or become a Jingo distributor."
+>
+  <header class="jl-head">
+    <Image src={logoRed} alt="Jingo" width={200} densities={[1, 2]} loading="eager" fetchpriority="high" class="jl-logo" />
+    <h1 class="jl-line">Big flavour, small price, pure fun &mdash; tap in!</h1>
+  </header>
+
+  <nav aria-label="Jingo links">
+    <ul class="jl-list" role="list">
+      {
+        links.map((l) => (
+          <li>
+            <a href={l.href} class:list={["jl-btn", `jl-btn--${l.tone}`]} data-link-id={l.id}>
+              <span class="jl-ico" set:html={l.icon} />
+              <span class="jl-label">{l.label}</span>
+              <span class="jl-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="jl-divider" role="separator">
+      <span>Shopkeeper or retailer?</span>
+    </div>
+
+    <a
+      href={WHATSAPP_DISTRIBUTOR}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="jl-btn jl-btn--red"
+      data-link-id="jingo-whatsapp-distributor"
+    >
+      <span class="jl-ico jl-ico--wa" set:html={whatsappGlyph} />
+      <span class="jl-label">Become a Jingo Distributor</span>
+      <span class="lk-sr">(opens WhatsApp)</span>
+    </a>
+  </nav>
+
+  <p class="jl-foot">Jingo is a Tall Nest Group brand.</p>
+</LinksLayout>
+
+<style>
+  :global(.lk--jingo) {
+    color: #24121a;
+    background:
+      radial-gradient(circle at 8% 6%, #ffc93c 0 46px, transparent 47px),
+      radial-gradient(circle at 96% 18%, #ff4f9a 0 30px, transparent 31px),
+      radial-gradient(circle at 4% 78%, #38c6f4 0 26px, transparent 27px),
+      radial-gradient(circle at 94% 92%, #a6e04a 0 40px, transparent 41px),
+      #fff6e9;
+  }
+  .jl-head {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .jl-logo {
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(0 4px 0 rgba(36, 18, 26, 0.18));
+  }
+  .jl-line {
+    max-width: 22em;
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .jl-list {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Sticker buttons: ink outline, hard offset shadow, press on tap. */
+  .jl-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 12px 18px;
+    border: 2.5px solid #24121a;
+    border-radius: 999px;
+    background: var(--tone, #fffdf8);
+    color: #24121a;
+    box-shadow: 0 5px 0 #24121a;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .jl-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #24121a;
+  }
+  .jl-btn--sun {
+    --tone: #ffc93c;
+  }
+  .jl-btn--pink {
+    --tone: #ff4f9a;
+  }
+  .jl-btn--sky {
+    --tone: #38c6f4;
+  }
+  .jl-btn--paper {
+    --tone: #fffdf8;
+  }
+  .jl-ico {
+    display: inline-flex;
+    flex: none;
+    width: 24px;
+    height: 24px;
+  }
+  .jl-label {
+    flex: 1;
+    min-width: 0;
+  }
+  .jl-arrow {
+    font-size: 1.15rem;
+  }
+  .jl-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 26px 0 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5b4450;
+  }
+  .jl-divider::before,
+  .jl-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 2.5px dashed rgba(36, 18, 26, 0.35);
+  }
+  /* The distributor enquiry — brand red, WhatsApp glyph, set apart. */
+  .jl-btn--red {
+    min-height: 64px;
+    --tone: #e0202b;
+    color: #ffffff;
+  }
+  .jl-ico--wa {
+    width: 26px;
+    height: 26px;
+  }
+  .jl-foot {
+    margin-top: 26px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5b4450;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jl-btn {
+      transition: none;
+    }
+    .jl-btn:active {
+      transform: none;
+    }
+  }
+</style>

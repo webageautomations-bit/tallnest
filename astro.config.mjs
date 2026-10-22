@@ -13,7 +13,12 @@ export default defineConfig({
   redirects: {
     '/distributors': { status: 301, destination: '/partners' },
   },
-  integrations: [sitemap(), motionPreload()],
+  integrations: [
+    // Link-in-bio pages (/links, /jingo/links) are noindex navigation shims —
+    // keep them out of the sitemap.
+    sitemap({ filter: (page) => !/\/links\/?$/.test(new URL(page).pathname) }),
+    motionPreload(),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },
