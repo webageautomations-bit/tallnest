@@ -29,7 +29,7 @@ export const categories: JingoCategory[] = [
 
 export const products: JingoProduct[] = [
   // candies
-  { id: 'cola-candy', name: "Cola Candy", flavour: "Cola Flavoured", categoryId: 'candies', price: 'Rs. 5', color: '#D4213D', tint: '#D7A8AF', textOn: 'light' },
+  { id: 'cola-candy', name: "Cola Fizz", flavour: "Cola Flavoured", categoryId: 'candies', price: 'Rs. 5', color: '#D4213D', tint: '#D7A8AF', textOn: 'light' },
   { id: 'kachi-keri', name: "Kachi Keri", flavour: "Raw Mango Flavoured", categoryId: 'candies', price: 'Rs. 5', color: '#7BAB56', tint: '#BAD6A4', textOn: 'dark' },
   { id: 'tangy-candy', name: "Tangy Candy", flavour: "Orange Flavoured", categoryId: 'candies', price: 'Rs. 5', color: '#E8551E', tint: '#D7B5A8', textOn: 'dark' },
   { id: 'chilli-chaska', name: "Chilli Chaska", flavour: "Chilli Candy", categoryId: 'candies', price: 'Rs. 5', color: '#8158AC', tint: '#BFAAD5', textOn: 'light' },

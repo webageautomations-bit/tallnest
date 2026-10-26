@@ -8,9 +8,11 @@ import {
   readingTime,
   formatDate,
   coverGradient,
+  coverImage,
   postSlug,
   type Post,
 } from "../../lib/posts";
+import { Image } from "astro:assets";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts", ({ data }) => data.draft !== true);
@@ -27,6 +29,7 @@ const { post } = Astro.props;
 const { data } = post;
 const { Content } = await render(post);
 const rt = readingTime(post);
+const cover = coverImage(data.cover);
 
 // Related: same category (excluding current), fallback to latest.
 const all = await getSortedPosts();
@@ -92,9 +95,20 @@ const articleSchema = {
         data-reveal
         class="art-cover"
         style={`background:${coverGradient(data.category)}`}
-        role="img"
-        aria-label={`${data.title} — cover`}
       >
+        {
+          cover && (
+            <Image
+              class="art-cover-img"
+              src={cover}
+              alt=""
+              widths={[640, 1024]}
+              sizes="(min-width: 1100px) 1004px, calc(100vw - 48px)"
+              loading="eager"
+              fetchpriority="high"
+            />
+          )
+        }
       </div>
       {
         data.coverCredit && (
@@ -120,9 +134,9 @@ const articleSchema = {
 
       <!-- Share + back -->
       <div class="art-foot">
-        <div class="share" aria-label="Share this article">
+        <div class="share" role="group" aria-label="Share this article">
           <button type="button" class="share-btn" data-copy aria-label="Copy link">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>
+            <svg aria-hidden="true" focusable="false" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>
           </button>
           <a
             class="share-btn"
@@ -131,7 +145,7 @@ const articleSchema = {
             rel="noopener noreferrer"
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            <svg aria-hidden="true" focusable="false" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           </a>
           <a
             class="share-btn"
@@ -140,7 +154,7 @@ const articleSchema = {
             rel="noopener noreferrer"
             href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(data.title)}`}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l8-9.1L1 2h7l4.8 6.4zM17 20h1.9L7 4H5z"/></svg>
+            <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l8-9.1L1 2h7l4.8 6.4zM17 20h1.9L7 4H5z"/></svg>
           </a>
           <a
             class="share-btn"
@@ -149,7 +163,7 @@ const articleSchema = {
             rel="noopener noreferrer"
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v6h-4v-6a2 2 0 0 0-4 0v6h-4V8.5h4V10"/><rect x="2" y="9" width="4" height="11"/><circle cx="4" cy="4" r="2"/></svg>
+            <svg aria-hidden="true" focusable="false" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v6h-4v-6a2 2 0 0 0-4 0v6h-4V8.5h4V10"/><rect x="2" y="9" width="4" height="11"/><circle cx="4" cy="4" r="2"/></svg>
           </a>
         </div>
         <a href="/the-nest" class="back-link">&larr; Back to The Nest</a>
@@ -227,6 +241,14 @@ const articleSchema = {
     aspect-ratio: 21 / 9;
     border-radius: var(--radius-panel);
     box-shadow: var(--shadow-e2);
+    overflow: hidden;
+  }
+  /* Decorative (alt=""): the title sits directly above; the credit below. */
+  .art-cover-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   /* Cover photo attribution — small, muted, low emphasis (CC BY credit). */
   .art-credit {

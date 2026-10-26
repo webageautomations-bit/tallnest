@@ -62,6 +62,30 @@ html[data-zone="jingo"] .ag [tabindex="-1"]:focus {
     transform: translateX(-2px);
   }
 }
+:where(html[data-zone="jingo"]) .ag-about {
+  /* Always its own line under the title (a max-width would let flexbox fit
+     it beside the title); the padding caps the line length instead. */
+  flex-basis: 100%;
+  padding-inline-end: max(0px, calc(100% - 62ch));
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--jg-ink-soft);
+}
+/* Keyboard hint line on DOM games' intro screens. */
+:where(html[data-zone="jingo"]) .ag-keys {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.7;
+}
+:where(html[data-zone="jingo"]) .ag-keys kbd {
+  padding: 1px 7px;
+  border: 2px solid currentColor;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 0.9em;
+}
 :where(html[data-zone="jingo"]) .ag-title {
   min-width: 0;
   font-size: clamp(1.15rem, 3.6vw, 1.6rem);

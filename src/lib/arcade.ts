@@ -11,8 +11,13 @@ export interface ArcadeImage {
   h: number;
 }
 
+// NB: never read properties of the ImageMetadata here (e.g. img.width). Astro
+// marks an image whose properties are touched as "used directly" and then
+// copies the full-size ORIGINAL into the build — that once added 44 unused
+// 1–1.5 MB PNGs (38 MB) to dist/. getImage() reads it safely itself. Every
+// width requested by the games is below the renders' natural widths (≥ 820px).
 async function sized(img: ImageMetadata, width: number, quality: number): Promise<ArcadeImage> {
-  const out = await getImage({ src: img, width: Math.min(width, img.width), format: "webp", quality });
+  const out = await getImage({ src: img, width, format: "webp", quality });
   return { src: out.src, w: Number(out.attributes.width), h: Number(out.attributes.height) };
 }
 
@@ -37,3 +42,7 @@ export const jsonForScript = (data: unknown): string =>
 /** Absolute, canonical-host URL for a game (shared links). */
 export const gameUrl = (site: URL | undefined, slug: string): string =>
   new URL(`/jingo/arcade/${slug}/`, site ?? "https://www.tallnest.com").toString();
+
+/** Absolute URL of a quiz result landing page (/jingo/arcade/quiz/<productId>/). */
+export const quizResultUrl = (site: URL | undefined, productId: string): string =>
+  new URL(`/jingo/arcade/quiz/${productId}/`, site ?? "https://www.tallnest.com").toString();

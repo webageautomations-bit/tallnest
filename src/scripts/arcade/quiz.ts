@@ -7,7 +7,7 @@ interface Option { id: string; text: string; scores: string[] }
 interface Question { id: string; prompt: string; options: Option[] }
 interface Img { src: string; w: number; h: number }
 interface Result {
-  id: string; name: string; flavour: string; price: string;
+  id: string; url: string; name: string; flavour: string; price: string;
   color: string; tint: string; textOn: "light" | "dark";
   title: string; blurb: string;
   mascot: { label: string; color: string; img: Img };
@@ -22,7 +22,7 @@ export function initQuiz(): void {
   const raw = document.getElementById("quiz-data")?.textContent;
   if (!root || !raw) return;
   const data = JSON.parse(raw) as QuizData;
-  const { questions: pool, count, results, rarityOrder, url } = data;
+  const { questions: pool, count, results, rarityOrder } = data;
   // This play's questions — drawn client-side on mount and again on every
   // replay, so visitors (and replays) get different sets.
   let questions = drawQuestions(pool, count);
@@ -114,11 +114,11 @@ export function initQuiz(): void {
     const heading = $("[data-r-heading]");
     heading.textContent = `You're ${r.name} — ${r.title}`;
     $("[data-r-blurb]").textContent = r.blurb;
-    $("[data-r-name]").textContent = r.name;
     $("[data-r-flavour]").textContent = r.flavour;
-    $("[data-r-price]").textContent = r.price;
+    $("[data-r-price]").textContent = `${r.price} each`;
 
-    setShare(`I'm ${r.name} — ${r.title}. What's your Jingo flavour?`, url);
+    // Link to the RESULT page (it previews with this mascot), not the quiz.
+    setShare(`I'm ${r.name} — ${r.title}. What's your Jingo flavour?`, r.url);
     show("result");
     live.textContent = `Result: you're ${r.name}, ${r.title}.`;
     heading.focus({ preventScroll: true });

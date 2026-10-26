@@ -1,7 +1,8 @@
 ---
 // /jingo/mascots — "Meet the crew": the 9 candy mascots, one per Jingo candy.
-// Characters come from src/data/jingo-mascots.ts; each one's candy (chip)
-// resolves against src/data/jingo-products.ts.
+// Characters come from src/data/jingo-mascots.ts; each one IS its candy (the
+// mascot's name is the product name), so the panel heads with that name and
+// the chip carries the candy's flavour + price from src/data/jingo-products.ts.
 // Renders: src/assets/jingo/mascots/<image>.png.
 //
 // Motion layering (so GSAP reveals never fight CSS transforms):
@@ -14,23 +15,17 @@ import JingoLayout from "../../layouts/JingoLayout.astro";
 import JingoStockCTA from "../../components/jingo/JingoStockCTA.astro";
 import WhatsAppCTA from "../../components/WhatsAppCTA.astro";
 import { mascots } from "../../data/jingo-mascots";
-import {
-  products,
-  categoryById,
-  mascotImage,
-  productById,
-  shelfLabel,
-  textOnColor,
-} from "../../lib/jingo";
+import { products, mascotImage, productById, textOnColor } from "../../lib/jingo";
 
 const crew = mascots.map((m, i) => {
   // Exactly one candy per mascot (enforced in jingo-mascots.ts).
   const p = productById(m.relatedProductIds[0])!;
-  const cat = categoryById(p.categoryId);
-  const candy = { ...p, shelf: cat ? shelfLabel(cat) : "", textColor: textOnColor(p) };
+  const candy = { ...p, textColor: textOnColor(p) };
   return {
     ...m,
     img: mascotImage(m.image),
+    // What the character is, for its alt text: "Sour Imli Candy" → "sour imli".
+    look: p.flavour.replace(/ (Flavoured|Candy)$/, "").toLowerCase(),
     candy,
     // Number badge sits on the mascot's own colour → its contrast-derived textOn.
     badgeText: m.textOn === "light" ? "var(--jg-white)" : "var(--jg-ink)",
@@ -40,11 +35,13 @@ const crew = mascots.map((m, i) => {
   };
 });
 const total = String(crew.length).padStart(2, "0");
+const names = crew.map((m) => m.label);
+const nameList = `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 ---
 
 <JingoLayout
   title="Jingo Mascots — Meet the 9 Candy Characters"
-  description="Meet the Jingo crew: nine characters, one for each Jingo candy — Cola, Raw Mango, Orange, Chilli, Masala, Mint, Khatti Meethi, Imli and Falsa."
+  description={`Meet the Jingo crew: nine characters, one for each Jingo candy — ${nameList}.`}
 >
   <!-- Hero ---------------------------------------------------------------->
   <section class="hero" aria-labelledby="crew-h1">
@@ -81,7 +78,7 @@ const total = String(crew.length).padStart(2, "0");
                     {m.img && (
                       <Image
                         src={m.img}
-                        alt={`${m.label}, the Jingo ${m.label.toLowerCase()} mascot`}
+                        alt={`${m.label} — the Jingo ${m.look} character`}
                         widths={[320, 480, 640, 880]}
                         sizes="(min-width: 960px) 380px, 62vw"
                         quality={72}
@@ -102,17 +99,16 @@ const total = String(crew.length).padStart(2, "0");
                 <h2 id={`${m.id}-h`} data-reveal-heading class="name text-balance">
                   {m.label}
                 </h2>
-                <p data-reveal class="stars">The face of</p>
                 <div data-reveal class="candy">
                   <a
                     href={`/jingo/flavours#${m.candy.categoryId}`}
                     class="chip"
                     style={`--pc:${m.candy.color};--pt:${m.candy.textColor}`}
                   >
-                    {m.candy.name}
-                    <span class="chip-shelf">{m.candy.shelf}</span>
+                    {m.candy.flavour} &middot; {m.candy.price}
+                    <span class="sr-only"> &mdash; see {m.label} in the flavours range</span>
+                    <span class="chip-arrow" aria-hidden="true">&rarr;</span>
                   </a>
-                  <p class="candy-meta">{m.candy.flavour} &middot; {m.candy.price}</p>
                 </div>
               </div>
             </article>
@@ -190,7 +186,7 @@ const total = String(crew.length).padStart(2, "0");
     color: var(--jg-ink);
   }
   .hl {
-    color: var(--jg-red);
+    color: var(--jg-red-deep); /* --jg-red on the bubble-pink panel was 2.97:1 */
   }
   .lede {
     margin-top: 16px;
@@ -326,7 +322,7 @@ const total = String(crew.length).padStart(2, "0");
   }
   .num-of {
     font-size: 0.75rem;
-    opacity: 0.8;
+    opacity: 1;
   }
   .name {
     margin-top: 16px;
@@ -336,26 +332,13 @@ const total = String(crew.length).padStart(2, "0");
     letter-spacing: -0.05em;
     color: var(--jg-ink);
   }
-  .stars {
-    margin-top: 14px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--jg-ink-soft);
-  }
-  /* The one candy this character fronts: chip (its pack colour) + details. */
+  /* The candy's flavour + price, in its pack colour, linking to the range. */
   .candy {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
-    margin-top: 12px;
-  }
-  .candy-meta {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--jg-ink-soft);
+    margin-top: 18px;
   }
   .chip {
     display: inline-flex;
@@ -376,15 +359,8 @@ const total = String(crew.length).padStart(2, "0");
       transform 0.25s var(--jg-ease),
       box-shadow 0.2s ease;
   }
-  .chip-shelf {
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: var(--jg-paper);
-    color: var(--jg-ink);
+  .chip-arrow {
+    font-size: 1.1em;
   }
   @media (hover: hover) {
     .chip:hover {

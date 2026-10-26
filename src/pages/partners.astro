@@ -227,7 +227,7 @@ const arrowIcon = `<path d="M5 12h14M13 6l6 6-6 6"/>`;
             </li>
           ))
         }
-        <li data-reveal-item class="pcard pcard-cta group">
+        <li data-reveal-item class="pcard pcard-cta on-dark group">
           <a href="#enquire" class="cta-link">
             <h3 class="font-display">Ready to distribute Jingo?</h3>
             <span class="go">
@@ -570,6 +570,11 @@ const arrowIcon = `<path d="M5 12h14M13 6l6 6-6 6"/>`;
   }
   .pcard-cta::before {
     display: none;
+  }
+  /* The card clips overflow, so the focus ring sits inside its edge. */
+  .cta-link:focus-visible {
+    outline-offset: -8px;
+    border-radius: inherit;
   }
   .cta-link {
     display: flex;

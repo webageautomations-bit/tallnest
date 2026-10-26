@@ -202,5 +202,19 @@ export function initMatch(): void {
     }),
   );
 
+  // The clock doesn't run while the tab is hidden.
+  let hiddenAt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (!startedAt || screens.play.hidden) return;
+    if (document.hidden) {
+      hiddenAt = performance.now();
+      stopTimer();
+    } else if (hiddenAt) {
+      startedAt += performance.now() - hiddenAt;
+      hiddenAt = 0;
+      timer = window.setInterval(tick, 250);
+    }
+  });
+
   paintBests();
 }

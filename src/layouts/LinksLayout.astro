@@ -102,8 +102,13 @@ const weights = corp ? "500,600" : "600,700";
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
+  /* Ink ring on the light page (currentColor would be white on the red
+     buttons — invisible against the cream background). */
   :focus-visible {
-    outline: 3px solid currentColor;
+    outline: 3px solid #1e1b16;
     outline-offset: 3px;
+  }
+  .lk--jingo :focus-visible {
+    outline-color: #24121a;
   }
 </style>

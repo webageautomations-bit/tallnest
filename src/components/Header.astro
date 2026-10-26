@@ -374,7 +374,20 @@ const phones = [
       el.addEventListener("click", close),
     );
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && menu.classList.contains("is-open")) close();
+      if (!menu.classList.contains("is-open")) return;
+      if (e.key === "Escape") close();
+      // Modal: keep Tab / Shift+Tab cycling inside the open panel.
+      if (e.key === "Tab") {
+        const f = [...menu.querySelectorAll<HTMLElement>(".mm-panel a[href], .mm-panel button")];
+        const at = f.indexOf(document.activeElement as HTMLElement);
+        if (e.shiftKey ? at <= 0 : at === f.length - 1) {
+          e.preventDefault();
+          f[e.shiftKey ? f.length - 1 : 0].focus();
+        } else if (at === -1) {
+          e.preventDefault();
+          f[0].focus();
+        }
+      }
     });
   }
 </script>

@@ -34,6 +34,7 @@ const data = { crew, packs, url };
 
 <ArcadeGameLayout
   slug="runner"
+  about="An endless runner: your character runs on its own. Jump the crates and low birds, stay low under the high ones, and collect Jingo packs."
   title="Mascot Runner: The Jingo Candy Runner | Jingo by Tall Nest"
   description="Pick one of nine Jingo characters and run. Jump the crates, dodge the candy birds, grab the packs. It gets faster and trickier the further you go. Free."
 >
@@ -99,8 +100,8 @@ const data = { crew, packs, url };
 
     <!-- Play -->
     <section class="ag-screen rn-play" data-screen="play" hidden aria-label="Mascot Runner">
-      <div class="rn-stage" data-stage tabindex="0" aria-label="Game area. Tap, click or press Space to jump; swipe down or press the down arrow to drop fast.">
-        <canvas class="rn-canvas" data-canvas width="600" height="400"></canvas>
+      <div class="rn-stage" data-stage tabindex="0" role="application" aria-label="Mascot Runner game area. Tap, click or press Space to jump; swipe down or press the down arrow to drop fast. P pauses." aria-describedby="ag-about">
+        <canvas class="rn-canvas" data-canvas width="600" height="400" role="img" aria-label="Mascot Runner playfield. Visual only; your score is announced when the run ends."></canvas>
 
         <button type="button" class="rn-pause" data-pause aria-label="Pause">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1.5" fill="currentColor"/></svg>
@@ -124,7 +125,7 @@ const data = { crew, packs, url };
           <ShareResult message="I'm running in Mascot Runner in the Jingo Arcade. Beat it." url={url} />
         </div>
       </div>
-      <p class="rn-help">Tap / <kbd>Space</kbd> / <kbd>&uarr;</kbd> to jump (again for double) &middot; swipe down / <kbd>&darr;</kbd> to drop fast. Low birds: jump. High birds: stay down.</p>
+      <p class="rn-help" id="rn-help">Tap / <kbd>Space</kbd> / <kbd>&uarr;</kbd> to jump (again for double) &middot; swipe down / <kbd>&darr;</kbd> to drop fast. Low birds: jump. High birds: stay down.</p>
     </section>
 
     <p class="ag-sr" aria-live="polite" data-live></p>

@@ -262,11 +262,13 @@ const stepIcons = [
 
     // Mobile (stacked): no traveling line — a simple staggered fade-up.
     mm.add("(max-width: 760px)", () => {
+      // Opacity (not autoAlpha): visibility:hidden would drop the unrevealed
+      // steps from the accessibility tree for screen-reader users.
       const t = gsap.fromTo(
         steps,
-        { autoAlpha: 0, y: 20 },
+        { opacity: 0, y: 20 },
         {
-          autoAlpha: 1,
+          opacity: 1,
           y: 0,
           duration: 0.5,
           ease: "power2.out",

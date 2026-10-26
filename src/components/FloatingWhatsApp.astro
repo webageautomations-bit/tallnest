@@ -119,10 +119,12 @@ import { WHATSAPP_DISTRIBUTOR, whatsappGlyph } from "../data/contact";
   .fwa:focus-visible {
     outline: none;
   }
+  /* Two-tone ring (ink inside, white outside): visible over light pages AND
+     over the dark footer the button floats above at the end of the page. */
   .fwa:focus-visible .fwa-btn {
     box-shadow:
-      0 0 0 2px #fff,
-      0 0 0 5px #1e1b16,
+      0 0 0 3px #1e1b16,
+      0 0 0 6px #fff,
       0 10px 24px -8px rgba(0, 0, 0, 0.35);
   }
 

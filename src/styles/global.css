@@ -280,11 +280,37 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Visible keyboard focus for everything interactive. */
+/* Visible keyboard focus for everything interactive. Dark / red surfaces set
+   --focus-ring (white) so the ring keeps ≥ 3:1 against what's behind it. */
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-red);
+  outline: 2px solid var(--focus-ring, var(--color-red));
   outline-offset: 3px;
   border-radius: 2px;
+}
+.on-dark {
+  --focus-ring: #fff;
+}
+/* Sections focused by same-page links (skip link, "#enquire" CTAs) — focus
+   only marks where Tab continues from; no ring around a whole section. */
+[data-anchor-focus]:focus {
+  outline: none;
+}
+
+/* Skip link — first focusable on every page; hidden until focused. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -80px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 12px;
 }
 
 /* Honor reduced-motion at the document level too. */

@@ -35,6 +35,7 @@ const data = {
 
 <ArcadeGameLayout
   slug="cup"
+  about="A one-on-one football match against the computer: move, jump and kick the ball into the other goal before the clock runs out."
   title="Mascot Cup: Head-Soccer With the Jingo Crew | Jingo by Tall Nest"
   description="Pick a Jingo character and take on the computer in a 90-second head-soccer duel. Head it high, kick it flat, win the cup. Three difficulty levels, free."
 >
@@ -125,8 +126,8 @@ const data = {
         <div class="cu-fx cu-fx--r" data-fx-right></div>
       </div>
 
-      <div class="cu-stage" data-stage tabindex="0" aria-label="Pitch. Arrow keys or A and D to move, up, W or Space to jump, down or S to kick.">
-        <canvas class="cu-canvas" data-canvas width="720" height="405"></canvas>
+      <div class="cu-stage" data-stage tabindex="0" role="application" aria-label="Mascot Cup game area. Arrow keys or A and D to move, up, W or Space to jump, down or S to kick, P to pause." aria-describedby="ag-about">
+        <canvas class="cu-canvas" data-canvas width="720" height="405" role="img" aria-label="Mascot Cup pitch. Visual only; goals, power-ups and the final score are announced."></canvas>
         <button type="button" class="cu-pause" data-pause aria-label="Pause">
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1.5" fill="currentColor"/></svg>
         </button>
@@ -335,13 +336,53 @@ const data = {
   .cu-face--flip {
     transform: scaleX(-1);
   }
+  /* Names are candy names ("Chilli Chaska", "Falsa Frenzy"): wrap onto two
+     lines rather than truncate on narrow boards. */
   .cu-name {
     min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     font-weight: 700;
     font-size: 0.85rem;
+    line-height: 1.08;
+  }
+  .cu-team--r .cu-name {
+    text-align: right;
+  }
+  @media (max-width: 480px) {
+    .cu-team {
+      gap: 5px;
+      padding-inline-end: 8px;
+    }
+    .cu-team--r {
+      padding-inline: 8px 4px;
+    }
+    /* Width-capped too (contain keeps the natural ratio): the landscape
+       renders (masala, khatti meethi) otherwise squeeze the name. */
+    .cu-face {
+      height: 26px;
+      max-width: 26px;
+      object-fit: contain;
+    }
+    .cu-name {
+      font-size: 0.74rem;
+    }
+    .cu-score {
+      font-size: 1.35rem;
+    }
+    .cu-clock b {
+      min-width: 2.9em;
+      padding: 4px 6px;
+      font-size: 1rem;
+    }
+  }
+  /* Very narrow phones: the team colour identifies each side; the names win. */
+  @media (max-width: 359px) {
+    .cu-face {
+      display: none;
+    }
   }
   .cu-score {
     margin-left: auto;

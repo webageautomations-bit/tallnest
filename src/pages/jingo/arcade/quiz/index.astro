@@ -5,12 +5,12 @@
 // jingo-mascots.ts — nothing about a candy is hardcoded here.
 // Flow: intro → QUESTION_COUNT questions drawn at random IN THE BROWSER from
 // the full pool on every load / replay (one at a time, Back allowed) → result.
-import ArcadeGameLayout from "../../../layouts/ArcadeGameLayout.astro";
-import ShareResult from "../../../components/arcade/ShareResult.astro";
-import { questions, results, rarityOrder, QUESTION_COUNT } from "../../../data/jingo-quiz";
-import { mascots } from "../../../data/jingo-mascots";
-import { productById } from "../../../lib/jingo";
-import { packSrc, mascotSrc, jsonForScript, gameUrl } from "../../../lib/arcade";
+import ArcadeGameLayout from "../../../../layouts/ArcadeGameLayout.astro";
+import ShareResult from "../../../../components/arcade/ShareResult.astro";
+import { questions, results, rarityOrder, QUESTION_COUNT } from "../../../../data/jingo-quiz";
+import { mascots } from "../../../../data/jingo-mascots";
+import { productById } from "../../../../lib/jingo";
+import { packSrc, mascotSrc, jsonForScript, gameUrl, quizResultUrl } from "../../../../lib/arcade";
 
 // Build-time integrity: every scored id and every result must resolve.
 if (QUESTION_COUNT < 1 || QUESTION_COUNT > questions.length) {
@@ -33,6 +33,8 @@ const resolved = await Promise.all(
     if (!m) throw new Error(`jingo-quiz: unknown mascotId "${r.mascotId}"`);
     return {
       id: p.id,
+      // Shares link to this result's own landing page (its OG card shows the mascot).
+      url: quizResultUrl(Astro.site, p.id),
       name: p.name,
       flavour: p.flavour,
       price: p.price,
@@ -63,6 +65,7 @@ const data = {
 
 <ArcadeGameLayout
   slug="quiz"
+  about="A personality quiz: answer seven quick questions and find out which Jingo candy matches you."
   title="Which Jingo Candy Are You? Take the Quiz | Jingo by Tall Nest"
   description="Seven questions, one very specific verdict. Find out which of the nine Jingo candies matches your personality, then send your result to your friends."
 >
@@ -75,6 +78,7 @@ const data = {
         No right answers, no timer. Just pick what you&rsquo;d actually do &mdash; we&rsquo;ll
         tell you which candy you are.
       </p>
+      <p class="ag-keys">Keyboard: <kbd>Tab</kbd> to an answer, <kbd>Enter</kbd> to choose.</p>
       <div class="ag-actions">
         <button type="button" class="jg-btn jg-btn--paper qz-start" data-start>
           Start the quiz <span class="jg-arrow" aria-hidden="true">&rarr;</span>
@@ -120,8 +124,10 @@ const data = {
           <div class="qz-pack">
             <img class="qz-pack-img" data-r-pack alt="" width="320" height="424" decoding="async" />
             <div>
-              <p class="qz-pack-name" data-r-name></p>
-              <p class="qz-pack-meta"><span data-r-flavour></span> &middot; <span data-r-price></span></p>
+              <!-- The heading already names the candy: the pack line carries
+                   its flavour + price instead of repeating the name. -->
+              <p class="qz-pack-name" data-r-flavour></p>
+              <p class="qz-pack-meta" data-r-price></p>
             </div>
           </div>
 
@@ -144,7 +150,7 @@ const data = {
 </ArcadeGameLayout>
 
 <script>
-  import { initQuiz } from "../../../scripts/arcade/quiz";
+  import { initQuiz } from "../../../../scripts/arcade/quiz";
   initQuiz();
 </script>
 

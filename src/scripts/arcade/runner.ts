@@ -491,7 +491,8 @@ export function initRunner(): void {
     ctx.fillText(sub, W - 14, 16 + big);
 
     if (state === "ready" || state === "paused") {
-      ctx.fillStyle = "rgba(36,18,26,0.45)";
+      // 0.68 keeps the cream instructions ≥ 4.5:1 even over the palest scenery.
+      ctx.fillStyle = "rgba(36,18,26,0.68)";
       ctx.fillRect(0, 0, W, H);
       ctx.textAlign = "center";
       ctx.fillStyle = "#fff6e9";

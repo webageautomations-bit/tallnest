@@ -69,6 +69,14 @@ function wireAnchors(): void {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     history.pushState(null, "", hash);
+    // preventDefault() also cancelled the browser's own focus move, so move
+    // keyboard focus to the target too — otherwise a skip link (or "#enquire")
+    // scrolls but the next Tab starts back at the top of the page.
+    if (!target.matches("a[href], button, input, select, textarea, [tabindex]")) {
+      target.setAttribute("tabindex", "-1");
+      target.dataset.anchorFocus = "";
+    }
+    target.focus({ preventScroll: true });
   });
 }
 

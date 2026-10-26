@@ -19,29 +19,35 @@ const href = `/the-nest/${postSlug(post)}`;
 const cover = coverImage(data.cover);
 ---
 
-<a href={href} class="post-card card" data-reveal-item data-category={data.category}>
-  <div class="post-cover" style={`background:${coverGradient(data.category)}`}>
-    {
-      cover && (
-        <Image
-          class="post-cover-img"
-          src={cover}
-          alt={data.title}
-          widths={[400, 640, 900]}
-          sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
-          loading="lazy"
-        />
-      )
-    }
-    <span class="post-cat">{data.category}</span>
-  </div>
-  <div class="post-inner">
-    <h3 class="post-title font-display">{data.title}</h3>
-    <p class="post-meta">{formatDate(data.publishDate)} · {rt} min read</p>
-  </div>
-</a>
+<!-- Rendered inside the post grids' <ul>s, so the card is its own <li>. -->
+<li class="post-item" data-category={data.category}>
+  <a href={href} class="post-card card" data-reveal-item>
+    <div class="post-cover" style={`background:${coverGradient(data.category)}`}>
+      {
+        cover && (
+          <Image
+            class="post-cover-img"
+            src={cover}
+            alt=""
+            widths={[400, 640, 900]}
+            sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
+            loading="lazy"
+          />
+        )
+      }
+      <span class="post-cat">{data.category}</span>
+    </div>
+    <div class="post-inner">
+      <h3 class="post-title font-display">{data.title}</h3>
+      <p class="post-meta">{formatDate(data.publishDate)} · {rt} min read</p>
+    </div>
+  </a>
+</li>
 
 <style>
+  .post-item {
+    display: grid;
+  }
   .post-card {
     display: flex;
     flex-direction: column;
@@ -74,7 +80,7 @@ const cover = coverImage(data.cover);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: #fff;
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.55); /* ≥ 4.5:1 for the white label over any photo */
     backdrop-filter: blur(4px);
     padding: 5px 10px;
     border-radius: 999px;

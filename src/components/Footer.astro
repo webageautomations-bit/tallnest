@@ -45,7 +45,7 @@ const homeHref = "/";
 ---
 
 <footer class:list={[flush ? "footer-flush" : "bg-white px-3 pt-[clamp(56px,8vw,96px)] sm:px-4 lg:px-6"]}>
-  <div class:list={["footer-dark mx-auto max-w-7xl", { "is-flush": flush }]}>
+  <div class:list={["footer-dark on-dark mx-auto max-w-7xl", { "is-flush": flush }]}>
     <div class="footer-inner">
       <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-12">
         <!-- Brand -->
@@ -173,7 +173,7 @@ const homeHref = "/";
     letter-spacing: 0.18em;
     font-size: 0.68rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.6);
     margin: 0 0 18px;
   }
   .foot-link {
@@ -220,7 +220,9 @@ const homeHref = "/";
   /* Credit link — same muted tone as the bottom bar, subtle clickable hover. */
   .webage-link {
     color: rgba(255, 255, 255, 0.68);
-    text-decoration: none;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.35);
+    text-underline-offset: 2px;
     transition:
       color 0.2s var(--ease-brand),
       text-decoration-color 0.2s var(--ease-brand);

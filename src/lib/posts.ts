@@ -2,11 +2,14 @@ import { getCollection, type CollectionEntry } from "astro:content";
 
 export type Post = CollectionEntry<"posts">;
 
-/** Non-draft posts, newest first. */
+/** Non-draft posts, newest first (same-day posts in a fixed id order, so the
+ *  featured post and the list never depend on file-system order). */
 export async function getSortedPosts(): Promise<Post[]> {
   const posts = await getCollection("posts", ({ data }) => data.draft !== true);
   return posts.sort(
-    (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime(),
+    (a, b) =>
+      b.data.publishDate.getTime() - a.data.publishDate.getTime() ||
+      b.id.localeCompare(a.id),
   );
 }
 

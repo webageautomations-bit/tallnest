@@ -16,6 +16,9 @@ import "../styles/arcade.css";
 
 interface Props {
   slug: string;
+  /** One plain sentence saying what the game is — shown under the title and
+   *  referenced by the play area (aria-describedby="ag-about"). */
+  about: string;
   /** <title> override; defaults to "<game name> | Jingo by Tall Nest". */
   title?: string;
   description?: string;
@@ -24,7 +27,7 @@ interface Props {
   imageAlt?: string;
 }
 
-const { slug, title, description, image, imageAlt } = Astro.props;
+const { slug, about, title, description, image, imageAlt } = Astro.props;
 const game = gameBySlug(slug);
 if (!game) throw new Error(`ArcadeGameLayout: no game "${slug}" in jingo-arcade.ts`);
 
@@ -47,6 +50,7 @@ const onAccent = textOnFor(game.accentColor) === "light" ? "var(--jg-white)" : "
         <span aria-hidden="true">&larr;</span> Arcade
       </a>
       <h1 class="ag-title">{game.name}</h1>
+      <p id="ag-about" class="ag-about">{about}</p>
     </div>
     <div class="ag-stage">
       <slot />

@@ -1,0 +1,216 @@
+---
+// /jingo/arcade/quiz/<productId> — a pre-rendered landing page for each of the
+// nine quiz results. Shares from the quiz link here, so the preview shows the
+// actual mascot (its own OG card in public/og/quiz-<productId>.jpg, made by
+// scripts/og-quiz.py), and the page doubles as an entry point to the quiz.
+// Everything comes from jingo-quiz.ts results + jingo-products.ts +
+// jingo-mascots.ts. Indexable: each page has distinct copy, mascot and product.
+import JingoLayout from "../../../../layouts/JingoLayout.astro";
+import { results } from "../../../../data/jingo-quiz";
+import { mascots } from "../../../../data/jingo-mascots";
+import { productById } from "../../../../lib/jingo";
+import { mascotSrc, packSrc } from "../../../../lib/arcade";
+
+export function getStaticPaths() {
+  return results.map((r) => ({ params: { slug: r.productId } }));
+}
+
+const { slug } = Astro.params;
+const result = results.find((r) => r.productId === slug)!;
+const product = productById(result.productId);
+const mascot = mascots.find((m) => m.id === result.mascotId);
+if (!product || !mascot) throw new Error(`quiz result "${slug}": product or mascot missing`);
+
+// Mascot at its natural ratio (khatti-meethi's render is landscape): the img
+// carries the real width/height and CSS only ever sets one dimension.
+const mascotImg = await mascotSrc(mascot.image, 640);
+const packImg = await packSrc(product.id, 320);
+const heading = `You're ${product.name} — ${result.title}`;
+const firstSentence = result.blurb.split(/(?<=[.!?])\s/)[0];
+const description = `${heading}. ${firstSentence} Take the Jingo quiz and find your candy.`.slice(0, 160);
+---
+
+<JingoLayout
+  title={`${heading} | Which Jingo Candy Are You?`}
+  description={description}
+  image={`/og/quiz-${product.id}.jpg`}
+  imageWidth={1200}
+  imageHeight={630}
+  imageAlt={`${heading} — the Jingo ${mascot.label} character`}
+  motion={false}
+>
+  <section class="qr" style={`--tint:${product.tint};--accent:${product.color}`} aria-labelledby="qr-h">
+    <div class="qr-wrap">
+      <a href="/jingo/arcade" class="qr-back"><span aria-hidden="true">&larr;</span> Jingo Arcade</a>
+      <article class="qr-card">
+        <div class="qr-figure">
+          <img
+            class="qr-mascot"
+            src={mascotImg.src}
+            width={mascotImg.w}
+            height={mascotImg.h}
+            alt={`The Jingo ${mascot.label} character`}
+            fetchpriority="high"
+            decoding="async"
+          />
+        </div>
+        <div class="qr-copy">
+          <p class="qr-kicker">Which Jingo candy are you?</p>
+          <h1 id="qr-h" class="qr-h">{heading}</h1>
+          <p class="qr-blurb">{result.blurb}</p>
+
+          <div class="qr-pack">
+            <img class="qr-pack-img" src={packImg.src} width={packImg.w} height={packImg.h} alt={`${product.name} pack`} loading="lazy" decoding="async" />
+            <div>
+              <!-- The heading names the candy; this line carries flavour + price. -->
+              <p class="qr-pack-name">{product.flavour}</p>
+              <p class="qr-pack-meta">{product.price} each</p>
+            </div>
+          </div>
+
+          <div class="qr-actions">
+            <a href="/jingo/arcade/quiz" class="jg-btn">
+              Take the quiz <span class="jg-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+            <a href="/jingo/flavours#candies" class="qr-link">See it in the range</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</JingoLayout>
+
+<style>
+  .qr {
+    padding-block: clamp(1rem, 4vw, 2.5rem) clamp(2.5rem, 7vw, 4.5rem);
+    background:
+      radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0 24%, transparent 25%),
+      var(--jg-cream);
+  }
+  .qr-wrap {
+    max-width: 880px;
+    margin-inline: auto;
+    padding-inline: clamp(14px, 4vw, 32px);
+  }
+  .qr-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--jg-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  .qr-card {
+    display: grid;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: var(--jg-radius-lg);
+    background: var(--tint);
+    box-shadow: 0 8px 0 var(--jg-ink);
+    overflow: hidden;
+  }
+  .qr-figure {
+    display: grid;
+    place-items: center;
+    padding: 22px 16px 4px;
+    background: radial-gradient(circle closest-side at 50% 55%, color-mix(in srgb, var(--accent) 50%, transparent) 0 80%, transparent 81%);
+  }
+  /* One dimension only (width, capped by height) — the natural ratio is kept. */
+  .qr-mascot {
+    width: auto;
+    height: auto;
+    max-width: min(80%, 360px);
+    max-height: 340px;
+    filter: drop-shadow(0 8px 0 rgba(36, 18, 26, 0.22));
+  }
+  .qr-copy {
+    padding: 8px clamp(18px, 5vw, 36px) clamp(22px, 5vw, 36px);
+    color: var(--jg-ink);
+  }
+  .qr-kicker {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .qr-h {
+    margin-top: 8px;
+    font-size: clamp(2rem, 7.5vw, 3.1rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .qr-blurb {
+    margin-top: 14px;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    max-width: 52ch;
+  }
+  .qr-pack {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: 2.5px solid var(--jg-ink);
+    border-radius: 22px;
+    background: var(--jg-paper);
+  }
+  .qr-pack-img {
+    flex: none;
+    width: 84px;
+    height: auto;
+  }
+  .qr-pack-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .qr-pack-name::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border: 2px solid var(--jg-ink);
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  .qr-pack-meta {
+    margin-top: 2px;
+    color: var(--jg-ink-soft);
+  }
+  .qr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    margin-top: 22px;
+  }
+  .qr-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+    color: var(--jg-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  @media (min-width: 760px) {
+    .qr-card {
+      grid-template-columns: 0.9fr 1.1fr;
+      align-items: center;
+    }
+    .qr-figure {
+      align-self: stretch;
+      padding: 28px;
+    }
+    .qr-copy {
+      padding: clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px) clamp(24px, 4vw, 40px) 0;
+    }
+  }
+</style>

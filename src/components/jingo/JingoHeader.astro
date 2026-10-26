@@ -473,8 +473,10 @@ const links = [
   const menu = document.getElementById("jingo-menu") as
     | (HTMLElement & { hidePopover?: () => void })
     | null;
+  let viaLink = false; // a link closed the menu: focus follows the link, not the button
   menu?.querySelectorAll("a").forEach((a) =>
     a.addEventListener("click", () => {
+      viaLink = true;
       try {
         menu.hidePopover?.();
       } catch {
@@ -482,4 +484,30 @@ const links = [
       }
     }),
   );
+  // Keyboard: the sheet covers the page (dimmed backdrop), so treat it as
+  // modal — focus moves in on open, Tab / Shift+Tab cycle inside, and focus
+  // returns to the menu button on close (Esc / light-dismiss / Close).
+  if (menu) {
+    const opener = document.querySelector<HTMLElement>(".jh-menu-btn[popovertarget='jingo-menu']:not(.jm-close)");
+    const focusables = () => [...menu.querySelectorAll<HTMLElement>("a[href], button")];
+    menu.addEventListener("toggle", (e) => {
+      if ((e as ToggleEvent).newState === "open") {
+        viaLink = false;
+        focusables()[0]?.focus();
+      } else if (viaLink) {
+        viaLink = false;
+      } else if (!document.activeElement || document.activeElement === document.body || menu.contains(document.activeElement)) {
+        opener?.focus();
+      }
+    });
+    menu.addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const f = focusables();
+      const at = f.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey ? at <= 0 : at === f.length - 1) {
+        e.preventDefault();
+        f[e.shiftKey ? f.length - 1 : 0].focus();
+      }
+    });
+  }
 </script>

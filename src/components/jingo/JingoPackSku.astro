@@ -21,7 +21,7 @@ const stripes = productsIn(category.id).map((p) => p.color);
 const range = category.name.toLowerCase();
 ---
 
-<aside class="sku" aria-label={`${sku.name} — bulk pack`}>
+<div class="sku" role="group" aria-label={`${sku.name} — bulk pack`}>
   <div class:list={["art", { "has-photo": img }]} aria-hidden={img ? undefined : "true"}>
     {
       img ? (
@@ -50,7 +50,7 @@ const range = category.name.toLowerCase();
     <span class="price-k">Per pouch</span>
     <span class="price-v">{sku.price}</span>
   </div>
-</aside>
+</div>
 
 <style>
   .sku {

@@ -46,7 +46,7 @@ const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
                 <Image
                   class="featured-cover-img"
                   src={coverImage(featured.data.cover)!}
-                  alt={featured.data.title}
+                  alt=""
                   widths={[480, 800, 1100]}
                   sizes="(min-width: 1024px) 640px, 100vw"
                   loading="lazy"
@@ -69,11 +69,11 @@ const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
       {
         categories.length > 1 && (
           <div class="filters" role="group" aria-label="Filter by category">
-            <button type="button" class="chip-filter is-active" data-filter="all">
+            <button type="button" class="chip-filter is-active" data-filter="all" aria-pressed="true">
               All
             </button>
             {categories.map((c) => (
-              <button type="button" class="chip-filter" data-filter={c}>
+              <button type="button" class="chip-filter" data-filter={c} aria-pressed="false">
                 {c}
               </button>
             ))}
@@ -126,7 +126,7 @@ const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: #fff;
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.55); /* ≥ 4.5:1 for the white label over any photo */
     backdrop-filter: blur(4px);
     padding: 5px 10px;
     border-radius: 999px;
@@ -207,17 +207,20 @@ const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
       grid-template-columns: 1fr;
     }
   }
-  .post-grid :global(.post-card.is-hidden) {
+  .post-grid :global(.post-item.is-hidden) {
     display: none;
   }
 </style>
 
 <script>
   const filters = document.querySelectorAll<HTMLButtonElement>(".chip-filter");
-  const cards = document.querySelectorAll<HTMLElement>(".post-grid .post-card");
+  const cards = document.querySelectorAll<HTMLElement>(".post-grid .post-item");
   filters.forEach((btn) => {
     btn.addEventListener("click", () => {
-      filters.forEach((b) => b.classList.toggle("is-active", b === btn));
+      filters.forEach((b) => {
+        b.classList.toggle("is-active", b === btn);
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
       const f = btn.dataset.filter;
       cards.forEach((c) => {
         const show = f === "all" || c.dataset.category === f;

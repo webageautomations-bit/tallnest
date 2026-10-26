@@ -111,11 +111,13 @@ const cards = categories.map((c, i) => ({
   .card::after {
     content: "";
     position: absolute;
-    top: -40px;
-    right: -30px;
+    top: -76px;
+    right: -76px;
     width: 140px;
     height: 110px;
     border-radius: 50%;
+    /* Kept in the corner, clear of the price: a highlight behind white text
+       dropped it below 4.5:1. */
     background: radial-gradient(closest-side, rgba(255, 255, 255, 0.35), transparent);
     pointer-events: none;
   }

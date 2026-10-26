@@ -119,6 +119,10 @@ export function initCounter(): void {
     root.dataset.patienceMs = String(patienceMs);
 
     shelfEl.dataset.size = String(round.shelf.length);
+    // The shelf is rebuilt per customer: if keyboard focus was on it (or got
+    // dropped to <body> when a tile went away), put it back on the new shelf.
+    const active = document.activeElement;
+    const refocus = shelfEl.contains(active) || !active || active === document.body;
     shelfEl.replaceChildren(
       ...round.shelf.map((id, i) => {
         const p = byId.get(id)!;
@@ -138,6 +142,7 @@ export function initCounter(): void {
     shelfEl.classList.remove("is-locked");
     pulse("is-new");
     live.textContent = `Customer ${customerNo} wants a pack.`;
+    if (refocus) shelfEl.querySelector<HTMLButtonElement>(".ct-pack")?.focus({ preventScroll: true });
   };
 
   const end = (completed: boolean) => {
@@ -230,17 +235,25 @@ export function initCounter(): void {
     paintHud();
     show("play");
     root.scrollIntoView({ block: "start", behavior: "instant" });
-    // Warm the cache so packs appear instantly when they first hit the shelf.
-    for (const p of products) new Image().src = p.img.src;
+    // No bulk preload (it pulled all ~35 packs, ~0.5 MB, on mobile data):
+    // each shelf's packs (~16 KB each) load as customers arrive, and the tiles
+    // show their tint colour meanwhile, so there's no layout shift.
     nextCustomer();
+    // Keyboard players start on the shelf, not back at the top of the page.
+    shelfEl.querySelector<HTMLButtonElement>(".ct-pack")?.focus({ preventScroll: true });
     running = true;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   };
 
+  // Backgrounded: stop the loop entirely (patience freezes); restart on return.
   document.addEventListener("visibilitychange", () => {
     paused = document.hidden;
-    last = performance.now();
+    if (paused) cancelAnimationFrame(raf);
+    else if (running) {
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
   });
 
   $("[data-start]").addEventListener("click", start);

@@ -6,7 +6,7 @@
 // LOOKALIKES are derived from the product data, not hardcoded: two products
 // are lookalikes when their name or flavour shares a meaningful word once
 // range words (candy, twist, bublo…) are ignored — e.g. Frosty / Frosty Bublo
-// ("frosty", "mint"), Cola Candy / Cola Twist ("cola"), Tangy Candy / Tangy
+// ("frosty", "mint"), Cola Fizz / Cola Twist ("cola"), Tangy Candy / Tangy
 // Twist ("tangy", "orange"), the three Mehfil nimkos ("mehfil"). Add a product
 // to jingo-products.ts and it joins the right lookalike set automatically.
 

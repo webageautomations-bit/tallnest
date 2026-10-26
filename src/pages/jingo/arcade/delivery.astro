@@ -34,6 +34,7 @@ const data = {
 
 <ArcadeGameLayout
   slug="delivery"
+  about="A road-crossing game: step across lanes of traffic to deliver Jingo stock to the shop without getting hit."
   title="Delivery Dash: Beat the Traffic | Jingo by Tall Nest"
   description="Carry the Jingo stock across busy lanes of rickshaws, bikes and trucks to the shop. Grab loose candies on the way. Every delivery, the traffic gets faster."
 >
@@ -107,9 +108,9 @@ const data = {
           <span class="ag-chip-label">Lives</span><span class="dd-hearts" data-hud-lives aria-hidden="true"></span>
         </span>
       </div>
-      <div class="dd-stage" data-stage tabindex="0" aria-label="Road. Arrow keys or W A S D to step; swipe on touch screens.">
+      <div class="dd-stage" data-stage tabindex="0" role="application" aria-label="Delivery Dash game area. Arrow keys or W A S D to step, P to pause; swipe on touch screens." aria-describedby="ag-about">
         <div class="dd-frame">
-          <canvas class="dd-canvas" data-canvas width="360" height="532"></canvas>
+          <canvas class="dd-canvas" data-canvas width="360" height="532" role="img" aria-label="Delivery Dash road. Visual only; deliveries, hits and the final score are announced."></canvas>
           <button type="button" class="dd-pause" data-pause aria-label="Pause">
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1.5" fill="currentColor"/></svg>
           </button>

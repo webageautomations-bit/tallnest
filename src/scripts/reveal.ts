@@ -26,13 +26,17 @@ export function initReveals(): void {
 
   // fromTo (explicit visible end state) so the CSS first-paint pre-hide
   // (html.reveal-active [data-reveal]{opacity:0}) can never leave an element
-  // stuck hidden — GSAP always animates it back to autoAlpha:1.
+  // stuck hidden — GSAP always animates it back to opacity:1.
+  // Opacity only — NOT autoAlpha: autoAlpha's visibility:hidden takes links
+  // and buttons out of the Tab order until they scroll into view, so keyboard
+  // users skipped straight past unrevealed content (and, unable to focus it,
+  // never scrolled it into view). See revealOnFocus() below.
   gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
     gsap.fromTo(
       el,
-      { autoAlpha: 0, y: 24 },
+      { opacity: 0, y: 24 },
       {
-        autoAlpha: 1,
+        opacity: 1,
         y: 0,
         duration: 0.6,
         ease: EASE,
@@ -46,9 +50,9 @@ export function initReveals(): void {
     if (!items.length) return;
     gsap.fromTo(
       items,
-      { autoAlpha: 0, y: 24 },
+      { opacity: 0, y: 24 },
       {
-        autoAlpha: 1,
+        opacity: 1,
         y: 0,
         duration: 0.55,
         ease: EASE,
@@ -56,6 +60,18 @@ export function initReveals(): void {
         scrollTrigger: { trigger: group, start: "top 80%" },
       },
     );
+  });
+
+  revealOnFocus();
+}
+
+/** Keyboard focus landing inside a not-yet-revealed element (Tab outruns the
+ *  scroll trigger) finishes its reveal at once, so focus is never invisible. */
+function revealOnFocus(): void {
+  document.addEventListener("focusin", (e) => {
+    const el = (e.target as HTMLElement).closest?.<HTMLElement>("[data-reveal], [data-reveal-item]");
+    if (!el) return;
+    gsap.getTweensOf(el).forEach((t) => t.progress(1));
   });
 }
 
