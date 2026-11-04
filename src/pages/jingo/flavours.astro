@@ -17,7 +17,9 @@ import {
   categoryTheme,
   flavourLabel,
   priceRange,
+  categoryById,
 } from "../../lib/jingo";
+import { packSrc } from "../../lib/arcade";
 
 const { min } = priceRange();
 const sections = categories.map((c, i) => ({
@@ -26,11 +28,91 @@ const sections = categories.map((c, i) => ({
   items: productsIn(c.id),
   skus: skusIn(c.id),
 }));
+
+// ── Structured data: the range as an ItemList of Products ────────────────────
+// Every value comes from jingo-products.ts at build time. Deliberately NO
+// `offers`: there's no online checkout, so an Offer would claim a
+// purchasability the site doesn't have — the price lives in `description` and
+// `additionalProperty` instead. Pack format is set per category in the data
+// (products don't carry their own), so each product uses its category's.
+
+// "Rs. 5" → "Rs. 5"; "Rs. 5 / 10" → "Rs. 5 or Rs. 10"; "Rs. 10 / 20 / 50" →
+// "Rs. 10, Rs. 20 or Rs. 50". Unknown shapes fail the build, never guess.
+const priceWords = (price: string, id: string): string => {
+  const m = price.match(/^Rs\. (\d+(?: \/ \d+)*)$/);
+  if (!m) throw new Error(`flavours JSON-LD: unrecognised price "${price}" (${id})`);
+  const rs = m[1].split(" / ").map((n) => `Rs. ${n}`);
+  return rs.length === 1 ? rs[0] : `${rs.slice(0, -1).join(", ")} or ${rs.at(-1)}`;
+};
+// Catalogue pack shorthand → words: "50 pcs / box · 36 box / carton" →
+// "50 pieces per box, 36 boxes per carton"; the unit sold (piece / pack) is
+// read from the same string. Unknown segments fail the build.
+const UNIT: Record<string, string> = { pcs: "pieces", box: "boxes", packs: "packs", pouch: "pouches" };
+const packWords = (packing: string, id: string): { text: string; unit: string } => {
+  const parts = packing.split(" · ").map((seg) => {
+    if (seg === "Multi-pack") return "multi-pack";
+    const m = seg.match(/^(\d+(?:-\d+)?) (pcs|box|packs|pouch) \/ (box|carton|pouch)$/);
+    if (!m) throw new Error(`flavours JSON-LD: unrecognised pack format "${seg}" (${id})`);
+    return `${m[1]} ${UNIT[m[2]]} per ${m[3]}`;
+  });
+  return { text: parts.join(", "), unit: /\bpacks\b/.test(packing) ? "pack" : "piece" };
+};
+// What a single item is called, for the description sentence.
+const NOUN: Record<string, string> = {
+  candies: "candy",
+  toffees: "toffee",
+  squizo: "liquid chocolate",
+  lollipops: "lollipop",
+  bubblegums: "bubblegum",
+  bunties: "bunties",
+  nimkos: "nimko",
+};
+
+const site = Astro.site ?? new URL("https://www.tallnest.com");
+const itemList = {
+  "@type": "ItemList",
+  name: "Jingo product range",
+  numberOfItems: products.length,
+  itemListElement: await Promise.all(
+    // Catalogue order, as on the page (grouped by category).
+    sections.flatMap((s) => s.items).map(async (p, i) => {
+      const cat = categoryById(p.categoryId);
+      if (!cat) throw new Error(`flavours JSON-LD: unknown category "${p.categoryId}" (${p.id})`);
+      const noun = NOUN[cat.id];
+      if (!noun) throw new Error(`flavours JSON-LD: no item noun for category "${cat.id}"`);
+      const pack = packWords(cat.packing, p.id);
+      // Same 640w WebP the product card renders — no extra image is built.
+      const img = await packSrc(p.id, 640, 72);
+      const title = p.name.toLowerCase().endsWith(noun) ? p.name : `${p.name} ${noun}`;
+      return {
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Product",
+          name: p.name,
+          brand: { "@type": "Brand", name: "Jingo" },
+          category: cat.name,
+          sku: p.id,
+          image: new URL(img.src, site).href,
+          description: `Jingo ${title}, ${priceWords(p.price, p.id)} per ${pack.unit}, ${pack.text}.`,
+          additionalProperty: [
+            { "@type": "PropertyValue", name: "Price point", value: p.price },
+            { "@type": "PropertyValue", name: "Pack format", value: cat.packing },
+          ],
+        },
+      };
+    }),
+  ),
+};
+if (itemList.itemListElement.length !== products.length) {
+  throw new Error(`flavours JSON-LD: listed ${itemList.itemListElement.length} of ${products.length} products`);
+}
 ---
 
 <JingoLayout
   title="All 35 Jingo Flavours — Candies, Toffees, Lollipops & More"
   description="Browse all 35 Jingo flavours: candies, toffees, Squizo liquid chocolates, Twist lollipops, Bublo bubblegums, Choco Chums bunties and Mehfil nimkos — from Rs. 5."
+  jsonLd={itemList}
 >
   <div class="wall">
     <!-- Intro ("All" in the jump bar) -->
