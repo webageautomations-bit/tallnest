@@ -35,7 +35,7 @@ const benefits = [
   },
   {
     title: "Reliable supply",
-    line: "Contract-manufactured for consistent quality and stock.",
+    line: "Consistent quality and stock, order after order.",
     icon: `<path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/>`,
   },
   {
@@ -85,10 +85,31 @@ const faqs = [
     q: "Which areas are available?",
     a: "Jingo is appointing distributors across Pakistan — in Punjab, Sindh, Khyber Pakhtunkhwa, Balochistan, Islamabad, Azad Kashmir and Gilgit-Baltistan. Territories are available in major markets such as Lahore, Karachi, Islamabad and Rawalpindi, Faisalabad, Multan, Peshawar and Quetta, and in smaller towns too: Jingo is built for B- and C-tier towns.",
   },
-  { q: "What's the minimum order quantity?", a: "Sole distributorships carry a minimum commitment of Rs. 30 million per month. That reflects the scale of an exclusive territory — full coverage, consistent stock, and a partnership built for real volume." },
+  {
+    q: "What's the minimum order quantity?",
+    a: "Distributorships start at a commitment of Rs. 3 million per month. The commitment scales with the territory a distributor covers, up to Rs. 3 crore per month for a full sole distributorship with exclusive rights. Sub-distributorships are appointed under an existing sole distributor and carry a lower commitment.",
+  },
+  { q: "What margin does a Jingo distributor earn?", a: "Sub-distributors earn 11% on trade price. Sole distributors earn 3% plus 1%." },
+  {
+    q: "Can I become a sub-distributor instead of a sole distributor?",
+    a: "Yes. Sub-distributorships are appointed under the sole distributor for a region and carry an 11% margin on trade price. A sub-distributor's agreement is with the sole distributor for that territory rather than directly with Tall Nest Group. If you want to distribute Jingo in a single city, town or district, message us with your area and the capacity you can commit, and we will put you in touch with the appointed distributor for that territory.",
+  },
   { q: "Do you offer exclusive territories?", a: "Yes. We grant exclusive coverage where a distributor commits to fully covering the area and the order value justifies the territory. Protected territories reward the partners who invest in building the market." },
-  { q: "What are the payment terms?", a: "Advance payment on all orders. As the relationship matures and a track record builds, terms can be revisited together." },
+  { q: "What are the payment terms?", a: "All orders are paid 100% in advance, online, into the company account. Sub-distributors pay their sole distributor on the same terms." },
   { q: "What are typical lead times?", a: "Typically 3–5 working days. Timelines vary slightly by region and are coordinated with you in advance — once we commit a delivery window, we deliver on it." },
+  {
+    q: "How much stock does a distributor need to hold?",
+    a: "A sole distributor holds 15 days of stock in his own warehouse. A sub-distributor holds 7 days. The premises are the distributor's own arrangement; Tall Nest Group does not specify a storage facility.",
+  },
+  {
+    q: "What is required to be appointed?",
+    a: "An appointed distributor provides one security cheque and a copy of his CNIC, and signs the distributor agreement.",
+  },
+  { q: "How is a distributorship ended?", a: "Either party may end the arrangement with one month's written notice." },
+  {
+    q: "What sales support does a distributor receive?",
+    a: "Sales support comes from Tall Nest Group's own field structure. National and Regional Sales Managers support the distributor directly. Setting up sub-distribution is supported by Regional, Territory and Area Sales Managers. Shop-level sales and growth is supported by company Direct Sales Representatives working the retail counters in the distributor's territory.",
+  },
   {
     q: "What products does Jingo offer?",
     a: `Jingo covers ${nCats} categories and ${nProducts}+ products: candies (${cat("candies").flavourCount} flavours) and toffees (${cat("toffees").flavourCount}) at Rs. 5; Squizo liquid chocolates (${cat("squizo").flavourCount}), Twist lollipops (${cat("lollipops").flavourCount}) and Bublo bubblegums (${cat("bubblegums").flavourCount}) at Rs. 10; Choco Chums bunties at Rs. 5 and Rs. 10; and Mehfil nimkos (${cat("nimkos").flavourCount}) at Rs. 10, Rs. 20 and Rs. 50.`,
@@ -115,7 +136,7 @@ const glance = [
   { k: "Brand", v: "Jingo, by Tall Nest Group" },
   { k: "Categories", v: `${nCats} categories, ${nProducts}+ products — candies, toffees, liquid chocolates, lollipops, bubblegums, bunties and nimkos` },
   { k: "Price points", v: `${priceList} (Rs. ${min} to Rs. ${max})` },
-  { k: "MOQ", v: "Rs. 30 million per month (sole distributorship)" },
+  { k: "MOQ", v: "From Rs. 3 million per month, up to Rs. 3 crore per month for sole distributorship" },
   { k: "Territory", v: "Exclusive rights where full coverage is committed; territories available across Pakistan" },
   { k: "Payment", v: "Advance payment on all orders" },
   { k: "Lead time", v: "Typically 3–5 working days" },
@@ -157,10 +178,10 @@ const arrowIcon = `<path d="M5 12h14M13 6l6 6-6 6"/>`;
             across Pakistan, and territories are available now. The Jingo range
             covers {nCats} categories and {nProducts}+ products &mdash; candies,
             toffees, liquid chocolates, lollipops, bubblegums, bunties and nimkos
-            &mdash; priced from Rs.&nbsp;{min} to Rs.&nbsp;{max}. Sole
-            distributorships carry a minimum commitment of Rs.&nbsp;30 million per
-            month, with exclusive territory rights where full coverage is
-            committed. Orders are on advance payment and are typically fulfilled
+            &mdash; priced from Rs.&nbsp;{min} to Rs.&nbsp;{max}.
+            Distributorships start at Rs.&nbsp;3 million per month and scale up
+            to Rs.&nbsp;3 crore per month for a full sole distributorship, with
+            exclusive territory rights where full coverage is committed. Orders are on advance payment and are typically fulfilled
             in 3&ndash;5 working days.
           </p>
           <div data-reveal class="intro-ctas">

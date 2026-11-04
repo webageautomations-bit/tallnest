@@ -52,7 +52,7 @@ New brands lean almost entirely on push, because there's no pull yet. But push a
 
 Nothing kills a young brand faster than being out of stock the week demand finally arrives. Reliability is unglamorous and absolutely decisive:
 
-- **Consistent quality** so the product tastes the same every time — contract manufacturing with real quality control, not a variable supply.
+- **Consistent quality** so the product tastes the same every time — real quality control, not a variable supply.
 - **Stock availability** so reorders are filled fast and the shelf is never empty.
 - **Predictable logistics** so distributors can plan, and retailers trust that what they sell will be replaced.
 
