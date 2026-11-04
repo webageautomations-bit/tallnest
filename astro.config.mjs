@@ -15,8 +15,12 @@ export default defineConfig({
   },
   integrations: [
     // Link-in-bio pages (/links, /jingo/links) are noindex navigation shims —
-    // keep them out of the sitemap.
-    sitemap({ filter: (page) => !/\/links\/?$/.test(new URL(page).pathname) }),
+    // keep them out of the sitemap. llms.txt is a static file in public/, so
+    // it's never emitted as a page — list it via customPages.
+    sitemap({
+      filter: (page) => !/\/links\/?$/.test(new URL(page).pathname),
+      customPages: ['https://www.tallnest.com/llms.txt'],
+    }),
     motionPreload(),
   ],
   vite: {
