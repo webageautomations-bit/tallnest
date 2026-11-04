@@ -23,7 +23,7 @@ const cards = categories.map((c, i) => ({
         cards.map((c, i) => (
           <li data-reveal-item class:list={["cell", { "is-feature": i === 0 }]}>
             <a
-              href={`/jingo/flavours#${c.id}`}
+              href={`/jingo/flavours/#${c.id}`}
               aria-label={`${c.name}${c.subBrand ? ` (${c.subBrand})` : ""}: ${flavourLabel(c.flavourCount)}, ${c.price}`}
               class="card jg-sticker"
               style={`--bg:${c.theme.bg};--fg:${c.theme.fg};--badge-bg:${c.theme.badgeBg};--badge-fg:${c.theme.badgeFg}`}

@@ -14,7 +14,7 @@ import { Image } from "astro:assets";
 const posts = await getSortedPosts();
 const [featured, ...rest] = posts;
 const categories = [...new Set(posts.map((p) => p.data.category))];
-const featuredHref = featured ? `/the-nest/${postSlug(featured)}` : "#";
+const featuredHref = featured ? `/the-nest/${postSlug(featured)}/` : "#";
 ---
 
 <BaseLayout

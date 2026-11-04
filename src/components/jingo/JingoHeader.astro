@@ -14,19 +14,19 @@ const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const onHub = path === "/jingo";
 
 const links = [
-  { label: "Home", href: "/jingo", current: onHub },
-  { label: "Flavours", href: "/jingo/flavours", current: path.startsWith("/jingo/flavours") },
-  { label: "Mascots", href: "/jingo/mascots", current: path.startsWith("/jingo/mascots") },
-  { label: "Arcade", href: "/jingo/arcade", current: path.startsWith("/jingo/arcade") },
+  { label: "Home", href: "/jingo/", current: onHub },
+  { label: "Flavours", href: "/jingo/flavours/", current: path.startsWith("/jingo/flavours") },
+  { label: "Mascots", href: "/jingo/mascots/", current: path.startsWith("/jingo/mascots") },
+  { label: "Arcade", href: "/jingo/arcade/", current: path.startsWith("/jingo/arcade") },
   // On-page anchor for now; resolves from any Jingo page.
-  { label: "Our Story", href: onHub ? "#story" : "/jingo#story", current: false },
+  { label: "Our Story", href: onHub ? "#story" : "/jingo/#story", current: false },
 ];
 ---
 
 <header id="jingo-header" class="jh">
   <div class="jg-wrap jh-row">
     <!-- Jingo — the zone's primary brand, far left. -->
-    <a href="/jingo" class="jh-logo" aria-label="Jingo — home">
+    <a href="/jingo/" class="jh-logo" aria-label="Jingo — home">
       <Image
         src={logoRed}
         alt="Jingo"

@@ -77,4 +77,4 @@ Everything else is paperwork.
 
 ---
 
-*Tall Nest Group grants exclusive territories for its Jingo range where a distributor commits to covering the area, with the minimum commitment and terms stated openly on the [partner page](/partners).*
+*Tall Nest Group grants exclusive territories for its Jingo range where a distributor commits to covering the area, with the minimum commitment and terms stated openly on the [partner page](/partners/).*

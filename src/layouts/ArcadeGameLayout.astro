@@ -46,7 +46,7 @@ const onAccent = textOnFor(game.accentColor) === "light" ? "var(--jg-white)" : "
 >
   <div class="ag" data-game={game.slug} style={`--ag-accent:${game.accentColor};--ag-on-accent:${onAccent}`}>
     <div class="ag-bar">
-      <a href="/jingo/arcade" class="ag-back">
+      <a href="/jingo/arcade/" class="ag-back">
         <span aria-hidden="true">&larr;</span> Arcade
       </a>
       <h1 class="ag-title">{game.name}</h1>
@@ -57,7 +57,7 @@ const onAccent = textOnFor(game.accentColor) === "light" ? "var(--jg-white)" : "
       <noscript>
         <p class="ag-noscript">
           This game needs JavaScript. Switch it on to play &mdash; or browse
-          <a href="/jingo/flavours">all the Jingo flavours</a> instead.
+          <a href="/jingo/flavours/">all the Jingo flavours</a> instead.
         </p>
       </noscript>
     </div>

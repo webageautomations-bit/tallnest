@@ -55,4 +55,4 @@ The flip side is that this cuts both ways. A distributor should be asking the ma
 
 ---
 
-*Tall Nest Group is appointing distributors for its Jingo confectionery range across Pakistan. If you're evaluating a territory, the [partner page](/partners) sets out our terms plainly — minimum commitment, exclusivity, payment and lead times — rather than leaving them to a first call.*
+*Tall Nest Group is appointing distributors for its Jingo confectionery range across Pakistan. If you're evaluating a territory, the [partner page](/partners/) sets out our terms plainly — minimum commitment, exclusivity, payment and lead times — rather than leaving them to a first call.*

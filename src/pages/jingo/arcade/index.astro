@@ -17,7 +17,7 @@ const cards = games.map((g, i) => {
   return {
     ...g,
     live: g.status === "live",
-    href: `/jingo/arcade/${g.slug}`,
+    href: `/jingo/arcade/${g.slug}/`,
     num: String(i + 1).padStart(2, "0"),
     img: mascotImage(mascot.image),
     mascotLabel: mascot.label,
@@ -37,7 +37,7 @@ const liveCount = cards.filter((c) => c.live).length;
 >
   <section class="ar-hero" aria-labelledby="arcade-h1">
     <div class="jg-wrap">
-      <a href="/jingo" class="ar-backlink">
+      <a href="/jingo/" class="ar-backlink">
         <span aria-hidden="true">&larr;</span> Back to Jingo
       </a>
       <p class="jg-eyebrow ar-eyebrow">Jingo Arcade</p>
@@ -110,7 +110,7 @@ const liveCount = cards.filter((c) => c.live).length;
         liveCount === 0 && (
           <p class="ar-note">
             The arcade is warming up &mdash; the first games open soon. Meanwhile,{" "}
-            <a href="/jingo/mascots">meet the crew</a>.
+            <a href="/jingo/mascots/">meet the crew</a>.
           </p>
         )
       }

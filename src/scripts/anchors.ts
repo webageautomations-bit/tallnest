@@ -20,7 +20,7 @@ const stripSlash = (p: string) => p.replace(/\/+$/, "") || "/";
 
 /**
  * Resolve a link to a same-page fragment. Handles both bare hashes ("#id") and
- * absolute-path hashes ("/path#id") when the path matches the current page.
+ * absolute-path hashes ("/path/#id") when the path matches the current page.
  */
 function samePageHash(link: HTMLAnchorElement): string | null {
   const href = link.getAttribute("href");

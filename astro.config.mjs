@@ -7,11 +7,15 @@ import motionPreload from './integrations/motion-preload.mjs';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.tallnest.com',
+  // One canonical URL per page: every route ends in "/". vercel.json's
+  // `trailingSlash: true` 308s the slashless form in production; in dev a
+  // slashless internal link 404s, so a missed href is obvious.
+  trailingSlash: 'always',
   // Keyword-matched URL for distributor recruitment. Astro serves a 301 in dev
   // and emits a redirect page in the static build; vercel.json issues a true
   // edge 301 in production.
   redirects: {
-    '/distributors': { status: 301, destination: '/partners' },
+    '/distributors': { status: 301, destination: '/partners/' },
   },
   integrations: [
     // Link-in-bio pages (/links, /jingo/links) are noindex navigation shims —

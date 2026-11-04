@@ -101,7 +101,7 @@ const nameList = `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
                 </h2>
                 <div data-reveal class="candy">
                   <a
-                    href={`/jingo/flavours#${m.candy.categoryId}`}
+                    href={`/jingo/flavours/#${m.candy.categoryId}`}
                     class="chip"
                     style={`--pc:${m.candy.color};--pt:${m.candy.textColor}`}
                   >
@@ -129,13 +129,13 @@ const nameList = `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
           Taste the whole crew &mdash; all {products.length} Jingo flavours in one place.
         </p>
         <div data-reveal class="close-ctas">
-          <a href="/jingo/flavours" class="jg-btn jg-btn--sun">
+          <a href="/jingo/flavours/" class="jg-btn jg-btn--sun">
             See all {products.length} flavours <span class="jg-arrow" aria-hidden="true">&rarr;</span>
           </a>
           <WhatsAppCTA theme="jingo" />
         </div>
       </div>
-      <a href="/jingo/arcade" class="arcade-card jg-sticker" data-reveal>
+      <a href="/jingo/arcade/" class="arcade-card jg-sticker" data-reveal>
         <span class="arcade-kicker">Jingo Arcade</span>
         <span class="arcade-title">Play with the crew</span>
         <span class="arcade-sub">Quick games starring the Jingo characters &mdash; made for your phone.</span>

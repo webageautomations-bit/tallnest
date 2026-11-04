@@ -15,7 +15,7 @@ interface Props {
 const { post } = Astro.props;
 const { data } = post;
 const rt = readingTime(post);
-const href = `/the-nest/${postSlug(post)}`;
+const href = `/the-nest/${postSlug(post)}/`;
 const cover = coverImage(data.cover);
 ---
 

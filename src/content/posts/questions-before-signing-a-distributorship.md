@@ -81,4 +81,4 @@ You are being evaluated during this conversation. You should be evaluating too.
 
 ---
 
-*Tall Nest Group publishes its distributor terms openly — minimum commitment, territory exclusivity, payment and lead times — on the [partner page](/partners), so the first conversation can start from facts rather than discovery.*
+*Tall Nest Group publishes its distributor terms openly — minimum commitment, territory exclusivity, payment and lead times — on the [partner page](/partners/), so the first conversation can start from facts rather than discovery.*

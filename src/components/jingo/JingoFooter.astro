@@ -6,24 +6,24 @@ import logoWhite from "../../assets/jingo/jingo-logo-white.png";
 import { jingoSocials } from "../../data/socials";
 
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
-const storyHref = path === "/jingo" ? "#story" : "/jingo#story";
+const storyHref = path === "/jingo" ? "#story" : "/jingo/#story";
 
 const groups = [
   {
     title: "Explore",
     links: [
-      { label: "Home", href: "/jingo" },
-      { label: "Flavours", href: "/jingo/flavours" },
-      { label: "Mascots", href: "/jingo/mascots" },
-      { label: "Arcade", href: "/jingo/arcade" },
+      { label: "Home", href: "/jingo/" },
+      { label: "Flavours", href: "/jingo/flavours/" },
+      { label: "Mascots", href: "/jingo/mascots/" },
+      { label: "Arcade", href: "/jingo/arcade/" },
       { label: "Our Story", href: storyHref },
     ],
   },
   {
     title: "For retailers",
     links: [
-      { label: "Become a stockist", href: "/partners" },
-      { label: "Contact us", href: "/contact" },
+      { label: "Become a stockist", href: "/partners/" },
+      { label: "Contact us", href: "/contact/" },
     ],
   },
 ];
@@ -34,7 +34,7 @@ const year = new Date().getFullYear();
 <footer class="jf">
   <div class="jg-wrap jf-grid">
     <div class="jf-brand">
-      <a href="/jingo" class="jf-logo" aria-label="Jingo — home">
+      <a href="/jingo/" class="jf-logo" aria-label="Jingo — home">
         <Image src={logoWhite} alt="Jingo" width={360} class="jf-logo-img" loading="lazy" />
       </a>
       <p class="jf-tag">Big flavour, small price, pure fun.</p>

@@ -1,6 +1,7 @@
 {
+  "trailingSlash": true,
   "redirects": [
-    { "source": "/distributors", "destination": "/partners", "statusCode": 301 },
-    { "source": "/distributors/", "destination": "/partners", "statusCode": 301 }
+    { "source": "/distributors", "destination": "/partners/", "statusCode": 301 },
+    { "source": "/distributors/", "destination": "/partners/", "statusCode": 301 }
   ]
 }
