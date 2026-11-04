@@ -12,6 +12,7 @@ import SocialRail from "../components/SocialRail.astro";
 import FloatingWhatsApp from "../components/FloatingWhatsApp.astro";
 import { jingoSocials } from "../data/socials";
 import SEOHead from "../components/SEOHead.astro";
+import Analytics from "../components/Analytics.astro";
 import { organizationNode, websiteNode, jingoBrandNode } from "../lib/schema";
 
 interface Props {
@@ -126,6 +127,7 @@ const graph = [jingoBrandNode, organizationNode, websiteNode, ...pageNodes];
       robots={noindex ? "noindex,follow" : undefined}
       jsonLd={graph}
     />
+    <Analytics />
 
     <slot name="head" />
   </head>
